@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Windpower Books</title>
+<title>Windpower Books (mockup)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
@@ -167,8 +167,6 @@ input.price{width:130px;border-bottom-color:var(--carbon)}
 @media (max-width:640px){input,select,textarea{font-size:16px}}
 @media (pointer:coarse){.btn{min-height:46px;padding-inline:22px}.seg button{min-height:42px;padding-inline:16px}.link{padding-block:8px}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="config.js"></script>
 </head>
 <body>
 
@@ -344,21 +342,20 @@ const now=()=>compute(START,FAR);
 function status(o){const t=today();if(o.due<t){const k=daysBetween(o.due,t);return {late:true,txt:`Late ${k} day${k===1?'':'s'}`};}const k=daysBetween(t,o.due);return {late:false,txt:k===0?'Due today':`Due in ${k} day${k===1?'':'s'}`};}
 const stTag=o=>{const s=status(o);return `<span class="tag ${s.late?'late':'ok'}">${s.txt}</span>`;};
 
-/* ---------- storage: Supabase tables (see supabase/setup.sql) ---------- */
-const BUCKET='tire-photos';
-async function q(p){const {data,error}=await p;if(error)throw error;return data;}
+/* ---------- storage: mockup only, everything lives in this browser tab ---------- */
+const changed=()=>{S.ver++;S.cache={};schedule();return Promise.resolve();};
 const store={
-  saveEntry:e=>q(S.sb.from('entries').upsert({id:e.id,d:e.d,data:e,updated_at:new Date().toISOString()})),
-  deleteEntry:id=>q(S.sb.from('entries').delete().eq('id',id)),
-  setProduct:(id,data)=>q(S.sb.from('products').upsert({id,data,updated_at:new Date().toISOString()})),
+  saveEntry:e=>{const L=S.live.entries,i=L.findIndex(x=>x.id===e.id);if(i>=0)L[i]=e;else L.push(e);return changed();},
+  deleteEntry:id=>{S.live.entries=S.live.entries.filter(x=>x.id!==id);return changed();},
+  setProduct:(id,data)=>{S.live.products[id]=data;return changed();},
   patchProduct:(id,patch)=>store.setProduct(id,Object.assign({},S.live.products[id]||{},patch)),
-  setContact:(id,data)=>q(S.sb.from('contacts').upsert({id,data,updated_at:new Date().toISOString()})),
+  setContact:(id,data)=>{S.live.contacts[id]=data;return changed();},
   patchContact:(id,patch)=>store.setContact(id,Object.assign({},S.live.contacts[id]||{},patch)),
-  setSetup:data=>q(S.sb.from('settings').upsert({id:'setup',data,updated_at:new Date().toISOString()})),
-  async uploadPhoto(blob){const path=uid()+'.jpg';await q(S.sb.storage.from(BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:false}));return path;},
-  deletePhoto:path=>S.sb.storage.from(BUCKET).remove([path]).catch(()=>{})
+  setSetup:data=>{S.live.setup=data;return changed();},
+  uploadPhoto:async blob=>URL.createObjectURL(blob),
+  deletePhoto:path=>{try{URL.revokeObjectURL(path);}catch(_){}}
 };
-const photoUrl=path=>S.sb&&path?S.sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl:'';
+const photoUrl=path=>path||'';
 async function saveEntry(e){await store.saveEntry(e);}
 async function deleteEntry(e){await store.deleteEntry(e.id);}
 async function ensureContact(name,kind){
@@ -419,7 +416,7 @@ const route=()=>{const h=(location.hash||'').slice(1);return PAGES[h]?h:'overvie
 const editable=()=>S.canWrite&&!S.demo&&S.mode==='live';
 
 function banner(){
-  const b=[];
+  const b=['<span>Mockup with example data. You can record, edit and delete freely. Nothing is saved: reloading the page starts over.</span><button class="link" data-act="demo-on">Reset example data</button><button class="link" data-act="demo-empty">Try an empty book</button>'];
   if(S.demo)b.push(`<span>Example data. Nothing entered here is saved.</span><button class="link" data-act="demo-off">${S.mode==='live'?'Back to real records':'Back to sign in'}</button>`);
   else if(S.err)b.push(`<span class="neg">${esc(S.err)}</span>`);
   else if(S.slow&&!allReady())b.push('<span>Saved records cannot be reached yet. Check the internet connection.</span>');
@@ -433,7 +430,7 @@ function pageOverview(){
   if(!d.entries.length){
     return `<section class="wrap hero"><p class="micro">Nothing recorded yet</p><h1 class="display">Start with what<br>the business has today.</h1>
     <div class="prose"><p>Record the opening balances once: money each person holds, the bank balance, every tire in the warehouse with what it cost, unpaid notas, and what you still owe Jakarta. After that, copy each nota, each DO and each payment as it happens. Profit, unpaid notas and the reports build themselves.</p></div>
-    <div class="row">${editable()?'<button class="btn primary" data-act="start-opening">Record opening balances</button>':''}<button class="btn" data-act="demo-on">Look around with example data</button></div></section>`;
+    <div class="row">${editable()?'<button class="btn primary" data-act="start-opening">Record opening balances</button>':''}<button class="btn" data-act="demo-on">Load example data</button></div></section>`;
   }
   const late=c.openAR.filter(o=>status(o).late),lateTot=late.reduce((a,o)=>a+o.open,0);
   const att=[];
@@ -880,7 +877,7 @@ function pageSetup(){
     <p>5. When collected money is handed over or put in the bank: record Money moved.</p>
     <p>6. Once a month: count the warehouse. If a number is different, record a Stock count with the difference.</p>
     <p class="micro" style="margin-top:12px">Giving access</p>
-    <p>Add each person's email under "Who can use this book". They then open the site, choose Create account with that same email, and confirm it from their inbox. Everyone who records notas or payments, including Ci Bella, should have their own account on their own phone. Each entry shows who recorded it.</p>
+    <p>In the finished version, each person (including Ci Bella) signs in with their own account on their own phone, and every entry shows who recorded it.</p>
     <p class="micro" style="margin-top:12px">Words used in this book</p>
     <p><strong>Nota:</strong> the paper nota kredit given to the shop. The nota number links the paper to the entry here.</p>
     <p><strong>DO:</strong> the delivery order from Jakarta listing what was sent.</p>
@@ -888,10 +885,10 @@ function pageSetup(){
     <p><strong>Cost per tire (average):</strong> Jakarta's price changes over time. The book blends every DO into one average and uses it as the cost when a tire is sold.</p>
     <p><strong>Profit and money in hand:</strong> profit counts a nota even before the shop pays. Money in hand only counts what was actually paid.</p>
     <p><strong>Owner took out:</strong> money taken from the business for personal use. It lowers money, not profit.</p>
-    <div class="row" style="margin-top:8px"><button class="btn" data-act="export-journal">Download every entry as CSV</button>${S.mode==='live'?`<button class="link" data-act="${S.demo?'demo-off':'demo-on'}">${S.demo?'Back to real records':'Look around with example data'}</button>`:''}</div>${membersHTML()}<div></div></div></section>`;
+    <div class="row" style="margin-top:8px"><button class="btn" data-act="export-journal">Download every entry as CSV</button></div>${membersHTML()}<div></div></div></section>`;
 }
-function pageTerms(){return `<section class="wrap prose"><h1 class="h1">Terms of use</h1><p>This record book is provided by Studio 1801 to help the business keep track of notas, goods received, stock, costs and money owed.</p><p>The reports are only as accurate as the entries typed in. They are management reports to help run the business. They are not tax returns or audited statements, and they do not calculate tax. Check figures with a qualified accountant before filing tax or applying for credit.</p><p>Anyone whose email is added in Setup can add, change and delete entries. Give that access only to people you trust with the books.</p><p>Studio 1801 may update the site to fix problems or add features. Saved entries are kept when the site is updated.</p></section>`;}
-function pagePrivacy(){return `<section class="wrap prose"><h1 class="h1">Privacy</h1><p>Entries and tire photos are stored in a private Supabase database set up for this business. Only people whose email has been added in Setup can sign in and see the records.</p><p>The page stores what you type: dates, amounts, nota and DO numbers, tire details, and the names and phone numbers of shops and suppliers. It also stores the email and name of each person given access, and notes who recorded each entry. It does not collect anything else and does not send records to any other service.</p><p>Downloads (CSV files) are saved to the device of the person who asks for them. Keep those files as carefully as the paper notas.</p><p>To remove a shop's details, edit their name and phone in People. To delete everything, the owner can delete the Supabase project.</p></section>`;}
+function pageTerms(){return `<section class="wrap prose"><h1 class="h1">Terms of use</h1><p>This is a mockup made by Studio 1801 to show how a record book for the business could work. The figures shown are examples, not real records.</p><p>In the finished version, the reports are management reports to help run the business. They are not tax returns or audited statements and do not calculate tax. Check figures with a qualified accountant before filing tax or applying for credit.</p></section>`;}
+function pagePrivacy(){return `<section class="wrap prose"><h1 class="h1">Privacy</h1><p>This mockup does not save or send anything. What you type stays in this browser tab and is gone when the page is reloaded or closed.</p><p>In the finished version, records would be stored in a private database that only invited people can sign in to.</p></section>`;}
 
 /* ---------- render and routing ---------- */
 function render(){
@@ -899,11 +896,10 @@ function render(){
   document.querySelectorAll('#nav a').forEach(a=>{if(a.getAttribute('href')==='#'+r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   $('#bizName').textContent=(D().setup&&D().setup.name)||'Windpower Books';
   $('#banner').innerHTML=banner();
-  $('#who').innerHTML=S.me?`Signed in as ${esc(S.me.name||S.me.email)} <button class="link" data-act="signout">Sign out</button>`:'';
+  $('#who').textContent='Mockup by Studio 1801';
   if(r==='record'&&S.formMounted&&S.lastRoute==='record'&&loaded()){S.allocKey=null;updateNota();const dl=$('#dl-contacts');if(dl)dl.outerHTML=contactDatalist();return;}
   S.formMounted=false;S.lastRoute=r;
   const m=$('#main');
-  if(!S.demo&&['login','denied','recovery','noconfig'].includes(S.mode)&&r!=='terms'&&r!=='privacy'){m.innerHTML=authPage();bindAuth();return;}
   if(!loaded()&&r!=='terms'&&r!=='privacy'){m.innerHTML=skeleton();return;}
   m.innerHTML=PAGES[r]();
   if(r==='record')mountForm();
@@ -919,9 +915,8 @@ function startPayment(side,k,ids){
 /* page-level clicks (forms on Record handle their own) */
 document.addEventListener('click',async ev=>{
   const b=ev.target.closest('[data-act]');if(!b||b.closest('#formArea'))return;const act=b.dataset.act,id=b.dataset.id;
-  if(act==='signout'){await S.sb.auth.signOut();location.hash='#overview';location.reload();return;}
-  if(act==='demo-on'){S.demo=true;S.cache={};render();}
-  else if(act==='demo-off'){S.demo=false;S.cache={};render();}
+  if(act==='demo-on'){loadBook(true);toast('Example data loaded');}
+  else if(act==='demo-empty'){loadBook(false);location.hash='#overview';toast('Empty book. Start with opening balances.');}
   else if(act==='start-opening'){S.editing=null;S.draft=newDraft('opening');S.lastRoute='';location.hash='#record';render();}
   else if(act==='edit'){const e=D().entries.find(x=>x.id===id);if(!e)return;S.editing=e;S.draft=draftFrom(e);S.lastRoute='';location.hash='#record';render();}
   else if(act==='del'){if(S.delArm!==id){S.delArm=id;render();setTimeout(()=>{if(S.delArm===id){S.delArm=null;render();}},4000);return;}
@@ -969,8 +964,6 @@ document.addEventListener('submit',async ev=>{const f=ev.target;if(f.id==='recFo
     else if(f.id==='setupForm'){const list=$('#sf-cats').value.split('\n').map(x=>x.trim()).filter(Boolean);
       const ac=[];document.querySelectorAll('[data-acctid]').forEach(inp=>{const nm=inp.value.trim(),id=inp.dataset.acctid;if(id)ac.push({id,name:nm||aname(id)});else if(nm)ac.push({id:'a'+uid(),name:nm});});
       await store.setSetup({name:$('#sf-name').value.trim(),cats:list.length?list:DEF_CATS,accts:ac.length?ac:DEF_ACCTS});toast('Setup saved');}
-    else if(f.id==='memForm'){const email=$('#mf-email').value.trim().toLowerCase(),name=$('#mf-name').value.trim();if(!/^\S+@\S+\.\S+$/.test(email))return toast('Type a valid email.');
-      await q(S.sb.from('members').upsert({email,name:name||email.split('@')[0],role:$('#mf-role').value}));toast('Access given to '+email);await loadMembers();render();}
   }catch(x){toast(friendly(x));}
 });
 
@@ -996,87 +989,16 @@ async function setPhoto(pid,file){
   catch(x){toast('Could not save the photo. '+friendly(x));}
 }
 
-/* ---------- sign in, access list ---------- */
-function authPage(){
-  const v=S.authView,msg=S.authMsg?`<p class="${/check|sent|saved/i.test(S.authMsg)?'':'err'}" role="alert">${esc(S.authMsg)}</p>`:'';
-  const demo='<button class="link" data-act="demo-on">Look around with example data</button>';
-  if(S.mode==='noconfig')return `<section class="wrap login"><h1 class="h1">Almost ready</h1><p>This site is not connected to its database yet. Fill in <span class="notano">config.js</span> with the Supabase address and key (see README).</p>${demo}</section>`;
-  if(S.mode==='denied')return `<section class="wrap login"><p class="micro">Signed in as ${esc(S.me&&S.me.email)}</p><h1 class="h1">Waiting for access</h1><p>This email has not been added to the book yet. Ask the owner to add it in Setup, then reload this page.</p><div class="row"><button class="btn" data-act="reload">Reload</button><button class="link" data-act="signout">Sign out</button></div></section>`;
-  if(S.mode==='recovery')return `<section class="wrap login"><h1 class="h1">Set a new password</h1><form id="pwForm" class="stack" novalidate>${F('New password','<input id="au-pw" type="password" autocomplete="new-password" minlength="8">')}<button class="btn primary" type="submit">Save password</button>${msg}</form></section>`;
-  const title={signin:'Sign in',signup:'Create account',forgot:'Reset password'}[v];
-  return `<section class="wrap login"><p class="micro">Windpower Books</p><h1 class="h1">${title}</h1>
-  <form id="authForm" class="stack" novalidate>${F('Email','<input id="au-email" type="email" autocomplete="email" inputmode="email">')}
-  ${v!=='forgot'?F('Password',`<input id="au-pw" type="password" autocomplete="${v==='signup'?'new-password':'current-password'}">`):''}
-  <button class="btn primary" type="submit">${v==='signin'?'Sign in':v==='signup'?'Create account':'Send reset email'}</button>${msg}</form>
-  <div class="row">${v!=='signin'?'<button class="link" data-act="au-view" data-v="signin">I have an account</button>':''}${v!=='signup'?'<button class="link" data-act="au-view" data-v="signup">Create account</button>':''}${v!=='forgot'?'<button class="link" data-act="au-view" data-v="forgot">Forgot password</button>':''}</div>
-  <p class="small">Only emails added by the owner can see the records. ${demo}</p></section>`;
+/* ---------- mockup boot: loads the example business, nothing is saved ---------- */
+function membersHTML(){return '';}
+function loadBook(example){
+  const d=example?JSON.parse(JSON.stringify(DEMO())):{products:JSON.parse(JSON.stringify(DEMO().products)),contacts:{},setup:{name:'Windpower Books'},entries:[]};
+  S.live.products=d.products;S.live.contacts=d.contacts;S.live.setup=d.setup;S.live.entries=d.entries;
+  S.priceEdits={};S.draft=null;S.editing=null;S.formMounted=false;S.lastRoute='';S.ver++;S.cache={};render();
 }
-function bindAuth(){
-  const f=$('#authForm'),p=$('#pwForm');
-  if(f)f.addEventListener('submit',async ev=>{ev.preventDefault();const email=$('#au-email').value.trim(),pw=$('#au-pw')?$('#au-pw').value:'';S.authMsg='';
-    try{
-      if(S.authView==='signin'){const {error}=await S.sb.auth.signInWithPassword({email,password:pw});if(error)throw error;return afterLogin();}
-      else if(S.authView==='signup'){if(pw.length<8)throw new Error('Use at least 8 characters for the password.');const {error}=await S.sb.auth.signUp({email,password:pw,options:{emailRedirectTo:location.origin+location.pathname}});if(error)throw error;S.authMsg='Check your email and press the confirm link, then sign in here.';S.authView='signin';}
-      else{const {error}=await S.sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;S.authMsg='Reset email sent. Open it on this device.';}
-    }catch(x){S.authMsg=/Invalid login/i.test(x.message)?'Wrong email or password.':/not confirmed/i.test(x.message)?'Confirm your email first. Check your inbox.':x.message;}
-    render();});
-  if(p)p.addEventListener('submit',async ev=>{ev.preventDefault();const pw=$('#au-pw').value;if(pw.length<8){S.authMsg='Use at least 8 characters.';return render();}
-    const {error}=await S.sb.auth.updateUser({password:pw});if(error){S.authMsg=error.message;return render();}S.authMsg='';history.replaceState(null,'',location.pathname);await afterLogin();});
-}
-document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');if(!b)return;
-  if(b.dataset.act==='au-view'){S.authView=b.dataset.v;S.authMsg='';render();}
-  else if(b.dataset.act==='reload'){location.reload();}
-  else if(b.dataset.act==='mem-del'){const em=b.dataset.email;if(S.delArm!=='m'+em){S.delArm='m'+em;b.textContent='Tap again to remove';return;}
-    S.delArm=null;q(S.sb.from('members').delete().eq('email',em)).then(loadMembers).then(()=>{toast('Access removed');render();}).catch(x=>toast(friendly(x)));}
-});
-function membersHTML(){
-  if(S.demo||!S.me)return '';const owner=S.me.role==='owner';
-  const rows=S.live.members.map(m=>`<div class="lrow"><span>${esc(m.name||'')}<span class="ex">${esc(m.email)}${m.role==='owner'?' (owner)':''}</span></span>${owner&&m.email!==S.me.email?`<button class="link danger" data-act="mem-del" data-email="${esc(m.email)}">Remove</button>`:''}</div>`).join('');
-  return `<div class="stack" style="margin-top:12px;gap:6px"><p class="micro">Who can use this book</p>${rows}
-  ${owner?`<form id="memForm" class="grid2" novalidate style="margin-top:8px">${F('Email','<input id="mf-email" type="email" inputmode="email" placeholder="name@gmail.com">')}${F('Name shown on entries','<input id="mf-name" placeholder="Ci Bella">')}${F('Can manage this list','<select id="mf-role"><option value="staff">No</option><option value="owner">Yes</option></select>')}<div style="align-self:end"><button class="btn" type="submit">Give access</button></div></form>`:'<p class="small">Only an owner can add or remove people.</p>'}</div>`;
-}
-async function loadMembers(){S.live.members=await q(S.sb.from('members').select('*').order('added_at'));}
-
-/* ---------- loading records ---------- */
-async function fetchAll(table){let out=[],from=0;for(;;){const rows=await q(S.sb.from(table).select('id,data').range(from,from+999));out=out.concat(rows);if(rows.length<1000)break;from+=1000;}return out;}
-async function loadTable(t){
-  const rows=await fetchAll(t);
-  if(t==='entries')S.live.entries=rows.map(r=>r.data);
-  else if(t==='settings'){const r=rows.find(x=>x.id==='setup');S.live.setup=r?r.data:{};}
-  else{const o={};rows.forEach(r=>{o[r.id]=r.data;});S.live[t]=o;}
-  S.ready[{products:'p',contacts:'c',entries:'d',settings:'m'}[t]]=1;S.ver++;S.cache={};schedule();
-}
-const reloadSoon={};
-function watch(){
-  const ch=S.sb.channel('books');
-  ['products','contacts','entries','settings'].forEach(t=>ch.on('postgres_changes',{event:'*',schema:'public',table:t},()=>{clearTimeout(reloadSoon[t]);reloadSoon[t]=setTimeout(()=>loadTable(t).catch(()=>{}),300);}));
-  ch.subscribe();
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.mode==='live')['products','contacts','entries','settings'].forEach(t=>loadTable(t).catch(()=>{}));});
-}
-async function afterLogin(){
-  const {data:{user}}=await S.sb.auth.getUser();if(!user){S.mode='login';return render();}
-  const email=(user.email||'').toLowerCase();
-  let mem=null;try{mem=(await q(S.sb.from('members').select('*').eq('email',email)))[0];}catch(_){}
-  if(!mem){S.me={email};S.mode='denied';return render();}
-  S.me={id:user.id,email,name:mem.name||email.split('@')[0],role:mem.role};S.mode='live';S.assets=true;S.canWrite=true;render();
-  setTimeout(()=>{if(!allReady()){S.slow=true;schedule();}},10000);
-  try{await Promise.all(['products','contacts','entries','settings'].map(loadTable));await loadMembers();S.slow=false;schedule();}
-  catch(x){S.err='Saved records could not be loaded. '+friendly(x);schedule();}
-  watch();
-}
-
-/* ---------- boot ---------- */
-async function boot(){
-  const cfg=window.BOOKS_CONFIG||{};
-  if(!window.supabase||!cfg.supabaseUrl||/YOUR-/.test(cfg.supabaseUrl+cfg.supabaseAnonKey)){S.mode='noconfig';return render();}
-  S.sb=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,detectSessionInUrl:true}});
-  const recovering=/type=recovery/.test(location.hash);
-  S.sb.auth.onAuthStateChange((ev)=>{if(ev==='PASSWORD_RECOVERY'){S.mode='recovery';render();}});
-  const {data:{session}}=await S.sb.auth.getSession();
-  if(recovering&&session){S.mode='recovery';return render();}
-  if(/access_token|type=signup/.test(location.hash))history.replaceState(null,'',location.pathname);
-  if(!session){S.mode='login';return render();}
-  await afterLogin();
+function boot(){
+  S.me={name:'Ci Via',email:'',role:'owner'};S.mode='live';S.canWrite=true;S.assets=true;S.demo=false;
+  S.ready={p:1,c:1,d:1,m:1};loadBook(true);
 }
 boot();
 })();
