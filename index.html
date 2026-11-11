@@ -1,0 +1,1085 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Windpower Books</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Concept: a tire shop's carbon-copy nota book on ruled ledger paper. Tire size codes are stamped in mono like sidewall lettering.
+   Layout: overview anchored left with one huge figure; record is form one side, live nota the other; statements are a centred printed sheet; stock runs edge to edge. */
+:root{
+  color-scheme:light;
+  --paper:#e8e6df;   /* Ledger Grey: page canvas */
+  --sheet:#f6f5f0;   /* Top Copy: forms, statements, bands */
+  --ink:#1d1c19;     /* Rubber: all text */
+  --muted:#67645c;   /* Pencil: labels and secondary text */
+  --rule:#c6c2b6;    /* Ruling: every 1px line */
+  --carbon:#2c3c91;  /* Carbon Blue: things you click, nothing else */
+  --loss:#a1302a;    /* Loss Red: negative amounts and warnings only */
+  --sans:"Instrument Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#171614;--sheet:#211f1c;--ink:#ebe8df;--muted:#9c978b;--rule:#3b3933;--carbon:#a3b0f2;--loss:#e88d83;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#171614;--sheet:#211f1c;--ink:#ebe8df;--muted:#9c978b;--rule:#3b3933;--carbon:#a3b0f2;--loss:#e88d83;color-scheme:dark}
+
+html,body{background:var(--paper);margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+[hidden]{display:none!important}
+.login{max-width:440px;display:grid;gap:18px}
+body{color:var(--ink);font:400 15px/1.45 var(--sans);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;letter-spacing:-0.005em}
+*{box-sizing:border-box}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--carbon)}
+:focus-visible{outline:1px solid var(--carbon);outline-offset:3px}
+
+/* type scale: 112 / 64 / 28 / 15 / 13 / 11 */
+.display{font-size:clamp(52px,12.5vw,112px);line-height:.86;letter-spacing:-0.045em;font-weight:400;margin:0;text-wrap:balance}
+.h1{font-size:clamp(38px,7.5vw,64px);line-height:.95;letter-spacing:-0.03em;font-weight:400;margin:0;text-wrap:balance}
+.h2{font-size:28px;line-height:1.1;letter-spacing:-0.015em;font-weight:400;margin:0}
+.small{font-size:13px;letter-spacing:.01em;color:var(--muted)}
+.micro{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin:0;font-weight:500}
+.size{font-family:var(--mono);letter-spacing:.06em;font-size:.95em}
+.neg{color:var(--loss)}
+p{margin:0}
+.prose{max-width:62ch;display:grid;gap:12px}
+
+/* header: wordmark, one row of text links */
+header.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px 28px;padding-block:22px 14px;border-bottom:1px solid var(--rule)}
+.mark{color:var(--ink);text-decoration:none;font-size:15px;font-weight:500;letter-spacing:-0.01em}
+.mark .micro{margin-left:10px}
+nav{display:flex;flex-wrap:wrap;gap:4px 20px}
+nav a{color:var(--muted);text-decoration:none;font-size:13px;letter-spacing:.02em;padding-block:4px}
+nav a[aria-current="page"]{color:var(--carbon);text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1px}
+.banner{border-bottom:1px solid var(--rule);padding-block:10px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px}
+
+section{padding-block:40px}
+.band{background:var(--sheet)}
+.stack{display:grid;gap:16px}
+.row{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+
+/* controls: pills for actions, ruled lines for inputs */
+.btn{border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:9px 18px;font:inherit;font-size:14px;cursor:pointer;line-height:1.2}
+.btn.primary{background:var(--carbon);border-color:var(--carbon);color:var(--sheet)}
+.btn:disabled{opacity:.5;cursor:default}
+.link{color:var(--carbon);background:none;border:0;padding:0;font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.link.danger{color:var(--loss)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--rule);background:transparent;color:var(--muted);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--carbon);color:var(--carbon)}
+input,select,textarea{font:inherit;color:var(--ink);background:transparent;border:0;border-bottom:1px solid var(--muted);border-radius:0;padding:7px 0;width:100%;min-width:0}
+textarea{border:1px solid var(--rule);padding:10px;min-height:150px;resize:vertical}
+select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(-45deg,transparent 50%,var(--muted) 50%);background-position:right 6px top 55%,right 1px top 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:18px}
+select option{background:var(--sheet);color:var(--ink)}
+input.num{text-align:right}
+.fld{display:grid;gap:4px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px 24px}
+.tag{display:inline-block;border:1px solid currentColor;border-radius:999px;padding:1px 8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;line-height:1.5;white-space:nowrap}
+
+/* tables */
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:500;text-align:left;padding:10px 12px 10px 0;border-bottom:1px solid var(--ink);white-space:nowrap}
+td{padding:11px 12px 11px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.num{text-align:right;white-space:nowrap}
+th.num{text-align:right}
+.lines td{padding-block:6px;vertical-align:middle}
+.lines td:first-child{min-width:200px}
+.lines input{min-width:90px}
+
+/* overview */
+.hero{padding-block:48px 36px;display:grid;gap:18px}
+.hero .sub{display:flex;flex-wrap:wrap;gap:6px 28px;font-size:15px}
+.ledger{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:0 56px}
+.lrow{display:flex;justify-content:space-between;gap:16px;padding-block:13px;border-bottom:1px solid var(--rule);align-items:baseline}
+.lrow .v{font-size:20px;letter-spacing:-0.01em;white-space:nowrap}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:40px 56px}
+
+/* record: form one side, nota the other */
+.recgrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:40px;align-items:start;margin-top:24px}
+@media (max-width:900px){.recgrid{grid-template-columns:1fr}}
+.nota{background:var(--sheet);padding:24px;display:grid;gap:10px;border-top:1px solid var(--ink)}
+.nota .ln{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.nota .big{font-size:clamp(30px,3.6vw,46px);line-height:.95;letter-spacing:-0.025em;white-space:nowrap}
+.nota hr{border:0;border-top:1px dashed var(--rule);margin:6px 0;width:100%}
+.hint{font-size:13px;color:var(--muted);max-width:70ch}
+.err{color:var(--loss);font-size:14px;min-height:1.2em}
+details summary{cursor:pointer;color:var(--carbon);font-size:13px;text-decoration:underline;text-underline-offset:3px;list-style:none}
+details summary::-webkit-details-marker{display:none}
+.quick{display:grid;gap:12px;padding-block:14px}
+
+/* statements: centred printed sheet */
+.statement{max-width:780px;margin:28px auto 0;background:var(--sheet);padding:44px clamp(18px,5vw,60px) 40px;display:grid;gap:22px}
+.statement .head{text-align:center;display:grid;gap:10px;justify-items:center}
+.srow{display:flex;justify-content:space-between;gap:16px;padding-block:9px;border-bottom:1px solid var(--rule);animation:rin .5s var(--ease) both}
+.srow.ind{padding-left:20px}
+.srow.headr{border-bottom:1px solid var(--ink);padding-top:20px}
+.srow.headr span:first-child{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);font-weight:500}
+.srow.total{font-weight:500}
+.srow.grand{font-size:22px;letter-spacing:-0.01em;border-bottom:1px solid var(--ink);padding-block:14px}
+.srow.note{color:var(--muted);font-size:13px;border:0}
+@keyframes rin{from{opacity:.15;transform:translateY(5px)}}
+@media (prefers-reduced-motion:reduce){.srow{animation:none}}
+.stamp{display:inline-block;border:1px solid var(--ink);border-radius:999px;padding:4px 14px;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.stamp.off{border-color:var(--loss);color:var(--loss)}
+
+/* skeleton */
+.skel{background:var(--sheet);display:block}
+.skel.a{height:14px;width:180px;margin-bottom:22px}
+.skel.b{height:96px;width:min(560px,90%);margin-bottom:28px}
+.skel.c{height:44px;width:100%;margin-bottom:2px}
+
+.empty{padding-block:28px;border-top:1px solid var(--rule);display:grid;gap:12px}
+footer{border-top:1px solid var(--rule);margin-top:56px;padding-block:18px 28px;display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13px;color:var(--muted)}
+footer a{color:var(--muted)}
+strong{font-weight:500}
+.thumb{display:block;object-fit:cover;background:var(--sheet);border:1px solid var(--rule);flex:none}
+.thumb.ph{border-radius:50%;position:relative}
+.thumb.ph::after{content:"";position:absolute;inset:28%;border:1px solid var(--rule);border-radius:50%}
+.tire{display:flex;gap:14px;align-items:flex-start}
+.ex{display:block;font-size:12.5px;color:var(--muted);letter-spacing:.01em;line-height:1.4;margin-top:2px;font-weight:400}
+.srow>span:first-child{min-width:0}
+.srow>span:last-child{white-space:nowrap}
+.summary{font-size:17px;line-height:1.5;letter-spacing:-0.005em;max-width:58ch;margin:0 auto;text-align:center;text-wrap:pretty}
+.pricebar{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:end;padding-block:18px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin-top:22px}
+input.price{width:130px;border-bottom-color:var(--carbon)}
+.changed{display:block;color:var(--carbon);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);border-radius:999px;padding:9px 18px;font-size:13px;z-index:20;max-width:calc(100% - 32px)}
+
+/* v3: wholesale flow, mobile entry */
+.lineRow{display:grid;grid-template-columns:minmax(0,2.4fr) repeat(var(--cols,2),minmax(70px,1fr)) minmax(90px,1fr) auto;gap:8px 14px;align-items:end;padding-block:8px;border-bottom:1px solid var(--rule)}
+.lineRow .lt{text-align:right;font-size:13px;color:var(--muted);padding-bottom:9px;white-space:nowrap}
+.lineRow .rm{padding-bottom:9px}
+.lineHead{display:contents}
+@media (max-width:640px){.lineRow{grid-template-columns:repeat(2,minmax(0,1fr))}.lineRow .lp{grid-column:1/-1}.lineRow .lt{text-align:left}}
+.alloc{display:grid;gap:0;border-top:1px solid var(--ink)}
+.alloc label{display:flex;gap:12px;align-items:center;padding-block:11px;border-bottom:1px solid var(--rule);cursor:pointer}
+.alloc input[type=checkbox]{width:20px;height:20px;flex:none;accent-color:var(--carbon);border:0;padding:0}
+.alloc .amt{margin-left:auto;white-space:nowrap}
+.tag.late{color:var(--loss)}
+.tag.ok{color:var(--muted)}
+.notano{font-family:var(--mono);letter-spacing:.04em}
+@media (max-width:640px){input,select,textarea{font-size:16px}}
+@media (pointer:coarse){.btn{min-height:46px;padding-inline:22px}.seg button{min-height:42px;padding-inline:16px}.link{padding-block:8px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="#overview"><span id="bizName">Windpower Books</span><span class="micro">Books</span></a>
+    <nav id="nav">
+      <a href="#overview">Overview</a><a href="#record">Record</a><a href="#unpaid">Unpaid</a><a href="#journal">Journal</a><a href="#stock">Stock</a><a href="#people">People</a><a href="#reports">Reports</a><a href="#setup">Setup</a>
+    </nav>
+  </header>
+  <div id="banner"></div>
+</div>
+<main id="main"></main>
+<div class="wrap"><footer><span>All amounts in Rupiah. Tire cost uses the moving average method.</span><a href="#terms">Terms of use</a><a href="#privacy">Privacy</a><span id="who"></span></footer></div>
+<div id="toast" hidden></div>
+<input type="file" id="photoPick" accept="image/*" hidden>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* numbers: accepts Indonesian style 1.250.000 or 1250000, minus allowed */
+const n=v=>{if(typeof v==='number')return isFinite(v)?v:0;let s=String(v??'').trim();if(!s)return 0;s=s.replace(/rp/ig,'').replace(/\s/g,'');const neg=/^-/.test(s);s=s.replace(/[^0-9.,]/g,'').replace(/\./g,'').replace(',','.');const x=parseFloat(s);return isFinite(x)?(neg?-x:x):0;};
+const fmt=x=>Math.round(x||0).toLocaleString('id-ID');
+const rp=x=>{const v=Math.round(x||0);return (v<0?'-':'')+'Rp '+Math.abs(v).toLocaleString('id-ID');};
+const M=x=>`<span class="${Math.round(x||0)<0?'neg':''}">${rp(x)}</span>`;
+const pad=x=>String(x).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>iso(new Date());
+const parseD=s=>{const [y,m,d]=String(s).split('-').map(Number);return new Date(y,(m||1)-1,d||1);};
+const addDaysTo=(s,k)=>{const d=parseD(s);d.setDate(d.getDate()+k);return iso(d);};
+const addDays=k=>addDaysTo(today(),k);
+const daysBetween=(a,b)=>Math.round((parseD(b)-parseD(a))/864e5);
+const nice=s=>s?parseD(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
+const short=s=>s?parseD(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+const monthRange=off=>{const d=new Date();return [iso(new Date(d.getFullYear(),d.getMonth()+off,1)),iso(new Date(d.getFullYear(),d.getMonth()+off+1,0))];};
+const monthLabel=s=>parseD(s).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const FAR='9999-12-31', START='0000-01-01';
+const lsGet=k=>{try{return localStorage.getItem(k);}catch(_){return null;}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}};
+
+const ORDER=['sale','recv','purchase','expense','pay','transfer','adjust','capital','draw','opening'];
+const MAIN=['sale','recv','purchase','expense'];
+const TYPES={sale:'Sale',recv:'Payment received',purchase:'Goods received',expense:'Expense',pay:'Paid supplier',transfer:'Money moved',adjust:'Stock count',capital:'Owner put in',draw:'Owner took out',opening:'Opening balances'};
+const HINTS={
+  sale:'Copy one paper nota. If the shop pays later, pick how many days they have. The book keeps the nota open until it is fully paid. A returned tire: enter it with a minus quantity.',
+  recv:'A shop paying for a nota. Always pick who received the money, so nothing gets lost. Tick the notas this pays for.',
+  purchase:'Tires arriving from Jakarta. Type what the DO says and what the warehouse counted. The stock goes up by the counted number.',
+  pay:'Paying Jakarta (or another supplier) for goods received earlier. Tick the DOs this pays for.',
+  expense:'Running costs: rent, wages, electricity, fuel, ongkir not linked to a nota. Tire purchases go under Goods received, not here.',
+  transfer:'Money changing hands inside the business. For example Ci Bella handing collected money to Ci Via, or cash deposited into the bank. Profit does not change.',
+  adjust:'After counting the warehouse, enter only the difference. Missing or damaged tires: a minus number. Extra tires found: a plus number.',
+  capital:'The owner\'s own money put into the business.',
+  draw:'Money the owner takes out for personal use. This is not a business cost, so it does not lower profit.',
+  opening:'Do this once, on your start date. Write down what the business has on day one: money each person holds, the bank, tires in the warehouse, unpaid notas, and what you owe Jakarta.'
+};
+const SHIP='Shipping (ongkir)';
+const DEF_CATS=[SHIP,'Salaries and wages','Rent','Electricity and water','Transport and fuel','Loading and unloading','Phone and internet','Repairs and upkeep','Taxes and permits','Bank fees','Other'];
+const DEF_ACCTS=[{id:'cash',name:'Cash (Ci Via)'},{id:'bella',name:'Cash (Ci Bella)'},{id:'bank',name:'Bank'}];
+const TERMS=[['cash','Paid in full now'],['7','7 days'],['14','14 days'],['30','30 days'],['date','Pick a date']];
+
+const S={mode:'loading',db:null,user:null,uid:null,canWrite:true,demo:false,slow:false,err:'',ready:{p:0,c:0,d:0,m:0},
+  live:{products:{},contacts:{},days:{},setup:{}},ver:0,cache:{},draft:null,editing:null,formMounted:false,lastRoute:'',allocKey:null,
+  rp:{preset:'this',from:'',to:'',tab:'pl'},jr:{month:today().slice(0,7),type:''},prodEdit:null,contEdit:null,delArm:null,
+  priceEdits:{},explain:true,assets:null,photoFor:null,sb:null,me:null,authView:'signin',authMsg:''};
+S.live.entries=[];S.live.members=[];
+
+/* ---------- example data, only shown in example mode, never saved ---------- */
+let _demo=null;
+function DEMO(){
+  if(_demo)return _demo;
+  const products={p1:{brand:'Windpower',size:'7.50-16',pattern:'WGC29',cat:'Truck',price:2050000,low:15},p2:{brand:'Windpower',size:'7.50-16',pattern:'WSR81',cat:'Truck',price:2050000,low:15}};
+  const contacts={c1:{name:'Windpower Jakarta (example)',kind:'supplier',phone:''},c2:{name:'Toko Sumber Ban (example)',kind:'customer',phone:''},c3:{name:'Toko Maju Jaya (example)',kind:'customer',phone:''},c4:{name:'UD Lancar Lahat (example)',kind:'customer',phone:''}};
+  let i=0;const E=(off,o)=>Object.assign({id:'x'+(++i),d:addDays(off),ts:i,note:''},o);
+  const entries=[
+    E(-45,{t:'opening',bal:{cash:15000000,bella:0,bank:120000000},lines:[{p:'p1',q:30,c:1760000},{p:'p2',q:20,c:1790000}],recv:[{k:'c3',a:12300000,nota:'00640',due:addDays(-6)}],pay:[{k:'c1',a:35000000,nota:'DO-2291',due:addDays(-15)}]}),
+    E(-40,{t:'purchase',k:'c1',nota:'DO-2307',lines:[{p:'p1',qd:40,q:40,c:1765000},{p:'p2',qd:30,q:29,c:1795000}],extra:1500000,paid:0,acct:'bank',term:'30',due:addDays(-10),note:'One WSR81 short, claimed to Jakarta'}),
+    E(-38,{t:'sale',k:'c2',nota:'00651',lines:[{p:'p1',q:10,u:2050000}],disc:0,ship:0,term:'14',due:addDays(-24),paid:0,acct:'cash'}),
+    E(-30,{t:'pay',k:'c1',a:35000000,acct:'bank',alloc:[]}),
+    E(-28,{t:'recv',k:'c2',a:20500000,acct:'bella',alloc:[]}),
+    E(-25,{t:'expense',cat:'Rent',a:3500000,acct:'bank'}),
+    E(-20,{t:'sale',k:'c3',nota:'00654',lines:[{p:'p2',q:8,u:2050000}],disc:0,ship:0,term:'cash',paid:16400000,acct:'cash'}),
+    E(-15,{t:'sale',k:'c4',nota:'00655',lines:[{p:'p1',q:12,u:2050000},{p:'p2',q:6,u:2050000}],disc:0,ship:450000,shipAcct:'cash',term:'30',due:addDays(15),paid:5000000,acct:'bank'}),
+    E(-12,{t:'transfer',from:'bella',to:'bank',a:20500000}),
+    E(-10,{t:'sale',k:'c2',nota:'00656',lines:[{p:'p1',q:6,u:2050000}],disc:0,ship:0,term:'7',due:addDays(-3),paid:0,acct:'cash'}),
+    E(-8,{t:'expense',cat:'Salaries and wages',a:6000000,acct:'cash'}),
+    E(-5,{t:'sale',k:'c3',nota:'00657',lines:[{p:'p2',q:15,u:2050000},{p:'p1',q:10,u:2050000}],disc:0,ship:0,term:'30',due:addDays(25),paid:0,acct:'cash'}),
+    E(-3,{t:'recv',k:'c3',a:12300000,acct:'bella',alloc:[]}),
+    E(-2,{t:'adjust',lines:[{p:'p2',q:-1}],note:'One tire damaged in the warehouse'}),
+    E(-1,{t:'draw',a:3000000,acct:'cash'}),
+    E(-1,{t:'purchase',k:'c1',nota:'DO-2318',lines:[{p:'p1',qd:30,q:30,c:1770000}],extra:0,paid:0,acct:'bank',term:'30',due:addDays(29)})
+  ];
+  _demo={products,contacts,setup:{name:'Example Windpower Distributor'},entries};return _demo;
+}
+function liveEntries(){
+  const k='le'+S.ver;if(S.cache[k])return S.cache[k];
+  const out=S.live.entries.filter(v=>v&&v.t);
+  out.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:(a.ts||0)-(b.ts||0));
+  return S.cache[k]=out;
+}
+function D(){return S.demo?DEMO():{products:S.live.products,contacts:S.live.contacts,setup:S.live.setup,entries:liveEntries()};}
+const cats=()=>{const c=D().setup.cats;return Array.isArray(c)&&c.length?c:DEF_CATS;};
+const accts=()=>{const a=D().setup.accts;return Array.isArray(a)&&a.length?a:DEF_ACCTS;};
+const aname=id=>{const a=accts().find(x=>x.id===id);return a?a.name:(id==='cash'?'Cash':id==='bank'?'Bank':id||'Cash');};
+const pname=id=>{const p=D().products[id];return p?`${p.brand} ${p.size}${p.pattern?' '+p.pattern:''}`:'Removed tire';};
+const pH=id=>{const p=D().products[id];return p?`<span class="size">${esc(p.size)}</span> ${esc(p.pattern||'')} <span class="small">${esc(p.brand)}</span>`:'Removed tire';};
+const cname=id=>{const c=D().contacts[id];return c?c.name:(id?'Unknown':'No name');};
+const cidByName=name=>{name=(name||'').trim().toLowerCase();if(!name)return '';const C=D().contacts;return Object.keys(C).find(k=>(C[k].name||'').trim().toLowerCase()===name)||'';};
+const thumb=(id,sz)=>{const p=D().products[id];if(p&&p.img)return `<img class="thumb" src="${esc(photoUrl(p.img))}" alt="${esc(pname(id))}" width="${sz}" height="${sz}" loading="lazy" onerror="this.style.visibility='hidden'">`;return `<span class="thumb ph" style="width:${sz}px;height:${sz}px" aria-hidden="true"></span>`;};
+const margin=(price,avg)=>price&&avg?`${M(price-avg)}<div class="small">${((price-avg)/price*100).toFixed(0)}% of the price</div>`:'';
+
+/* ---------- the accounting engine: replays every entry in date order ---------- */
+function compute(from,to,ex){
+  const key=[S.demo,S.ver,from,to,ex||''].join('|');if(S.cache[key])return S.cache[key];
+  const st={},bal={},inv={ar:{},ap:{}},credit={ar:{},ap:{}},byId={};
+  let eqOpen=0,cap=0,draw=0,profit=0,open=null;
+  const P={goods:0,disc:0,cogs:0,exp:{},adj:0,sales:0,tires:0};
+  const C={openIn:0,saleCash:0,arIn:0,capIn:0,buyCash:0,apOut:0,expOut:0,drawOut:0};
+  const recvBy={},warn=[];
+  const sk=p=>st[p]||(st[p]={q:0,v:0,last:0});
+  const mv=(a,x)=>{a=a||'cash';bal[a]=(bal[a]||0)+x;};
+  const avg=s=>s.q>0?s.v/s.q:s.last;
+  const settle=s=>{if(Math.abs(s.q)<1e-9){s.q=0;s.v=0;}if(s.q>0)s.last=s.v/s.q;};
+  const addInv=(side,k,o)=>{const c=credit[side][k]||0;if(c>0){const t=Math.min(c,o.open);o.open-=t;credit[side][k]=c-t;}o.k=k;o.side=side;(inv[side][k]||(inv[side][k]=[])).push(o);byId[o.id]=o;};
+  const payInv=(side,k,amt,alloc)=>{const L=inv[side][k]||[];let left=amt;
+    for(const id of alloc||[]){const o=L.find(x=>x.id===id);if(o&&left>0&&o.open>0){const t=Math.min(o.open,left);o.open-=t;left-=t;}}
+    for(const o of L.filter(x=>x.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0)){if(left<=0)break;const t=Math.min(o.open,left);o.open-=t;left-=t;}
+    if(left>0.5)credit[side][k]=(credit[side][k]||0)+left;};
+  const owe=(side,e,tot,paid)=>{const o=tot-paid;if(o>0.5)addInv(side,e.k,{id:e.id,nota:e.nota||'',d:e.d,due:e.due||e.d,total:tot,open:o});else if(o<-0.5)credit[side][e.k]=(credit[side][e.k]||0)-o;};
+  for(const e of D().entries){
+    if(e.d>to)break;
+    if(ex&&e.id===ex)continue;
+    const inP=e.d>=from;
+    if(inP&&!open)open={tot:Object.values(bal).reduce((a,b)=>a+b,0)};
+    switch(e.t){
+      case 'opening':{let tot=0;const b=Object.assign({},e.bal||{});if(e.cash)b.cash=(b.cash||0)+n(e.cash);if(e.bank)b.bank=(b.bank||0)+n(e.bank);
+        for(const [a,v] of Object.entries(b)){mv(a,n(v));tot+=n(v);if(inP)C.openIn+=n(v);}
+        (e.lines||[]).forEach(l=>{const s=sk(l.p),v=n(l.q)*n(l.c);s.q+=n(l.q);s.v+=v;settle(s);tot+=v;});
+        (e.recv||[]).forEach((r,i)=>{if(!n(r.a))return;addInv('ar',r.k,{id:e.id+'-r'+i,nota:r.nota||'',d:e.d,due:r.due||e.d,total:n(r.a),open:n(r.a)});tot+=n(r.a);});
+        (e.pay||[]).forEach((r,i)=>{if(!n(r.a))return;addInv('ap',r.k,{id:e.id+'-p'+i,nota:r.nota||'',d:e.d,due:r.due||e.d,total:n(r.a),open:n(r.a)});tot-=n(r.a);});
+        eqOpen+=tot;break;}
+      case 'purchase':{const L=e.lines||[];const sub=L.reduce((a,l)=>a+n(l.q)*n(l.c),0),extra=n(e.extra);
+        L.forEach(l=>{const s=sk(l.p),base=n(l.q)*n(l.c);s.q+=n(l.q);s.v+=base+(sub?extra*base/sub:0);settle(s);});
+        const tot=sub+extra,paid=n(e.paid);mv(e.acct,-paid);owe('ap',e,tot,paid);if(inP)C.buyCash+=paid;break;}
+      case 'sale':{let goods=0,cogs=0,q=0;(e.lines||[]).forEach(l=>{const s=sk(l.p),lq=n(l.q),c=lq*avg(s);goods+=lq*n(l.u);q+=lq;s.q-=lq;s.v-=c;cogs+=c;settle(s);if(s.q<0)warn.push({d:e.d,p:l.p,q:s.q});});
+        const tot=goods-n(e.disc),paid=n(e.paid),ship=n(e.ship);mv(e.acct,paid);owe('ar',e,tot,paid);
+        if(ship){mv(e.shipAcct||e.acct,-ship);}
+        profit+=tot-cogs-ship;
+        if(inP){P.goods+=goods;P.disc+=n(e.disc);P.cogs+=cogs;P.sales++;P.tires+=q;C.saleCash+=paid;if(paid)recvBy[e.acct||'cash']=(recvBy[e.acct||'cash']||0)+paid;if(ship){P.exp[SHIP]=(P.exp[SHIP]||0)+ship;C.expOut+=ship;}}break;}
+      case 'recv':{const a=n(e.a);mv(e.acct,a);payInv('ar',e.k,a,e.alloc);if(inP){C.arIn+=a;recvBy[e.acct||'cash']=(recvBy[e.acct||'cash']||0)+a;}break;}
+      case 'pay':{const a=n(e.a);mv(e.acct,-a);payInv('ap',e.k,a,e.alloc);if(inP)C.apOut+=a;break;}
+      case 'expense':{const a=n(e.a);mv(e.acct,-a);profit-=a;if(inP){P.exp[e.cat||'Other']=(P.exp[e.cat||'Other']||0)+a;C.expOut+=a;}break;}
+      case 'adjust':{let tot=0;(e.lines||[]).forEach(l=>{const s=sk(l.p),q=n(l.q),v=q*avg(s);s.q+=q;s.v+=v;settle(s);tot+=v;});profit+=tot;if(inP)P.adj+=tot;break;}
+      case 'capital':{const a=n(e.a);mv(e.acct,a);cap+=a;if(inP)C.capIn+=a;break;}
+      case 'draw':{const a=n(e.a);mv(e.acct,-a);draw+=a;if(inP)C.drawOut+=a;break;}
+      case 'transfer':{const a=n(e.a),fr=e.from||'cash',tt=e.to||(fr==='bank'?'cash':'bank');mv(fr,-a);mv(tt,a);break;}
+    }
+  }
+  const money=Object.values(bal).reduce((a,b)=>a+b,0);
+  if(!open)open={tot:money};
+  const expTot=Object.values(P.exp).reduce((a,b)=>a+b,0);
+  P.net=P.goods-P.disc;P.gross=P.net-P.cogs;P.expTot=expTot;P.profit=P.gross-expTot+P.adj;
+  const side=sd=>{const m={};let t=0;const ks=new Set([...Object.keys(inv[sd]),...Object.keys(credit[sd])]);for(const k of ks){const v=(inv[sd][k]||[]).reduce((a,o)=>a+o.open,0)-(credit[sd][k]||0);m[k]=v;t+=v;}return [m,t];};
+  const [ar,arTot]=side('ar'),[ap,apTot]=side('ap');
+  const openInv=sd=>Object.values(inv[sd]).flat().filter(o=>o.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);
+  const stockVal=Object.values(st).reduce((a,s)=>a+s.v,0);
+  const assets=money+arTot+stockVal,equity=eqOpen+cap-draw+profit;
+  return S.cache[key]={st,bal,money,ar,ap,arTot,apTot,inv,byId,openAR:openInv('ar'),openAP:openInv('ap'),credit,open,P,C,recvBy,warn,stockVal,assets,equity,eqOpen,cap,draw,profit,diff:assets-apTot-equity};
+}
+const now=()=>compute(START,FAR);
+function status(o){const t=today();if(o.due<t){const k=daysBetween(o.due,t);return {late:true,txt:`Late ${k} day${k===1?'':'s'}`};}const k=daysBetween(t,o.due);return {late:false,txt:k===0?'Due today':`Due in ${k} day${k===1?'':'s'}`};}
+const stTag=o=>{const s=status(o);return `<span class="tag ${s.late?'late':'ok'}">${s.txt}</span>`;};
+
+/* ---------- storage: Supabase tables (see supabase/setup.sql) ---------- */
+const BUCKET='tire-photos';
+async function q(p){const {data,error}=await p;if(error)throw error;return data;}
+const store={
+  saveEntry:e=>q(S.sb.from('entries').upsert({id:e.id,d:e.d,data:e,updated_at:new Date().toISOString()})),
+  deleteEntry:id=>q(S.sb.from('entries').delete().eq('id',id)),
+  setProduct:(id,data)=>q(S.sb.from('products').upsert({id,data,updated_at:new Date().toISOString()})),
+  patchProduct:(id,patch)=>store.setProduct(id,Object.assign({},S.live.products[id]||{},patch)),
+  setContact:(id,data)=>q(S.sb.from('contacts').upsert({id,data,updated_at:new Date().toISOString()})),
+  patchContact:(id,patch)=>store.setContact(id,Object.assign({},S.live.contacts[id]||{},patch)),
+  setSetup:data=>q(S.sb.from('settings').upsert({id:'setup',data,updated_at:new Date().toISOString()})),
+  async uploadPhoto(blob){const path=uid()+'.jpg';await q(S.sb.storage.from(BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:false}));return path;},
+  deletePhoto:path=>S.sb.storage.from(BUCKET).remove([path]).catch(()=>{})
+};
+const photoUrl=path=>S.sb&&path?S.sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl:'';
+async function saveEntry(e){await store.saveEntry(e);}
+async function deleteEntry(e){await store.deleteEntry(e.id);}
+async function ensureContact(name,kind){
+  name=(name||'').trim();if(!name)return '';
+  const cs=S.live.contacts;const id=Object.keys(cs).find(k=>(cs[k].name||'').trim().toLowerCase()===name.toLowerCase());
+  if(id){const c=cs[id];if(c.kind!==kind&&c.kind!=='both')await store.patchContact(id,{kind:'both'});return id;}
+  const nid='c'+uid();const data={name,kind,phone:''};await store.setContact(nid,data);S.live.contacts[nid]=data;return nid;
+}
+function friendly(x){if(!x)return 'Something went wrong.';const m=String(x.message||'');if(/row-level security|permission denied/i.test(m))return 'This account has not been given access yet. Ask the owner to add your email in Setup.';if(/JWT|expired/i.test(m))return 'You were signed out. Sign in again.';if(/fetch|network/i.test(m))return 'No connection. Check the internet and try again.';return 'Could not save: '+m;}
+
+/* ---------- helpers ---------- */
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>{t.hidden=true;},2600);}
+function csv(rows){return rows.map(r=>r.map(c=>{const s=String(c??'');return /[",\n;]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\r\n');}
+async function download(name,rows){
+  try{const blob=new Blob(['\ufeff'+csv(rows)],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('Saved '+name);}
+  catch(e){toast('Could not save the file.');}
+}
+function entryTotal(e){
+  switch(e.t){
+    case 'sale':return (e.lines||[]).reduce((a,l)=>a+n(l.q)*n(l.u),0)-n(e.disc);
+    case 'purchase':return (e.lines||[]).reduce((a,l)=>a+n(l.q)*n(l.c),0)+n(e.extra);
+    case 'opening':return Object.values(e.bal||{}).reduce((a,v)=>a+n(v),0)+n(e.cash)+n(e.bank)+(e.lines||[]).reduce((a,l)=>a+n(l.q)*n(l.c),0);
+    case 'adjust':return null;
+    default:return n(e.a);
+  }
+}
+const plain=h=>String(h).replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/\s+/g,' ').trim();
+function describe(e,c){
+  const qty=L=>(L||[]).reduce((a,l)=>a+n(l.q),0);
+  const nota=e.nota?`<span class="notano">${esc(e.nota)}</span> `:'';
+  switch(e.t){
+    case 'sale':{const q=qty(e.lines),o=c&&c.byId[e.id];const tag=o&&o.open>0.5?' '+stTag(o):(Math.abs(entryTotal(e)-n(e.paid))>0.5&&!o?'':' <span class="tag ok">Paid</span>');
+      return `${nota}${q} tire${q===1?'':'s'} to ${esc(cname(e.k))}${tag}${n(e.paid)?`<div class="small">${rp(e.paid)} received by ${esc(aname(e.acct))}</div>`:''}`;}
+    case 'purchase':{const q=qty(e.lines),miss=(e.lines||[]).some(l=>l.qd!=null&&n(l.qd)!==n(l.q)),o=c&&c.byId[e.id];
+      return `${nota}${q} tire${q===1?'':'s'} from ${esc(cname(e.k))}${miss?' <span class="tag late">Count differs from DO</span>':''}${o&&o.open>0.5?' '+stTag(o):''}`;}
+    case 'recv':return `${esc(cname(e.k))}<div class="small">Received by ${esc(aname(e.acct))}</div>`;
+    case 'pay':return `${esc(cname(e.k))}<div class="small">Paid from ${esc(aname(e.acct))}</div>`;
+    case 'expense':return `${esc(e.cat||'Other')}<div class="small">Paid from ${esc(aname(e.acct))}</div>`;
+    case 'adjust':return (e.lines||[]).map(l=>`${n(l.q)>0?'+':''}${n(l.q)} ${esc(pname(l.p))}`).join(', ');
+    case 'transfer':{const fr=e.from||'cash',tt=e.to||(fr==='bank'?'cash':'bank');return `${esc(aname(fr))} to ${esc(aname(tt))}`;}
+    case 'capital':return `Into ${esc(aname(e.acct))}`;
+    case 'draw':return `Out of ${esc(aname(e.acct))}`;
+    case 'opening':return 'Starting position';
+    default:return '';
+  }
+}
+function nextNota(){
+  let best=null;for(const e of D().entries){if(e.t!=='sale'||!e.nota)continue;const m=String(e.nota).match(/^(\D*)(\d+)(\D*)$/);if(!m)continue;const v=parseInt(m[2],10);if(!best||v>best.v)best={v,m};}
+  if(!best)return '';return best.m[1]+String(best.v+1).padStart(best.m[2].length,'0')+best.m[3];
+}
+function lastSupplier(){const L=D().entries;for(let i=L.length-1;i>=0;i--)if(L[i].t==='purchase'&&L[i].k)return cname(L[i].k);return 'Windpower Jakarta';}
+
+/* ---------- pages ---------- */
+const PAGES={overview:pageOverview,record:pageRecord,unpaid:pageUnpaid,journal:pageJournal,stock:pageStock,people:pagePeople,reports:pageReports,setup:pageSetup,terms:pageTerms,privacy:pagePrivacy};
+const allReady=()=>S.ready.p&&S.ready.c&&S.ready.d&&S.ready.m;
+const loaded=()=>S.demo||allReady();
+const route=()=>{const h=(location.hash||'').slice(1);return PAGES[h]?h:'overview';};
+const editable=()=>S.canWrite&&!S.demo&&S.mode==='live';
+
+function banner(){
+  const b=[];
+  if(S.demo)b.push(`<span>Example data. Nothing entered here is saved.</span><button class="link" data-act="demo-off">${S.mode==='live'?'Back to real records':'Back to sign in'}</button>`);
+  else if(S.err)b.push(`<span class="neg">${esc(S.err)}</span>`);
+  else if(S.slow&&!allReady())b.push('<span>Saved records cannot be reached yet. Check the internet connection.</span>');
+  if(!S.demo&&S.mode==='live'&&!S.canWrite)b.push('<span>View only.</span>');
+  return b.length?`<div class="banner">${b.join('')}</div>`:'';
+}
+function skeleton(){return `<section class="wrap" aria-busy="true"><span class="skel a"></span><span class="skel b"></span>${'<span class="skel c"></span>'.repeat(6)}</section>`;}
+
+function pageOverview(){
+  const d=D();const [f,t]=monthRange(0);const m=compute(f,t),c=now();
+  if(!d.entries.length){
+    return `<section class="wrap hero"><p class="micro">Nothing recorded yet</p><h1 class="display">Start with what<br>the business has today.</h1>
+    <div class="prose"><p>Record the opening balances once: money each person holds, the bank balance, every tire in the warehouse with what it cost, unpaid notas, and what you still owe Jakarta. After that, copy each nota, each DO and each payment as it happens. Profit, unpaid notas and the reports build themselves.</p></div>
+    <div class="row">${editable()?'<button class="btn primary" data-act="start-opening">Record opening balances</button>':''}<button class="btn" data-act="demo-on">Look around with example data</button></div></section>`;
+  }
+  const late=c.openAR.filter(o=>status(o).late),lateTot=late.reduce((a,o)=>a+o.open,0);
+  const att=[];
+  if(late.length)att.push(`<div class="lrow"><span class="neg">${late.length} nota${late.length===1?' is':'s are'} past the due date</span><a href="#unpaid">${rp(lateTot)}</a></div>`);
+  const apLate=c.openAP.filter(o=>status(o).late);if(apLate.length)att.push(`<div class="lrow"><span>${apLate.length} DO${apLate.length===1?'':'s'} to Jakarta past the due date</span><a href="#unpaid">${rp(apLate.reduce((a,o)=>a+o.open,0))}</a></div>`);
+  for(const [pid,s] of Object.entries(c.st)){const p=d.products[pid];if(!p)continue;if(s.q<0)att.push(`<div class="lrow"><span>${pH(pid)}</span><span class="tag late">Below zero: ${s.q}</span></div>`);else if(n(p.low)&&s.q<=n(p.low))att.push(`<div class="lrow"><span>${pH(pid)}</span><span class="tag">Low: ${s.q} left</span></div>`);}
+  if(Math.abs(c.diff)>1)att.unshift(`<div class="lrow"><span class="neg">Books are off by ${rp(c.diff)}</span><a href="#reports">Check</a></div>`);
+  if(!d.entries.some(e=>e.t==='opening'))att.unshift('<div class="lrow"><span>No opening balances yet, so money and stock start from zero.</span><button class="link" data-act="start-opening">Add them</button></div>');
+  const recent=d.entries.slice(-7).reverse().map(e=>`<div class="lrow"><span><span class="small">${short(e.d)}</span> ${TYPES[e.t]}: ${describe(e,c)}</span><span class="v" style="font-size:15px">${entryTotal(e)==null?'':M(entryTotal(e))}</span></div>`).join('');
+  const held=accts().map(a=>`<div class="lrow"><span>${esc(a.name)}</span><span class="v">${M(c.bal[a.id]||0)}</span></div>`).join('');
+  const extra=Object.keys(c.bal).filter(k=>!accts().some(a=>a.id===k)&&Math.round(c.bal[k])).map(k=>`<div class="lrow"><span>${esc(aname(k))}</span><span class="v">${M(c.bal[k])}</span></div>`).join('');
+  return `<section class="wrap hero">
+    <p class="micro">Profit so far, ${monthLabel(f)}</p>
+    <h1 class="display ${Math.round(m.P.profit)<0?'neg':''}">${rp(m.P.profit)}</h1>
+    <div class="sub"><span>Sales ${M(m.P.net)}</span><span>${m.P.tires} tires on ${m.P.sales} nota${m.P.sales===1?'':'s'}</span><span>Profit from selling tires ${M(m.P.gross)}</span><span>Running costs ${M(m.P.expTot)}</span></div>
+    <p class="small" style="max-width:62ch">What the business earned this month after paying for the tires that were sold and the running costs. It is not the same as money in hand, because some notas are not paid yet.</p>
+  </section>
+  <div class="band"><section class="wrap"><div class="ledger">
+      <div><p class="micro" style="margin-bottom:4px">Who is holding the money</p>${held}${extra}<div class="lrow"><span><strong>Total money</strong></span><span class="v">${M(c.money)}</span></div></div>
+      <div><p class="micro" style="margin-bottom:4px">Where the business stands</p>
+        <div class="lrow"><span>Shops owe you<span class="ex">${c.openAR.length} unpaid nota${c.openAR.length===1?'':'s'}${late.length?`, ${late.length} late`:''}.</span></span><a class="v" href="#unpaid">${M(c.arTot)}</a></div>
+        <div class="lrow"><span>You owe Jakarta and suppliers<span class="ex">Goods received, not paid yet.</span></span><span class="v">${M(c.apTot)}</span></div>
+        <div class="lrow"><span>Tires in the warehouse<span class="ex">What you paid for the tires you still have.</span></span><span class="v">${M(c.stockVal)}</span></div>
+        <div class="lrow"><span>What the business is worth<span class="ex">Everything it has minus everything it owes.</span></span><span class="v">${M(c.equity)}</span></div></div>
+    </div></section></div>
+  <section class="wrap two">
+    <div><p class="micro" style="margin-bottom:8px">Needs attention</p>${att.join('')||'<div class="lrow"><span class="small">Nothing right now.</span></div>'}</div>
+    <div><p class="micro" style="margin-bottom:8px">Latest entries</p>${recent}<div style="padding-top:14px"><a href="#journal">Open the journal</a></div></div>
+  </section>`;
+}
+
+/* ---------- unpaid notas and DOs ---------- */
+function pageUnpaid(){
+  const c=now(),ed=editable();
+  const tbl=(list,side)=>{if(!list.length)return `<p class="small" style="padding-block:14px">${side==='ar'?'Every nota is paid.':'Nothing owed to suppliers.'}</p>`;
+    const rows=list.map(o=>`<tr><td><span class="notano">${esc(o.nota||'No number')}</span></td><td>${esc(cname(o.k))}</td><td class="small" style="white-space:nowrap">${short(o.d)}</td><td style="white-space:nowrap">${short(o.due)} ${stTag(o)}</td><td class="num">${o.open<o.total-0.5?`<div class="small">of ${rp(o.total)}</div>`:''}${M(o.open)}</td><td class="num">${ed?`<button class="link" data-act="${side==='ar'?'pay-nota':'pay-do'}" data-id="${esc(o.id)}">${side==='ar'?'Record payment':'Record payment'}</button>`:''}</td></tr>`).join('');
+    return `<div class="tbl"><table><thead><tr><th>${side==='ar'?'Nota':'DO'}</th><th>${side==='ar'?'Shop':'Supplier'}</th><th>Date</th><th>Due</th><th class="num">Still owed</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;};
+  const ar=c.openAR,late=ar.filter(o=>status(o).late),soon=ar.filter(o=>!status(o).late&&daysBetween(today(),o.due)<=7),later=ar.filter(o=>!status(o).late&&daysBetween(today(),o.due)>7);
+  const sum=L=>L.reduce((a,o)=>a+o.open,0);
+  const credits=Object.entries(c.credit.ar).filter(([k,v])=>v>0.5);
+  const held=accts().map(a=>`<span>${esc(a.name)} <strong>${M(c.bal[a.id]||0)}</strong></span>`).join('');
+  return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><div class="stack" style="gap:10px"><p class="micro">${ar.length} unpaid nota${ar.length===1?'':'s'}</p><h1 class="h1">Unpaid notas</h1></div>
+    <div style="text-align:right"><p class="micro">Shops owe you</p><p class="h2">${M(c.arTot)}</p></div></div>
+    <p class="hint" style="margin-top:14px">Every credit nota stays here until it is fully paid. When a shop pays anyone, Ci Via, Ci Bella or into the bank, press Record payment and pick who received it.</p>
+    <div class="row" style="gap:8px 28px;margin-top:14px;font-size:14px">${held}</div>
+    <div class="stack" style="margin-top:28px;gap:6px"><p class="micro ${late.length?'neg':''}">Past the due date, ${rp(sum(late))}</p>${tbl(late,'ar')}</div>
+    <div class="stack" style="margin-top:28px;gap:6px"><p class="micro">Due in the next 7 days, ${rp(sum(soon))}</p>${tbl(soon,'ar')}</div>
+    <div class="stack" style="margin-top:28px;gap:6px"><p class="micro">Due later, ${rp(sum(later))}</p>${tbl(later,'ar')}</div>
+    ${credits.length?`<div class="stack" style="margin-top:28px;gap:6px"><p class="micro">Paid more than they owed</p>${credits.map(([k,v])=>`<div class="lrow"><span>${esc(cname(k))}</span><span>${M(v)} <span class="small">will go toward their next nota</span></span></div>`).join('')}</div>`:''}
+  </section>
+  <div class="band"><section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><h2 class="h2">What you owe Jakarta and suppliers</h2><p class="h2">${M(c.apTot)}</p></div><div style="margin-top:16px">${tbl(c.openAP,'ap')}</div></section></div>`;
+}
+
+/* ---------- record ---------- */
+function newDraft(t,d){
+  const la=lsGet('tsb-acct')||accts()[0].id;
+  const dr={t,d:d||today(),k:'',nota:'',term:'cash',due:'',lines:[{p:'',q:'',qd:'',x:''}],disc:'',ship:'',shipAcct:la,extra:'',paid:'',acct:la,a:'',cat:cats()[0],note:'',
+    from:accts().some(a=>a.id==='bella')?'bella':accts()[0].id,to:accts().some(a=>a.id==='bank')?'bank':accts()[accts().length-1].id,bal:{},recv:[],pay:[],alloc:[]};
+  if(t==='sale')dr.nota=nextNota();
+  if(t==='purchase'){dr.k=lastSupplier();dr.term='30';dr.acct=accts().some(a=>a.id==='bank')?'bank':la;}
+  if(t==='pay'){dr.k=lastSupplier();dr.acct=accts().some(a=>a.id==='bank')?'bank':la;}
+  return dr;
+}
+function draftFrom(e){
+  const d=newDraft(e.t,e.d);d.k=e.k?cname(e.k):'';d.note=e.note||'';d.acct=e.acct||'cash';d.nota=e.nota||'';d.term=e.term||'cash';d.due=e.due||'';
+  d.lines=(e.lines||[]).map(l=>({p:l.p,q:String(n(l.q)),qd:l.qd!=null?String(n(l.qd)):'',x:fmt(l.u!=null?l.u:l.c)}));if(!d.lines.length)d.lines=[{p:'',q:'',qd:'',x:''}];
+  ['disc','ship','extra','a'].forEach(f=>{if(e[f]!=null&&n(e[f]))d[f]=fmt(e[f]);});
+  d.shipAcct=e.shipAcct||d.acct;d.paid=e.paid!=null&&n(e.paid)?fmt(e.paid):'';
+  d.cat=e.cat||d.cat;d.from=e.from||'cash';d.to=e.to||(d.from==='bank'?'cash':'bank');
+  const b=Object.assign({},e.bal||{});if(e.cash)b.cash=(b.cash||0)+n(e.cash);if(e.bank)b.bank=(b.bank||0)+n(e.bank);d.bal={};for(const k in b)d.bal[k]=fmt(b[k]);
+  d.recv=(e.recv||[]).map(r=>({name:cname(r.k),a:fmt(r.a),nota:r.nota||'',due:r.due||''}));d.pay=(e.pay||[]).map(r=>({name:cname(r.k),a:fmt(r.a),nota:r.nota||'',due:r.due||''}));
+  d.alloc=(e.alloc||[]).slice();
+  return d;
+}
+function dueOf(d){if(d.term==='cash')return '';if(d.term==='date')return d.due||'';return addDaysTo(d.d,parseInt(d.term,10)||0);}
+function totals(d){
+  const goods=d.lines.reduce((a,l)=>a+n(l.q)*n(l.x),0);
+  let total=0;
+  if(d.t==='sale')total=goods-n(d.disc);
+  else if(d.t==='purchase')total=goods+n(d.extra);
+  else if(d.t==='opening')total=Object.values(d.bal).reduce((a,v)=>a+n(v),0)+goods;
+  else total=n(d.a);
+  const paid=(d.t==='sale'||d.t==='purchase')?(d.term==='cash'?total:n(d.paid)):total;
+  return {goods,total,paid};
+}
+function pageRecord(){
+  if(!S.draft)S.draft=newDraft('sale');
+  return `<section class="wrap"><p class="micro">${S.editing?'Editing a saved entry':'New entry'}</p><h1 class="h1" style="margin-top:12px">${S.editing?'Edit '+TYPES[S.draft.t].toLowerCase():'Record something'}</h1><div id="formArea"></div></section>`;
+}
+function productOptions(sel){
+  const P=D().products;return Object.keys(P).sort((a,b)=>pname(a).localeCompare(pname(b))).map(id=>`<option value="${id}"${id===sel?' selected':''}>${esc(P[id].size)} ${esc(P[id].pattern||'')} (${esc(P[id].brand)})</option>`).join('');
+}
+const F=(label,inner,cls)=>`<label class="fld ${cls||''}"><span class="micro">${label}</span>${inner}</label>`;
+const I=(f,attrs)=>`<input id="f-${f}" data-f="${f}" value="${esc(S.draft[f])}" ${attrs||''}>`;
+const MONEY='class="num" data-money inputmode="numeric"';
+const acctSel=(f,val)=>`<select id="f-${f}" data-f="${f}">${accts().map(a=>`<option value="${esc(a.id)}"${a.id===val?' selected':''}>${esc(a.name)}</option>`).join('')}</select>`;
+function linesHTML(kind){
+  const d=S.draft;
+  const cols={sale:[['q','Qty'],['x','Price each',1]],purchase:[['qd','Qty on DO'],['q','Qty counted'],['x','Cost each',1]],opening:[['q','Qty'],['x','Cost each',1]],adjust:[['q','Difference']]}[kind];
+  const rows=d.lines.map((l,i)=>`<div class="lineRow" style="--cols:${cols.length}">
+    <label class="fld lp"><span class="micro">Tire</span><select id="l-${i}-p" data-li="${i}" data-lf="p"><option value="">Choose tire</option>${productOptions(l.p)}</select></label>
+    ${cols.map(([f,lab,money])=>`<label class="fld"><span class="micro">${lab}</span><input id="l-${i}-${f}" class="num" data-li="${i}" data-lf="${f}" ${money?'data-money ':''}inputmode="numeric" value="${esc(l[f])}" placeholder="0"></label>`).join('')}
+    <span class="lt" id="lt-${i}"></span><span class="rm"><button type="button" class="link" data-act="rmline" data-i="${i}">Remove</button></span></div>`).join('');
+  return `<div>${rows}</div>
+  <div class="row"><button type="button" class="link" data-act="addline">Add another tire</button>
+  <details id="qp"><summary>Tire not in the list? Add it</summary><div class="quick grid2">${F('Brand','<input id="qp-brand" value="Windpower">')}${F('Size code','<input id="qp-size" placeholder="7.50-16">')}${F('Pattern or type','<input id="qp-pattern" placeholder="WGC29">')}${F('Selling price','<input id="qp-price" data-money inputmode="numeric" placeholder="2.050.000">')}<div><button type="button" class="btn" data-act="quickprod">Add tire</button></div></div></details></div>`;
+}
+function peopleRows(list,label,numLabel){
+  const rows=S.draft[list].map((r,i)=>`<div class="grid2" style="padding-block:6px;border-bottom:1px solid var(--rule)">
+    <label class="fld"><span class="micro">${label}</span><input id="${list}-${i}-n" list="dl-contacts" data-rl="${list}" data-ri="${i}" data-rf="name" value="${esc(r.name)}"></label>
+    <label class="fld"><span class="micro">${numLabel}</span><input id="${list}-${i}-o" data-rl="${list}" data-ri="${i}" data-rf="nota" value="${esc(r.nota)}"></label>
+    <label class="fld"><span class="micro">Due date</span><input type="date" id="${list}-${i}-d" data-rl="${list}" data-ri="${i}" data-rf="due" value="${esc(r.due)}"></label>
+    <label class="fld"><span class="micro">Still owed</span><input id="${list}-${i}-a" class="num" data-money inputmode="numeric" data-rl="${list}" data-ri="${i}" data-rf="a" value="${esc(r.a)}"></label>
+    <div style="align-self:end"><button type="button" class="link" data-act="rmrow" data-l="${list}" data-i="${i}">Remove</button></div></div>`).join('');
+  return rows+`<div><button type="button" class="link" data-act="addrow" data-l="${list}">Add ${list==='recv'?'an unpaid nota':'an unpaid DO'}</button></div>`;
+}
+function contactDatalist(){return `<datalist id="dl-contacts">${Object.values(D().contacts).map(c=>`<option value="${esc(c.name)}"></option>`).join('')}</datalist>`;}
+function termsHTML(paidLabel,accLabel){
+  const d=S.draft,due=dueOf(d);
+  return `<div class="stack" style="gap:10px"><span class="micro">Payment</span><div class="seg" role="group" aria-label="Payment">${TERMS.map(([v,l])=>`<button type="button" data-act="term" data-v="${v}" aria-pressed="${d.term===v}">${l}</button>`).join('')}</div>
+  <div class="grid2">${d.term==='date'?F('Due date',`<input type="date" id="f-due" data-f="due" value="${esc(d.due)}">`):''}
+  ${d.term!=='cash'?F(paidLabel,I('paid',MONEY+' placeholder="0"')):''}
+  ${F(accLabel,acctSel('acct',d.acct))}</div>
+  ${d.term!=='cash'&&due?`<p class="small">Due on ${nice(due)}.</p>`:''}</div>`;
+}
+function formHTML(){
+  const d=S.draft,t=d.t;
+  const pill=k=>`<button type="button" data-act="type" data-t="${k}" aria-pressed="${k===t}">${TYPES[k]}</button>`;
+  const seg=S.editing?'':`<div class="seg" role="group" aria-label="What happened">${MAIN.map(pill).join('')}</div><div class="row" style="gap:6px 10px"><span class="micro">Less often</span><div class="seg">${ORDER.filter(k=>!MAIN.includes(k)).map(pill).join('')}</div></div>`;
+  let body='';
+  const date=F('Date',`<input id="f-d" data-f="d" type="date" value="${esc(d.d)}">`);
+  const note=F('Note (optional)',I('note','placeholder="Anything worth remembering"'));
+  if(t==='sale')body=`<div class="grid2">${date}${F('Nota number',I('nota','class="notano" placeholder="00657"'))}${F('Shop (customer)',I('k','list="dl-contacts" placeholder="Shop name"'))}</div>${linesHTML('sale')}
+    <div class="grid2">${F('Discount',I('disc',MONEY+' placeholder="0"'))}${F('Ongkir paid by you',I('ship',MONEY+' placeholder="0"'))}${n(d.ship)?F('Ongkir paid from',acctSel('shipAcct',d.shipAcct)):''}</div>
+    ${termsHTML('Paid now as a deposit (optional)','Money received by')}${note}`;
+  else if(t==='purchase')body=`<div class="grid2">${date}${F('DO number',I('nota','class="notano" placeholder="DO number"'))}${F('Supplier',I('k','list="dl-contacts"'))}</div>${linesHTML('purchase')}
+    <div class="grid2">${F('Truck or delivery cost',I('extra',MONEY+' placeholder="0"'))}</div>${termsHTML('Paid now (optional)','Paid from')}${note}`;
+  else if(t==='recv'||t==='pay')body=`<div class="grid2">${date}${F(t==='recv'?'Shop':'Supplier',I('k','list="dl-contacts"'))}${F('Amount',I('a',MONEY))}${F(t==='recv'?'Money received by':'Paid from',acctSel('acct',d.acct))}</div>
+    <div class="stack" style="gap:6px"><span class="micro">${t==='recv'?'Which notas does this pay?':'Which DOs does this pay?'}</span><div id="allocBox"></div></div>${note}`;
+  else if(t==='expense')body=`<div class="grid2">${date}${F('What for',`<select id="f-cat" data-f="cat">${cats().map(c=>`<option${c===d.cat?' selected':''}>${esc(c)}</option>`).join('')}</select>`)}${F('Amount',I('a',MONEY))}${F('Paid from',acctSel('acct',d.acct))}</div>${note}`;
+  else if(t==='adjust')body=`<div class="grid2">${date}</div>${linesHTML('adjust')}${note}`;
+  else if(t==='capital'||t==='draw')body=`<div class="grid2">${date}${F('Amount',I('a',MONEY))}${F(t==='capital'?'Into':'Out of',acctSel('acct',d.acct))}</div>${note}`;
+  else if(t==='transfer')body=`<div class="grid2">${date}${F('From',acctSel('from',d.from))}${F('To',acctSel('to',d.to))}${F('Amount',I('a',MONEY))}</div>${note}`;
+  else if(t==='opening')body=`<div class="grid2">${date}</div><p class="micro">Money on the starting day</p><div class="grid2">${accts().map(a=>F(esc(a.name),`<input id="bal-${esc(a.id)}" class="num" data-money inputmode="numeric" data-bal="${esc(a.id)}" value="${esc(d.bal[a.id]||'')}" placeholder="0">`)).join('')}</div>
+    <p class="micro">Tires in the warehouse, with what each one cost</p>${linesHTML('opening')}<p class="micro">Notas not paid yet</p>${peopleRows('recv','Shop','Nota number')}<p class="micro">DOs you have not paid Jakarta for yet</p>${peopleRows('pay','Supplier','DO number')}${note}`;
+  return `<div style="margin-top:24px" class="stack">${seg}<p class="hint">${HINTS[t]}</p></div>
+  <div class="recgrid"><form id="recForm" class="stack" novalidate>${body}<p class="err" id="formErr" role="alert"></p><div class="row"><button class="btn primary" id="saveBtn" type="submit"${editable()?'':' disabled'}>${S.editing?'Save changes':'Save '+TYPES[t].toLowerCase()}</button>${S.editing?'<button type="button" class="btn" data-act="cancel-edit">Cancel</button>':''}</div></form>
+  <aside class="nota" id="nota" aria-live="polite"></aside></div>${contactDatalist()}`;
+}
+function drawForm(){const a=$('#formArea');if(!a)return;S.allocKey=null;a.innerHTML=formHTML();updateNota();}
+function openFor(side,k){const ex=S.editing?S.editing.id:null;const c=compute(START,FAR,ex);return (c.inv[side][k]||[]).filter(o=>o.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);}
+function simulate(list,amt,alloc){const L=list.map(o=>({o,take:0,left:o.open}));let left=amt;
+  for(const id of alloc){const x=L.find(y=>y.o.id===id);if(x&&left>0){const t=Math.min(x.left,left);x.take+=t;x.left-=t;left-=t;}}
+  for(const x of L){if(left<=0)break;const t=Math.min(x.left,left);x.take+=t;x.left-=t;left-=t;}
+  return {L,left};}
+function drawAlloc(){
+  const d=S.draft,box=$('#allocBox');if(!box)return;const side=d.t==='recv'?'ar':'ap';const k=cidByName(d.k);
+  const key=side+'|'+k+'|'+S.ver;if(S.allocKey===key)return;S.allocKey=key;
+  if(!k){box.innerHTML=`<p class="small">Type the ${side==='ar'?'shop':'supplier'} name to see what is unpaid.</p>`;return;}
+  const list=openFor(side,k);
+  if(!list.length){box.innerHTML=`<p class="small">Nothing unpaid for ${esc(d.k)}. The money will be kept as credit toward their next ${side==='ar'?'nota':'DO'}.</p>`;return;}
+  box.innerHTML=`<div class="alloc">${list.map(o=>`<label><input type="checkbox" id="al-${esc(o.id)}" data-alloc="${esc(o.id)}"${d.alloc.includes(o.id)?' checked':''}><span><span class="notano">${esc(o.nota||'No number')}</span> <span class="small">${short(o.d)}</span> ${stTag(o)}</span><span class="amt">${rp(o.open)}</span></label>`).join('')}</div>
+  <p class="small">Nothing ticked? The money goes to the oldest ones first.</p>`;
+}
+function updateNota(){
+  const d=S.draft,t=d.t,T=totals(d),c=now();const nota=$('#nota');if(!nota)return;
+  d.lines.forEach((l,i)=>{const el=$('#lt-'+i);if(!el)return;if(t==='adjust'){el.textContent=l.p?'On record: '+(c.st[l.p]?c.st[l.p].q:0):'';}else el.textContent=n(l.q)&&n(l.x)?fmt(n(l.q)*n(l.x)):'';});
+  if(t==='recv'||t==='pay')drawAlloc();
+  const ln=(a,b,cls)=>`<div class="ln ${cls||''}"><span>${a}</span><span>${b}</span></div>`;
+  let h=`<div class="ln"><span class="micro">${t==='sale'?'Nota kredit':t==='purchase'?'Goods received':TYPES[t]}</span><span class="small">${nice(d.d)}</span></div>`;
+  if((t==='sale'||t==='purchase')&&(d.nota||d.k))h+=`<div class="ln"><span><span class="notano">${esc(d.nota)}</span></span><span>${esc(d.k)}</span></div>`;
+  h+='<hr>';
+  const valid=d.lines.filter(l=>l.p&&(n(l.q)||n(l.qd)));
+  if(t==='sale'||t==='purchase'||t==='opening'){
+    h+=valid.map(l=>ln(`${n(l.q)} × ${pH(l.p)}`,fmt(n(l.q)*n(l.x)))).join('')||'<p class="small">No tires added yet.</p>';
+    if(t==='purchase'){const miss=valid.filter(l=>l.qd!==''&&n(l.qd)!==n(l.q));if(miss.length)h+=`<p class="small neg">${miss.map(l=>`${pH(l.p)}: DO says ${n(l.qd)}, counted ${n(l.q)} (${n(l.q)-n(l.qd)>0?'+':''}${n(l.q)-n(l.qd)}).`).join(' ')} The amount owed is based on what was counted. Write the claim to Jakarta in the note.</p>`;
+      else if(valid.length&&valid.every(l=>l.qd!==''))h+='<p class="small">Count matches the DO.</p>';}
+    if(t==='sale'&&n(d.disc))h+=ln('Discount','-'+fmt(n(d.disc)));
+    if(t==='purchase'&&n(d.extra))h+=ln('Truck or delivery','+'+fmt(n(d.extra)));
+    if(t==='opening'){const r=d.recv.reduce((a,x)=>a+n(x.a),0),p=d.pay.reduce((a,x)=>a+n(x.a),0);accts().forEach(a=>{if(n(d.bal[a.id]))h+=ln(esc(a.name),fmt(n(d.bal[a.id])));});if(r)h+=ln('Unpaid notas',fmt(r));if(p)h+=ln('You owe','-'+fmt(p));
+      h+=`<hr><span class="micro">Starting value of the business</span><div class="big">${M(T.total+r-p)}</div>`;nota.innerHTML=h;return;}
+    h+=`<hr><span class="micro">${t==='sale'?'Jumlah (total)':'Total owed for this DO'}</span><div class="big">${M(T.total)}</div>`;
+    const rest=T.total-T.paid,due=dueOf(d);
+    if(d.term==='cash')h+=ln(`Paid now, ${esc(aname(d.acct))}`,fmt(T.paid));
+    else{if(T.paid)h+=ln(`Paid now, ${esc(aname(d.acct))}`,fmt(T.paid));h+=ln(t==='sale'?'Still to collect':'Still to pay',`<span class="${rest<0?'neg':''}">${fmt(rest)}</span>`);h+=ln('Due',due?nice(due):'<span class="neg">Pick a date</span>');}
+    if(t==='sale'&&valid.length){
+      let cost=0;const w=[];valid.forEach(l=>{const s=c.st[l.p]||{q:0,v:0,last:0};const a=s.q>0?s.v/s.q:s.last;cost+=n(l.q)*a;if(n(l.q)>s.q&&!S.editing)w.push(`Only ${s.q} of ${pH(l.p)} on record.`);});
+      h+='<hr>'+ln('What these tires cost you',fmt(cost));if(n(d.ship))h+=ln('Ongkir',`-${fmt(n(d.ship))}`);h+=ln('You make on this nota',M(T.total-cost-n(d.ship)));
+      if(w.length)h+=`<p class="small neg">${w.join(' ')} Record the goods received first, or the profit will look too high.</p>`;
+    }
+  }else if(t==='adjust'){
+    h+=valid.map(l=>{const s=c.st[l.p]||{q:0,v:0,last:0};const a=s.q>0?s.v/s.q:s.last;return ln(`${n(l.q)>0?'+':''}${n(l.q)} × ${pH(l.p)}`,M(n(l.q)*a));}).join('')||'<p class="small">Add the tires whose count is different.</p>';
+    const tot=valid.reduce((a,l)=>{const s=c.st[l.p]||{q:0,v:0,last:0};return a+n(l.q)*(s.q>0?s.v/s.q:s.last);},0);
+    h+=`<hr><span class="micro">Effect on profit</span><div class="big">${M(tot)}</div>`;
+  }else if(t==='recv'||t==='pay'){
+    h+=`<div class="big">${M(T.total)}</div>`+ln(t==='recv'?'Received by':'Paid from',esc(aname(d.acct)));
+    const k=cidByName(d.k);if(k){const side=t==='recv'?'ar':'ap';const list=openFor(side,k);const sim=simulate(list,T.total,d.alloc);
+      const used=sim.L.filter(x=>x.take>0);if(used.length)h+='<hr>'+used.map(x=>ln(`<span class="notano">${esc(x.o.nota||'No number')}</span>`,x.left<0.5?'Fully paid':`${fmt(x.take)} paid, ${fmt(x.left)} left`)).join('');
+      if(sim.left>0.5)h+=`<p class="small">${fmt(sim.left)} more than what is owed. Kept as credit for the next ${side==='ar'?'nota':'DO'}.</p>`;
+      const tot=list.reduce((a,o)=>a+o.open,0);h+='<hr>'+ln(t==='recv'?'They owed before':'You owed before',fmt(tot))+ln('Left after this',M(Math.max(0,tot-T.total)));}
+  }else{
+    h+=`<div class="big">${M(T.total)}</div>`;
+    if(t==='transfer')h+=`<p class="small">${esc(aname(d.from))} goes down, ${esc(aname(d.to))} goes up. Profit does not change.</p>`;
+    if(t==='expense')h+=ln('Paid from',esc(aname(d.acct)));
+    if(t==='draw')h+='<p class="small">Lowers money, not profit.</p>';
+    if(t==='capital')h+='<p class="small">Raises money, not profit.</p>';
+  }
+  nota.innerHTML=h;
+}
+function mountForm(){
+  drawForm();S.formMounted=true;const a=$('#formArea');
+  a.addEventListener('input',ev=>{const el=ev.target,d=S.draft;
+    if(el.dataset.f){d[el.dataset.f]=el.value;if(el.dataset.f==='k')d.alloc=[];}
+    else if(el.dataset.lf){d.lines[+el.dataset.li][el.dataset.lf]=el.value;}
+    else if(el.dataset.rf){d[el.dataset.rl][+el.dataset.ri][el.dataset.rf]=el.value;}
+    else if(el.dataset.bal){d.bal[el.dataset.bal]=el.value;}
+    else return;
+    updateNota();});
+  a.addEventListener('change',ev=>{const el=ev.target,d=S.draft;
+    if(el.dataset.alloc){const id=el.dataset.alloc;d.alloc=d.alloc.filter(x=>x!==id);if(el.checked)d.alloc.push(id);
+      const k=cidByName(d.k),list=openFor(d.t==='recv'?'ar':'ap',k);const sum=list.filter(o=>d.alloc.includes(o.id)).reduce((s,o)=>s+o.open,0);
+      if(d.alloc.length){d.a=fmt(sum);const ai=$('#f-a');if(ai)ai.value=d.a;}updateNota();return;}
+    if(el.dataset.lf==='p'&&d.t==='sale'){const l=d.lines[+el.dataset.li];const p=D().products[l.p];if(p&&!n(l.x)&&n(p.price)){l.x=fmt(p.price);const x=$('#l-'+el.dataset.li+'-x');if(x)x.value=l.x;}updateNota();}
+    if(el.dataset.f==='ship'){drawForm();return;}
+    if(el.dataset.f==='acct'){lsSet('tsb-acct',el.value);}
+    if(el.dataset.f)updateNota();});
+  a.addEventListener('focusout',ev=>{const el=ev.target;if(el.hasAttribute&&el.hasAttribute('data-money')&&el.value.trim()){el.value=fmt(n(el.value));el.dispatchEvent(new Event('input',{bubbles:true}));}});
+  a.addEventListener('submit',ev=>{ev.preventDefault();doSave();});
+  a.addEventListener('click',async ev=>{const b=ev.target.closest('[data-act]');if(!b)return;const d=S.draft,act=b.dataset.act;
+    if(act==='type'){S.draft=newDraft(b.dataset.t,d.d);drawForm();}
+    else if(act==='term'){d.term=b.dataset.v;if(d.term==='date'&&!d.due)d.due=addDaysTo(d.d,30);drawForm();}
+    else if(act==='addline'){d.lines.push({p:'',q:'',qd:'',x:''});drawForm();}
+    else if(act==='rmline'){d.lines.splice(+b.dataset.i,1);if(!d.lines.length)d.lines.push({p:'',q:'',qd:'',x:''});drawForm();}
+    else if(act==='addrow'){d[b.dataset.l].push({name:'',a:'',nota:'',due:''});drawForm();}
+    else if(act==='rmrow'){d[b.dataset.l].splice(+b.dataset.i,1);drawForm();}
+    else if(act==='cancel-edit'){S.editing=null;S.draft=null;location.hash='#journal';}
+    else if(act==='quickprod'){
+      const brand=$('#qp-brand').value.trim(),size=$('#qp-size').value.trim();
+      if(!brand||!size)return($('#formErr').textContent='A new tire needs at least a brand and a size code.');
+      if(!editable())return($('#formErr').textContent='Tires can only be added to real records.');
+      const id='p'+uid();try{await store.setProduct(id,{brand,size,pattern:$('#qp-pattern').value.trim(),cat:'Truck',price:n($('#qp-price').value),low:0});
+        const empty=d.lines.find(l=>!l.p);if(empty)empty.p=id;else d.lines.push({p:id,q:'',qd:'',x:''});toast('Tire added');setTimeout(drawForm,250);}catch(x){$('#formErr').textContent=friendly(x);}
+    }});
+}
+async function doSave(){
+  const d=S.draft,t=d.t,errEl=$('#formErr');const err=m=>{errEl.textContent=m;};err('');
+  if(S.demo)return err('Example mode: entries are not saved. Use "Back to real records" at the top.');
+  if(!editable())return err('This page is view only for you.');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d.d))return err('Pick a date.');
+  const T=totals(d);const lines=d.lines.filter(l=>l.p&&(n(l.q)!==0||(t==='purchase'&&n(l.qd))));
+  if(d.lines.some(l=>!l.p&&(n(l.q)||n(l.x)||n(l.qd))))return err('One line has a quantity but no tire chosen.');
+  const e={id:S.editing?S.editing.id:'e'+uid(),t,d:d.d,ts:S.editing?S.editing.ts:Date.now(),note:(d.note||'').trim()};
+  e.by=S.editing&&S.editing.by?S.editing.by:(S.me&&S.me.name)||'';if(S.editing)e.editedBy=(S.me&&S.me.name)||'';
+  const needAmt=()=>{if(!(n(d.a)>0)){err('Enter an amount above zero.');return false;}return true;};
+  const nota=(d.nota||'').trim();
+  if(t==='sale'||t==='purchase'){
+    if(t==='sale'&&!nota)return err('Type the nota number from the paper nota.');
+    if(nota){const dup=D().entries.find(x=>x.t===t&&x.id!==e.id&&String(x.nota||'').trim().toLowerCase()===nota.toLowerCase());if(dup)return err(`${t==='sale'?'Nota':'DO'} ${nota} is already recorded on ${nice(dup.d)}. Open it from the Journal instead.`);}
+    if(!d.k.trim())return err(t==='sale'?'Add the shop\'s name.':'Add the supplier\'s name.');
+    if(!lines.length)return err('Add at least one tire.');
+    if(lines.some(l=>!n(l.x)))return err(t==='sale'?'Every tire needs a price.':'Every tire needs its cost.');
+    if(t==='purchase'&&d.lines.some(l=>l.p&&l.q===''))return err('Type what the warehouse counted for each tire.');
+    if(T.paid>T.total+0.5)return err('Paid now is more than the total.');
+    if(d.term!=='cash'&&!dueOf(d))return err('Pick the due date.');
+  }
+  if((t==='recv'||t==='pay')&&!d.k.trim())return err(t==='recv'?'Which shop paid?':'Who did you pay?');
+  if(['recv','pay','expense','capital','draw','transfer'].includes(t)&&!needAmt())return;
+  if(t==='transfer'&&d.from===d.to)return err('From and To must be different.');
+  if(t==='adjust'&&!lines.length)return err('Add at least one tire with a difference.');
+  const btn=$('#saveBtn');btn.disabled=true;
+  try{
+    const kind=t==='sale'||t==='recv'?'customer':'supplier';
+    if(['sale','purchase','recv','pay'].includes(t))e.k=await ensureContact(d.k,kind);
+    if(t==='sale')Object.assign(e,{nota,lines:lines.map(l=>({p:l.p,q:n(l.q),u:n(l.x)})),disc:n(d.disc),ship:n(d.ship),shipAcct:d.shipAcct||d.acct,term:d.term,due:dueOf(d),paid:T.paid,acct:d.acct});
+    if(t==='purchase')Object.assign(e,{nota,lines:lines.map(l=>({p:l.p,qd:l.qd===''?n(l.q):n(l.qd),q:n(l.q),c:n(l.x)})),extra:n(d.extra),term:d.term,due:dueOf(d),paid:T.paid,acct:d.acct});
+    if(t==='recv'||t==='pay')Object.assign(e,{a:n(d.a),acct:d.acct,alloc:d.alloc.slice()});
+    if(t==='capital'||t==='draw')Object.assign(e,{a:n(d.a),acct:d.acct});
+    if(t==='expense')Object.assign(e,{a:n(d.a),acct:d.acct,cat:d.cat});
+    if(t==='transfer')Object.assign(e,{a:n(d.a),from:d.from,to:d.to});
+    if(t==='adjust')e.lines=lines.map(l=>({p:l.p,q:n(l.q)}));
+    if(t==='opening'){
+      e.bal={};for(const a of accts())if(n(d.bal[a.id]))e.bal[a.id]=n(d.bal[a.id]);
+      e.lines=lines.map(l=>({p:l.p,q:n(l.q),c:n(l.x)}));e.recv=[];e.pay=[];
+      for(const r of d.recv)if(r.name.trim()&&n(r.a))e.recv.push({k:await ensureContact(r.name,'customer'),a:n(r.a),nota:(r.nota||'').trim(),due:r.due||d.d});
+      for(const r of d.pay)if(r.name.trim()&&n(r.a))e.pay.push({k:await ensureContact(r.name,'supplier'),a:n(r.a),nota:(r.nota||'').trim(),due:r.due||d.d});
+    }
+    lsSet('tsb-acct',d.acct);
+    await saveEntry(e,S.editing?S.editing.d:null);
+    toast(S.editing?'Changes saved':TYPES[t]+' saved');
+    if(S.editing){S.editing=null;S.draft=null;location.hash='#journal';}
+    else{S.draft=newDraft(t,d.d);if(t==='sale')S.draft.nota=nextNotaAfter(nota);drawForm();}
+  }catch(x){err(friendly(x));}
+  finally{const b=$('#saveBtn');if(b)b.disabled=!editable();}
+}
+function nextNotaAfter(s){const m=String(s).match(/^(\D*)(\d+)(\D*)$/);if(!m)return nextNota();return m[1]+String(parseInt(m[2],10)+1).padStart(m[2].length,'0')+m[3];}
+
+/* ---------- journal ---------- */
+function pageJournal(){
+  const d=D(),j=S.jr,c=now();
+  const list=d.entries.filter(e=>(!j.month||e.d.slice(0,7)===j.month)&&(!j.type||e.t===j.type)).slice().reverse();
+  const rows=list.map(e=>`<tr><td class="small" style="white-space:nowrap">${nice(e.d)}</td><td style="white-space:nowrap">${TYPES[e.t]}${e.by?`<div class="small">by ${esc(e.by)}</div>`:''}</td><td>${describe(e,c)}${e.note?`<div class="small">${esc(e.note)}</div>`:''}</td><td class="num">${entryTotal(e)==null?'':M(entryTotal(e))}</td>
+    <td class="num">${editable()?`<button class="link" data-act="edit" data-id="${e.id}">Edit</button>&nbsp;&nbsp;<button class="link danger" data-act="del" data-id="${e.id}">${S.delArm===e.id?'Tap again to delete':'Delete'}</button>`:''}</td></tr>`).join('');
+  return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><h1 class="h1">Journal</h1>
+    <div class="row"><label class="fld"><span class="micro">Month</span><input type="month" id="jr-month" value="${esc(j.month)}"></label>
+    <label class="fld"><span class="micro">Kind</span><select id="jr-type"><option value="">Everything</option>${ORDER.map(k=>`<option value="${k}"${k===j.type?' selected':''}>${TYPES[k]}</option>`).join('')}</select></label>
+    <button class="link" data-act="jr-all">${j.month?'Show all months':'This month only'}</button><button class="btn" data-act="export-journal">Download as CSV</button></div></div>
+    <div class="tbl" style="margin-top:24px"><table><thead><tr><th>Date</th><th>Kind</th><th>Details</th><th class="num">Amount</th><th></th></tr></thead><tbody>${rows||`<tr><td colspan="5" class="small">Nothing recorded ${j.month?'in '+monthLabel(j.month+'-01'):'yet'}.</td></tr>`}</tbody></table></div></section>`;
+}
+
+/* ---------- stock and prices ---------- */
+function priceChanged(){const P=D().products;return Object.keys(S.priceEdits).filter(id=>P[id]&&Math.round(n(S.priceEdits[id]))!==Math.round(n(P[id].price)));}
+function priceBtnLabel(k){return k?`Save ${k} price change${k===1?'':'s'}`:'No price changes';}
+function pageStock(){
+  const d=D(),c=now(),P=d.products,ed=editable();const pe=S.prodEdit?(P[S.prodEdit]||{}):{};
+  const ids=Object.keys(P).sort((a,b)=>pname(a).localeCompare(pname(b)));
+  const brands=[...new Set(ids.map(id=>P[id].brand))].sort();
+  const changed=priceChanged();
+  const rows=ids.map(id=>{const p=P[id],s=c.st[id]||{q:0,v:0,last:0},avg=s.q>0?s.v/s.q:s.last;
+    const price=S.priceEdits[id]!=null?n(S.priceEdits[id]):n(p.price);
+    const flag=s.q<0?'<span class="tag late">Below zero</span>':(n(p.low)&&s.q<=n(p.low)?'<span class="tag">Low</span>':'');
+    const priceCell=ed?`<input class="num price" id="pr-${id}" data-price="${id}" inputmode="numeric" value="${fmt(price)}" aria-label="Selling price for ${esc(pname(id))}"><span class="changed" id="ch-${id}"${changed.includes(id)?'':' hidden'}>Not saved yet</span>`:fmt(price);
+    const acts=ed?`<div class="row" style="gap:4px 14px;margin-top:6px">${S.assets?`<button class="link" data-act="photo-change" data-id="${id}">${p.img?'Change photo':'Add photo'}</button>`:''}${S.assets&&p.img?`<button class="link danger" data-act="photo-remove" data-id="${id}">Remove photo</button>`:''}<button class="link" data-act="prod-edit" data-id="${id}">Edit details</button></div>`:'';
+    return `<tr><td><div class="tire">${thumb(id,64)}<div><span class="size" style="font-size:17px">${esc(p.size)}</span> <span style="font-size:17px">${esc(p.pattern||'')}</span><div class="small">${esc(p.brand)}</div>${acts}</div></div></td><td class="num">${s.q} ${flag}</td><td class="num">${fmt(avg)}</td><td class="num">${M(s.v)}</td><td class="num">${priceCell}</td><td class="num" id="mg-${id}">${margin(price,avg)}</td></tr>`;}).join('');
+  const bar=ed&&ids.length?`<div class="pricebar">
+    <label class="fld" style="width:150px"><span class="micro">Change prices by %</span><input id="pp-pct" inputmode="decimal" placeholder="5 or -5"></label>
+    <label class="fld" style="width:200px"><span class="micro">For which tires</span><select id="pp-brand"><option value="">All brands</option>${brands.map(b=>`<option>${esc(b)}</option>`).join('')}</select></label>
+    <button class="btn" data-act="price-pct">Apply to the list</button>
+    <div class="row" style="margin-left:auto"><button class="btn primary" id="savePrices" data-act="price-save"${changed.length?'':' disabled'}>${priceBtnLabel(changed.length)}</button><button class="link" data-act="price-undo" id="undoPrices"${changed.length?'':' hidden'}>Undo</button></div>
+    <p class="hint" style="flex-basis:100%">Type new selling prices straight into the list, or change many at once with a percentage (rounded to the nearest Rp 1.000). Nothing changes until you press Save. A different price can still be typed on a single nota.</p></div>`:'';
+  const form=ed?`<details ${S.prodEdit?'open':''} style="margin-top:20px"><summary>${S.prodEdit?'Editing '+esc(pname(S.prodEdit)):'Add a tire type'}</summary>
+    <form id="prodForm" class="quick grid2" novalidate>${F('Brand',`<input id="pf-brand" value="${esc(pe.brand||'Windpower')}">`)}${F('Size code',`<input id="pf-size" value="${esc(pe.size)}" placeholder="7.50-16">`)}${F('Pattern or type',`<input id="pf-pattern" value="${esc(pe.pattern)}" placeholder="WGC29">`)}
+    ${F('Vehicle',`<select id="pf-cat">${['Truck','Light truck','Car','Motorcycle','Other'].map(x=>`<option${x===(pe.cat||'Truck')?' selected':''}>${x}</option>`).join('')}</select>`)}${F('Selling price',`<input id="pf-price" data-money inputmode="numeric" value="${pe.price?fmt(pe.price):''}">`)}${F('Warn me when stock is at or below',`<input id="pf-low" inputmode="numeric" value="${esc(pe.low||'')}">`)}
+    ${S.assets?F(S.prodEdit&&pe.img?'Replace photo (optional)':'Photo (optional)','<input type="file" id="pf-photo" accept="image/*">'):''}
+    <div class="row" style="align-self:end"><button class="btn primary" type="submit">${S.prodEdit?'Save tire':'Add tire'}</button>${S.prodEdit?'<button type="button" class="link" data-act="prod-cancel">Cancel</button>':''}</div><p class="err" id="pfErr"></p></form></details>`:'';
+  const photoNote='';
+  return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><div class="stack" style="gap:10px"><p class="micro">${ids.length} tire type${ids.length===1?'':'s'}</p><h1 class="h1">Stock and prices</h1></div>
+    <div style="text-align:right"><p class="micro">What the warehouse cost you</p><p class="h2">${M(c.stockVal)}</p></div></div>${form}${photoNote}${bar}
+    <div class="tbl" style="margin-top:20px"><table><thead><tr><th>Tire</th><th class="num">In the warehouse</th><th class="num">Cost per tire<br>(average)</th><th class="num">Value</th><th class="num">Selling price</th><th class="num">You make per tire</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="small">No tire types yet. Add the first one above.</td></tr>'}</tbody></table></div>
+    <p class="hint" style="margin-top:14px">Cost per tire is an average: Jakarta's price changes over time, so the book blends every DO. When a tire is sold, that average is what it cost you.</p></section>`;
+}
+
+/* ---------- people ---------- */
+function pagePeople(){
+  const d=D(),c=now(),C=d.contacts;const ce=S.contEdit?(C[S.contEdit]||{}):{};
+  const ids=Object.keys(C).sort((a,b)=>(Math.abs(c.ar[b]||0)+Math.abs(c.ap[b]||0))-(Math.abs(c.ar[a]||0)+Math.abs(c.ap[a]||0))||C[a].name.localeCompare(C[b].name));
+  const rows=ids.map(id=>{const x=C[id],ar=c.ar[id]||0,ap=c.ap[id]||0,lateN=c.openAR.filter(o=>o.k===id&&status(o).late).length;
+    const acts=editable()?[Math.round(ar)>0?`<button class="link" data-act="pay-in" data-id="${id}">Record payment</button>`:'',Math.round(ap)>0?`<button class="link" data-act="pay-out" data-id="${id}">Pay them</button>`:'',`<button class="link" data-act="cont-edit" data-id="${id}">Edit</button>`].filter(Boolean).join('&nbsp;&nbsp;'):'';
+    return `<tr><td>${esc(x.name)}<div class="small">${esc(x.phone||'')}</div></td><td class="small">${x.kind==='both'?'Shop and supplier':x.kind==='supplier'?'Supplier':'Shop'}</td><td class="num">${Math.round(ar)?M(ar):''}${lateN?`<div><span class="tag late">${lateN} late</span></div>`:''}</td><td class="num">${Math.round(ap)?M(ap):''}</td><td class="num">${acts}</td></tr>`;}).join('');
+  const form=editable()&&S.contEdit?`<form id="contForm" class="quick grid2" novalidate style="margin-top:20px">${F('Name',`<input id="cf-name" value="${esc(ce.name)}">`)}${F('Phone or WhatsApp',`<input id="cf-phone" value="${esc(ce.phone)}">`)}${F('Kind',`<select id="cf-kind">${[['customer','Shop'],['supplier','Supplier'],['both','Both']].map(([v,l])=>`<option value="${v}"${v===ce.kind?' selected':''}>${l}</option>`).join('')}</select>`)}<div class="row" style="align-self:end"><button class="btn primary" type="submit">Save</button><button type="button" class="link" data-act="cont-cancel">Cancel</button></div></form>`:'';
+  return `<section class="wrap"><h1 class="h1">Shops and suppliers</h1>
+    <div class="row" style="margin-top:18px;gap:10px 40px"><span>Shops owe you <strong>${M(c.arTot)}</strong></span><span>You owe suppliers <strong>${M(c.apTot)}</strong></span></div>${form}
+    <div class="tbl" style="margin-top:24px"><table><thead><tr><th>Name</th><th>Kind</th><th class="num">Owes you</th><th class="num">You owe</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="small">Shops and suppliers appear here as soon as you name them on a nota or DO.</td></tr>'}</tbody></table></div></section>`;
+}
+
+/* ---------- reports ---------- */
+function period(){
+  const r=S.rp;const y=new Date().getFullYear();
+  if(r.preset==='this')return monthRange(0);
+  if(r.preset==='last')return monthRange(-1);
+  if(r.preset==='year')return [y+'-01-01',y+'-12-31'];
+  if(r.preset==='all')return [START,FAR];
+  return [r.from||monthRange(0)[0],r.to||monthRange(0)[1]];
+}
+const RNAMES={pl:'Profit',cf:'Money in and out',bs:'What the business owns and owes',st:'Stock value'};
+const RSHORT={pl:'Profit',cf:'Money in and out',bs:'Owns and owes',st:'Stock value'};
+const RACC={pl:'Accountants call this the profit and loss statement.',cf:'Accountants call this the cash flow statement.',bs:'Accountants call this the balance sheet.',st:'Accountants call this the inventory valuation.'};
+function statementRows(tab,from,to){
+  const c=compute(from,to),P=c.P,C=c.C,R=[];let sum='';
+  const h=l=>R.push({k:'headr',l}),it=(l,v,ind,x)=>R.push({k:ind?'ind':'',l,v,x}),tot=(l,v,x)=>R.push({k:'total',l,v,x}),grand=(l,v,x)=>R.push({k:'grand',l,v,x}),note=l=>R.push({k:'note',l});
+  const acctRows=()=>{const ks=[...accts().map(a=>a.id),...Object.keys(c.bal).filter(k=>!accts().some(a=>a.id===k))];ks.forEach(k=>{if(accts().some(a=>a.id===k)||Math.round(c.bal[k]||0))it(aname(k),c.bal[k]||0,1);});};
+  if(tab==='pl'){
+    h('What shops were charged');
+    it(`Tires sold (${P.tires})`,P.goods,1,'Everything on the notas, paid or not paid yet.');
+    if(P.disc)it('Discounts given',-P.disc,1);
+    tot('Total sales',P.net,'Accountants call this revenue.');
+    it('What those tires cost you',-P.cogs,0,'What you paid Jakarta for the tires that were sold. Accountants call this COGS, cost of goods sold.');
+    tot(`Profit from selling tires${P.net?' ('+(P.gross/P.net*100).toFixed(1)+'% of sales)':''}`,P.gross,'Sales minus what the tires cost. Running costs are not taken off yet. Accountants call this gross profit.');
+    h('Running costs');const ex=Object.entries(P.exp).sort((a,b)=>b[1]-a[1]);ex.forEach(([k,v])=>it(k,-v,1));if(!ex.length)note('No running costs recorded in this period.');
+    tot('Total running costs',-P.expTot,'What it cost to run the business, including ongkir. Accountants call these operating expenses.');
+    if(P.adj)it('Tires missing or found when counting',P.adj,0,'The cost of tires that were not in the warehouse when counted (or extra ones found).');
+    grand(P.profit>=0?'Profit':'Loss',P.profit,'What the business really earned after everything. Accountants call this net profit.');
+    note('Money the owner takes out for personal use is not a business cost, so it is not here. It shows in Money in and out.');
+    sum=`The business sold ${P.tires} tires for ${rp(P.net)}. Those tires had cost ${rp(P.cogs)}, so selling them earned ${rp(P.gross)}. Running costs took ${rp(P.expTot)}.${P.adj?` Counting the warehouse changed things by ${rp(P.adj)}.`:''} ${P.profit>=0?`What is left, ${rp(P.profit)}, is the profit.`:`That leaves a loss of ${rp(-P.profit)}.`}`;
+  }else if(tab==='cf'){
+    const start=c.open.tot;
+    tot('Money at the start',start,'All cash and bank when this period began.');
+    h('Money that came in');if(C.openIn)it('Opening balances entered',C.openIn,1,'The money you had on day one.');
+    it('Paid on the spot when the nota was made',C.saleCash,1);it('Shops paying their notas later',C.arIn,1);it('Owner put money in',C.capIn,1);
+    const tin=C.openIn+C.saleCash+C.arIn+C.capIn;tot('Total in',tin);
+    const by=Object.entries(c.recvBy).filter(([k,v])=>v);if(by.length){h('Who collected it');by.forEach(([k,v])=>it(aname(k),v,1));}
+    h('Money that went out');it('Paid for goods when they arrived',-C.buyCash,1);it('Paying Jakarta and suppliers later',-C.apOut,1);it('Running costs and ongkir',-C.expOut,1);it('Owner took money out',-C.drawOut,1);
+    const tout=C.buyCash+C.apOut+C.expOut+C.drawOut;tot('Total out',-tout);
+    tot(tin-tout>=0?'More came in than went out':'More went out than came in',tin-tout);
+    grand('Money at the end',c.money,'Should match the cash each person holds plus the bank balance.');acctRows();
+    note('Profit and money in hand are different. A credit nota counts as profit before the shop pays. Tires in the warehouse were paid for but are not profit until sold.');
+    sum=`The business started with ${rp(start)}. ${rp(tin)} came in and ${rp(tout)} went out, so it ended with ${rp(c.money)}.`;
+  }else if(tab==='bs'){
+    h('What the business owns');acctRows();
+    it(`Shops owe you (${c.openAR.length} unpaid notas)`,c.arTot,1,'Notas not paid yet. Accountants call this accounts receivable.');
+    it('Tires in the warehouse',c.stockVal,1,'What you paid for the tires you still have. Accountants call this inventory.');tot('Total owned',c.assets,'Accountants call this assets.');
+    h('What the business owes');it('You owe Jakarta and suppliers',c.apTot,1,'Goods received, not paid yet. Accountants call this accounts payable.');tot('Total owed',c.apTot,'Accountants call this liabilities.');
+    h('What belongs to the owner');it('Value on the starting day',c.eqOpen,1,'What the business was worth when you started this book.');it('Owner put in',c.cap,1);it('Owner took out',-c.draw,1);
+    it('Profit since the start',c.profit,1,'All profit earned since the starting day.');tot('Owner\'s share',c.equity,'What is left for the owner after paying everything owed. Accountants call this equity.');
+    grand('Owed plus owner\'s share',c.apTot+c.equity,'This must equal Total owned. When it does, the books balance and nothing is missing.');
+    sum=`The business owns ${rp(c.assets)} in money, unpaid notas and tires. It owes ${rp(c.apTot)}. The difference, ${rp(c.equity)}, belongs to the owner.`;
+  }else{
+    const d=D();let q=0;Object.keys(d.products).sort((a,b)=>pname(a).localeCompare(pname(b))).forEach(id=>{const s=c.st[id];if(!s||(!s.q&&!s.v))return;q+=s.q;R.push({k:'',l:`${pname(id)}: ${s.q} tires at ${rp(s.q?s.v/s.q:0)} each`,v:s.v});});
+    if(!R.length)note('No stock on record at this date.');grand('Total warehouse value',c.stockVal,'What you paid for everything in the warehouse.');
+    sum=`There ${q===1?'is 1 tire':'are '+q+' tires'} in the warehouse. They cost ${rp(c.stockVal)} to buy.`;
+  }
+  return {R,c,sum};
+}
+function pageReports(){
+  const r=S.rp,[from,to]=period();const tab=r.tab;
+  const {R,c,sum}=statementRows(tab,from,to);
+  const asOf=tab==='bs'||tab==='st';
+  const plabel=r.preset==='all'&&!asOf?'From the start until today':(asOf?'On '+nice(to===FAR?today():to):`${nice(from)} to ${nice(to)}`);
+  const seg=(key,opts,cur)=>`<div class="seg" role="group">${opts.map(([v,l])=>`<button type="button" data-act="${key}" data-v="${v}" aria-pressed="${v===cur}">${l}</button>`).join('')}</div>`;
+  const rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*28,700)}ms"><span>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span></div>`).join('');
+  const stamp=tab==='bs'?(Math.abs(c.diff)<1?'<span class="stamp">Books balance</span>':`<span class="stamp off">Off by ${rp(c.diff)}</span>`):'';
+  return `<section class="wrap"><div class="stack">${seg('rp-tab',Object.entries(RSHORT),tab)}${seg('rp-preset',[['this','This month'],['last','Last month'],['year','This year'],['all','All time'],['custom','Choose dates']],r.preset)}
+    ${r.preset==='custom'?`<div class="row"><label class="fld"><span class="micro">From</span><input type="date" id="rp-from" value="${esc(from)}"></label><label class="fld"><span class="micro">To</span><input type="date" id="rp-to" value="${esc(to)}"></label></div>`:''}</div>
+    <article class="statement"><div class="head"><p class="micro">${esc(D().setup.name||'Windpower Books')}</p><h1 class="h1">${RNAMES[tab]}</h1><p class="small">${plabel}. ${RACC[tab]}</p>${stamp}</div>
+    <p class="summary">${esc(sum)}</p>
+    <div class="row" style="justify-content:center"><button class="link" data-act="explain">${S.explain?'Hide what each line means':'Show what each line means'}</button></div>
+    <div>${rows}</div>
+    <div class="row" style="justify-content:center"><button class="btn" data-act="export-report">Download as CSV</button></div></article></section>`;
+}
+
+/* ---------- setup, terms, privacy ---------- */
+function pageSetup(){
+  const s=D().setup,ed=editable();
+  return `<section class="wrap two"><div class="stack"><h1 class="h1">Setup</h1>
+    <form id="setupForm" class="stack" novalidate>${F('Business name',`<input id="sf-name" value="${esc(s.name||'')}" placeholder="Business name">`)}
+    <div class="stack" style="gap:8px"><span class="micro">Where money is kept</span><p class="hint">One line for each person who collects money, plus each bank account. Rename freely. Old entries follow the new name.</p>
+      ${accts().map((a,i)=>`<input id="sf-acct-${i}" data-acctid="${esc(a.id)}" value="${esc(a.name)}">`).join('')}<input id="sf-acct-new" data-acctid="" placeholder="Add another, for example Bank BCA"></div>
+    ${F('Kinds of running costs, one per line',`<textarea id="sf-cats">${esc(cats().join('\n'))}</textarea>`)}
+    <div class="row"><button class="btn primary" type="submit"${ed?'':' disabled'}>Save setup</button><span class="err" id="sfErr"></span></div></form></div>
+    <div class="stack prose"><p class="micro">How to use this every day</p>
+    <p>1. Once, on your start date: record opening balances. Count the warehouse, list unpaid notas, and what you owe Jakarta.</p>
+    <p>2. Every DO from Jakarta: record Goods received with what the DO says and what the warehouse counted.</p>
+    <p>3. Every paper nota: record a Sale with the same nota number, the same day.</p>
+    <p>4. Every payment from a shop, whoever receives it: record Payment received and pick who has the money.</p>
+    <p>5. When collected money is handed over or put in the bank: record Money moved.</p>
+    <p>6. Once a month: count the warehouse. If a number is different, record a Stock count with the difference.</p>
+    <p class="micro" style="margin-top:12px">Giving access</p>
+    <p>Add each person's email under "Who can use this book". They then open the site, choose Create account with that same email, and confirm it from their inbox. Everyone who records notas or payments, including Ci Bella, should have their own account on their own phone. Each entry shows who recorded it.</p>
+    <p class="micro" style="margin-top:12px">Words used in this book</p>
+    <p><strong>Nota:</strong> the paper nota kredit given to the shop. The nota number links the paper to the entry here.</p>
+    <p><strong>DO:</strong> the delivery order from Jakarta listing what was sent.</p>
+    <p><strong>Credit or tempo:</strong> the shop takes the tires now and pays within 7, 14 or 30 days. The due date is when it should be paid.</p>
+    <p><strong>Cost per tire (average):</strong> Jakarta's price changes over time. The book blends every DO into one average and uses it as the cost when a tire is sold.</p>
+    <p><strong>Profit and money in hand:</strong> profit counts a nota even before the shop pays. Money in hand only counts what was actually paid.</p>
+    <p><strong>Owner took out:</strong> money taken from the business for personal use. It lowers money, not profit.</p>
+    <div class="row" style="margin-top:8px"><button class="btn" data-act="export-journal">Download every entry as CSV</button>${S.mode==='live'?`<button class="link" data-act="${S.demo?'demo-off':'demo-on'}">${S.demo?'Back to real records':'Look around with example data'}</button>`:''}</div>${membersHTML()}<div></div></div></section>`;
+}
+function pageTerms(){return `<section class="wrap prose"><h1 class="h1">Terms of use</h1><p>This record book is provided by Studio 1801 to help the business keep track of notas, goods received, stock, costs and money owed.</p><p>The reports are only as accurate as the entries typed in. They are management reports to help run the business. They are not tax returns or audited statements, and they do not calculate tax. Check figures with a qualified accountant before filing tax or applying for credit.</p><p>Anyone whose email is added in Setup can add, change and delete entries. Give that access only to people you trust with the books.</p><p>Studio 1801 may update the site to fix problems or add features. Saved entries are kept when the site is updated.</p></section>`;}
+function pagePrivacy(){return `<section class="wrap prose"><h1 class="h1">Privacy</h1><p>Entries and tire photos are stored in a private Supabase database set up for this business. Only people whose email has been added in Setup can sign in and see the records.</p><p>The page stores what you type: dates, amounts, nota and DO numbers, tire details, and the names and phone numbers of shops and suppliers. It also stores the email and name of each person given access, and notes who recorded each entry. It does not collect anything else and does not send records to any other service.</p><p>Downloads (CSV files) are saved to the device of the person who asks for them. Keep those files as carefully as the paper notas.</p><p>To remove a shop's details, edit their name and phone in People. To delete everything, the owner can delete the Supabase project.</p></section>`;}
+
+/* ---------- render and routing ---------- */
+function render(){
+  const r=route();
+  document.querySelectorAll('#nav a').forEach(a=>{if(a.getAttribute('href')==='#'+r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  $('#bizName').textContent=(D().setup&&D().setup.name)||'Windpower Books';
+  $('#banner').innerHTML=banner();
+  $('#who').innerHTML=S.me?`Signed in as ${esc(S.me.name||S.me.email)} <button class="link" data-act="signout">Sign out</button>`:'';
+  if(r==='record'&&S.formMounted&&S.lastRoute==='record'&&loaded()){S.allocKey=null;updateNota();const dl=$('#dl-contacts');if(dl)dl.outerHTML=contactDatalist();return;}
+  S.formMounted=false;S.lastRoute=r;
+  const m=$('#main');
+  if(!S.demo&&['login','denied','recovery','noconfig'].includes(S.mode)&&r!=='terms'&&r!=='privacy'){m.innerHTML=authPage();bindAuth();return;}
+  if(!loaded()&&r!=='terms'&&r!=='privacy'){m.innerHTML=skeleton();return;}
+  m.innerHTML=PAGES[r]();
+  if(r==='record')mountForm();
+}
+let raf=0;const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render();});};
+window.addEventListener('hashchange',()=>{S.delArm=null;if(route()!=='record'&&!S.editing)S.formMounted=false;window.scrollTo(0,0);render();});
+
+function startPayment(side,k,ids){
+  const c=now();S.editing=null;S.draft=newDraft(side==='ar'?'recv':'pay');S.draft.k=cname(k);
+  const list=(c.inv[side][k]||[]).filter(o=>o.open>0.5);const pick=ids?list.filter(o=>ids.includes(o.id)):list;
+  S.draft.alloc=pick.map(o=>o.id);S.draft.a=fmt(pick.reduce((a,o)=>a+o.open,0));S.lastRoute='';location.hash='#record';render();
+}
+/* page-level clicks (forms on Record handle their own) */
+document.addEventListener('click',async ev=>{
+  const b=ev.target.closest('[data-act]');if(!b||b.closest('#formArea'))return;const act=b.dataset.act,id=b.dataset.id;
+  if(act==='signout'){await S.sb.auth.signOut();location.hash='#overview';location.reload();return;}
+  if(act==='demo-on'){S.demo=true;S.cache={};render();}
+  else if(act==='demo-off'){S.demo=false;S.cache={};render();}
+  else if(act==='start-opening'){S.editing=null;S.draft=newDraft('opening');S.lastRoute='';location.hash='#record';render();}
+  else if(act==='edit'){const e=D().entries.find(x=>x.id===id);if(!e)return;S.editing=e;S.draft=draftFrom(e);S.lastRoute='';location.hash='#record';render();}
+  else if(act==='del'){if(S.delArm!==id){S.delArm=id;render();setTimeout(()=>{if(S.delArm===id){S.delArm=null;render();}},4000);return;}
+    const e=D().entries.find(x=>x.id===id);S.delArm=null;try{await deleteEntry(e);toast('Entry deleted');}catch(x){toast(friendly(x));}}
+  else if(act==='pay-nota'||act==='pay-do'){const o=now().byId[id];if(o)startPayment(o.side,o.k,[id]);}
+  else if(act==='pay-in'){startPayment('ar',id);}
+  else if(act==='pay-out'){startPayment('ap',id);}
+  else if(act==='jr-all'){S.jr.month=S.jr.month?'':today().slice(0,7);render();}
+  else if(act==='export-journal'){const c=now();const rows=[['Date','Kind','Nota or DO','Shop or supplier','Details','Total','Paid now','Payment terms','Due date','Money account','Recorded by','Note']];
+    D().entries.forEach(e=>{const o=c.byId[e.id];rows.push([e.d,TYPES[e.t],e.nota||'',e.k?cname(e.k):'',plain(describe(e,null)),entryTotal(e)==null?'':Math.round(entryTotal(e)),e.paid!=null?Math.round(n(e.paid)):'',e.term?(e.term==='cash'?'Paid now':e.term==='date'?'Due date':e.term+' days'):'',e.due||'',e.t==='transfer'?aname(e.from)+' to '+aname(e.to):(e.acct?aname(e.acct):''),e.by||'',e.note||'']);});
+    download('journal_'+today()+'.csv',rows);}
+  else if(act==='export-report'){const [f,t]=period();const {R}=statementRows(S.rp.tab,f,t);const nm={pl:'profit',cf:'money-in-and-out',bs:'owns-and-owes',st:'stock-value'}[S.rp.tab];download(`${nm}_${f===START?'start':f}_to_${t===FAR?today():t}.csv`,[['Line','Amount (Rp)']].concat(R.map(x=>[x.l,x.v==null?'':Math.round(x.v)])));}
+  else if(act==='rp-tab'){S.rp.tab=b.dataset.v;render();}
+  else if(act==='rp-preset'){S.rp.preset=b.dataset.v;if(b.dataset.v==='custom'&&!S.rp.from){[S.rp.from,S.rp.to]=monthRange(0);}render();}
+  else if(act==='explain'){S.explain=!S.explain;render();}
+  else if(act==='price-pct'){const pct=parseFloat(($('#pp-pct').value||'').replace(',','.'));if(!isFinite(pct)||!pct)return toast('Type a percentage, like 5 or -5.');const br=$('#pp-brand').value,P=D().products;let k=0;
+    Object.keys(P).forEach(pid=>{if(br&&P[pid].brand!==br)return;const base=S.priceEdits[pid]!=null?n(S.priceEdits[pid]):n(P[pid].price);if(!base)return;S.priceEdits[pid]=fmt(Math.round(base*(1+pct/100)/1000)*1000);k++;});
+    toast(k?`${k} prices changed in the list. Check them, then press Save.`:'No tires with a price to change.');render();}
+  else if(act==='price-undo'){S.priceEdits={};render();}
+  else if(act==='price-save'){const ids=priceChanged();if(!ids.length)return;if(!editable())return toast('Prices can only be saved on real records.');b.disabled=true;let k=0;
+    try{for(const pid of ids){await store.patchProduct(pid,{price:n(S.priceEdits[pid])});delete S.priceEdits[pid];k++;}toast(`${k} price${k===1?'':'s'} saved`);}catch(x){toast(friendly(x));}render();}
+  else if(act==='photo-change'){S.photoFor=id;const f=$('#photoPick');f.value='';f.click();}
+  else if(act==='photo-remove'){if(S.delArm!=='img'+id){S.delArm='img'+id;b.textContent='Tap again to remove';setTimeout(()=>{if(S.delArm==='img'+id){S.delArm=null;render();}},4000);return;}
+    S.delArm=null;const old=S.live.products[id]&&S.live.products[id].img;try{await store.patchProduct(id,{img:null});if(old)store.deletePhoto(old);toast('Photo removed');}catch(x){toast(friendly(x));}}
+  else if(act==='prod-edit'){S.prodEdit=id;render();}
+  else if(act==='prod-cancel'){S.prodEdit=null;render();}
+  else if(act==='cont-edit'){S.contEdit=id;render();}
+  else if(act==='cont-cancel'){S.contEdit=null;render();}
+});
+document.addEventListener('change',ev=>{const el=ev.target;
+  if(el.id==='photoPick'){const f=el.files&&el.files[0];if(f&&S.photoFor)setPhoto(S.photoFor,f);}
+  else if(el.id==='jr-month'){S.jr.month=el.value;render();}
+  else if(el.id==='jr-type'){S.jr.type=el.value;render();}
+  else if(el.id==='rp-from'){S.rp.from=el.value;render();}
+  else if(el.id==='rp-to'){S.rp.to=el.value;render();}
+});
+document.addEventListener('focusout',ev=>{const el=ev.target;if(!el.closest||el.closest('#formArea'))return;if(el.hasAttribute('data-money')&&el.value.trim())el.value=fmt(n(el.value));});
+document.addEventListener('submit',async ev=>{const f=ev.target;if(f.id==='recForm')return;ev.preventDefault();if(!editable())return;
+  try{
+    if(f.id==='prodForm'){const brand=$('#pf-brand').value.trim(),size=$('#pf-size').value.trim();if(!brand||!size){$('#pfErr').textContent='Brand and size code are needed.';return;}
+      const data={brand,size,pattern:$('#pf-pattern').value.trim(),cat:$('#pf-cat').value,price:n($('#pf-price').value),low:n($('#pf-low').value)};
+      let pid=S.prodEdit;if(pid)await store.patchProduct(pid,data);else{pid='p'+uid();await store.setProduct(pid,data);}
+      const file=$('#pf-photo')&&$('#pf-photo').files[0];S.prodEdit=null;delete S.priceEdits[pid];toast('Tire saved');if(file)await setPhoto(pid,file);}
+    else if(f.id==='contForm'){const name=$('#cf-name').value.trim();if(!name)return;await store.setContact(S.contEdit,{name,phone:$('#cf-phone').value.trim(),kind:$('#cf-kind').value});S.contEdit=null;toast('Saved');}
+    else if(f.id==='setupForm'){const list=$('#sf-cats').value.split('\n').map(x=>x.trim()).filter(Boolean);
+      const ac=[];document.querySelectorAll('[data-acctid]').forEach(inp=>{const nm=inp.value.trim(),id=inp.dataset.acctid;if(id)ac.push({id,name:nm||aname(id)});else if(nm)ac.push({id:'a'+uid(),name:nm});});
+      await store.setSetup({name:$('#sf-name').value.trim(),cats:list.length?list:DEF_CATS,accts:ac.length?ac:DEF_ACCTS});toast('Setup saved');}
+    else if(f.id==='memForm'){const email=$('#mf-email').value.trim().toLowerCase(),name=$('#mf-name').value.trim();if(!/^\S+@\S+\.\S+$/.test(email))return toast('Type a valid email.');
+      await q(S.sb.from('members').upsert({email,name:name||email.split('@')[0],role:$('#mf-role').value}));toast('Access given to '+email);await loadMembers();render();}
+  }catch(x){toast(friendly(x));}
+});
+
+/* ---------- prices typed in the stock list ---------- */
+document.addEventListener('input',ev=>{const el=ev.target;if(!el.dataset||!el.dataset.price)return;const id=el.dataset.price;S.priceEdits[id]=el.value;
+  const P=D().products[id],s=now().st[id]||{q:0,v:0,last:0},avg=s.q>0?s.v/s.q:s.last;const mg=$('#mg-'+id);if(mg)mg.innerHTML=margin(n(el.value),avg);
+  const ch=$('#ch-'+id);if(ch)ch.hidden=!P||Math.round(n(el.value))===Math.round(n(P.price));
+  const k=priceChanged().length,b=$('#savePrices');if(b){b.disabled=!k;b.textContent=priceBtnLabel(k);}const u=$('#undoPrices');if(u)u.hidden=!k;});
+
+/* ---------- photos: shrunk in the browser, then stored with the page ---------- */
+async function shrink(file){
+  let bmp=null;try{bmp=await createImageBitmap(file);}catch(_){return null;}
+  const k=Math.min(1,900/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+  c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(b=>r(b),'image/jpeg',0.85));
+}
+async function setPhoto(pid,file){
+  if(!editable())return toast('Sign in to change photos.');
+  if(!/^image\//.test(file.type))return toast('That file is not a photo.');
+  toast('Uploading photo');
+  try{const blob=await shrink(file);if(!blob)return toast('This photo type cannot be read. Use a JPG or PNG.');
+    const path=await store.uploadPhoto(blob);const old=S.live.products[pid]&&S.live.products[pid].img;
+    await store.patchProduct(pid,{img:path});if(old)store.deletePhoto(old);toast('Photo saved');}
+  catch(x){toast('Could not save the photo. '+friendly(x));}
+}
+
+/* ---------- sign in, access list ---------- */
+function authPage(){
+  const v=S.authView,msg=S.authMsg?`<p class="${/check|sent|saved/i.test(S.authMsg)?'':'err'}" role="alert">${esc(S.authMsg)}</p>`:'';
+  const demo='<button class="link" data-act="demo-on">Look around with example data</button>';
+  if(S.mode==='noconfig')return `<section class="wrap login"><h1 class="h1">Almost ready</h1><p>This site is not connected to its database yet. Fill in <span class="notano">config.js</span> with the Supabase address and key (see README).</p>${demo}</section>`;
+  if(S.mode==='denied')return `<section class="wrap login"><p class="micro">Signed in as ${esc(S.me&&S.me.email)}</p><h1 class="h1">Waiting for access</h1><p>This email has not been added to the book yet. Ask the owner to add it in Setup, then reload this page.</p><div class="row"><button class="btn" data-act="reload">Reload</button><button class="link" data-act="signout">Sign out</button></div></section>`;
+  if(S.mode==='recovery')return `<section class="wrap login"><h1 class="h1">Set a new password</h1><form id="pwForm" class="stack" novalidate>${F('New password','<input id="au-pw" type="password" autocomplete="new-password" minlength="8">')}<button class="btn primary" type="submit">Save password</button>${msg}</form></section>`;
+  const title={signin:'Sign in',signup:'Create account',forgot:'Reset password'}[v];
+  return `<section class="wrap login"><p class="micro">Windpower Books</p><h1 class="h1">${title}</h1>
+  <form id="authForm" class="stack" novalidate>${F('Email','<input id="au-email" type="email" autocomplete="email" inputmode="email">')}
+  ${v!=='forgot'?F('Password',`<input id="au-pw" type="password" autocomplete="${v==='signup'?'new-password':'current-password'}">`):''}
+  <button class="btn primary" type="submit">${v==='signin'?'Sign in':v==='signup'?'Create account':'Send reset email'}</button>${msg}</form>
+  <div class="row">${v!=='signin'?'<button class="link" data-act="au-view" data-v="signin">I have an account</button>':''}${v!=='signup'?'<button class="link" data-act="au-view" data-v="signup">Create account</button>':''}${v!=='forgot'?'<button class="link" data-act="au-view" data-v="forgot">Forgot password</button>':''}</div>
+  <p class="small">Only emails added by the owner can see the records. ${demo}</p></section>`;
+}
+function bindAuth(){
+  const f=$('#authForm'),p=$('#pwForm');
+  if(f)f.addEventListener('submit',async ev=>{ev.preventDefault();const email=$('#au-email').value.trim(),pw=$('#au-pw')?$('#au-pw').value:'';S.authMsg='';
+    try{
+      if(S.authView==='signin'){const {error}=await S.sb.auth.signInWithPassword({email,password:pw});if(error)throw error;return afterLogin();}
+      else if(S.authView==='signup'){if(pw.length<8)throw new Error('Use at least 8 characters for the password.');const {error}=await S.sb.auth.signUp({email,password:pw,options:{emailRedirectTo:location.origin+location.pathname}});if(error)throw error;S.authMsg='Check your email and press the confirm link, then sign in here.';S.authView='signin';}
+      else{const {error}=await S.sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;S.authMsg='Reset email sent. Open it on this device.';}
+    }catch(x){S.authMsg=/Invalid login/i.test(x.message)?'Wrong email or password.':/not confirmed/i.test(x.message)?'Confirm your email first. Check your inbox.':x.message;}
+    render();});
+  if(p)p.addEventListener('submit',async ev=>{ev.preventDefault();const pw=$('#au-pw').value;if(pw.length<8){S.authMsg='Use at least 8 characters.';return render();}
+    const {error}=await S.sb.auth.updateUser({password:pw});if(error){S.authMsg=error.message;return render();}S.authMsg='';history.replaceState(null,'',location.pathname);await afterLogin();});
+}
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-act]');if(!b)return;
+  if(b.dataset.act==='au-view'){S.authView=b.dataset.v;S.authMsg='';render();}
+  else if(b.dataset.act==='reload'){location.reload();}
+  else if(b.dataset.act==='mem-del'){const em=b.dataset.email;if(S.delArm!=='m'+em){S.delArm='m'+em;b.textContent='Tap again to remove';return;}
+    S.delArm=null;q(S.sb.from('members').delete().eq('email',em)).then(loadMembers).then(()=>{toast('Access removed');render();}).catch(x=>toast(friendly(x)));}
+});
+function membersHTML(){
+  if(S.demo||!S.me)return '';const owner=S.me.role==='owner';
+  const rows=S.live.members.map(m=>`<div class="lrow"><span>${esc(m.name||'')}<span class="ex">${esc(m.email)}${m.role==='owner'?' (owner)':''}</span></span>${owner&&m.email!==S.me.email?`<button class="link danger" data-act="mem-del" data-email="${esc(m.email)}">Remove</button>`:''}</div>`).join('');
+  return `<div class="stack" style="margin-top:12px;gap:6px"><p class="micro">Who can use this book</p>${rows}
+  ${owner?`<form id="memForm" class="grid2" novalidate style="margin-top:8px">${F('Email','<input id="mf-email" type="email" inputmode="email" placeholder="name@gmail.com">')}${F('Name shown on entries','<input id="mf-name" placeholder="Ci Bella">')}${F('Can manage this list','<select id="mf-role"><option value="staff">No</option><option value="owner">Yes</option></select>')}<div style="align-self:end"><button class="btn" type="submit">Give access</button></div></form>`:'<p class="small">Only an owner can add or remove people.</p>'}</div>`;
+}
+async function loadMembers(){S.live.members=await q(S.sb.from('members').select('*').order('added_at'));}
+
+/* ---------- loading records ---------- */
+async function fetchAll(table){let out=[],from=0;for(;;){const rows=await q(S.sb.from(table).select('id,data').range(from,from+999));out=out.concat(rows);if(rows.length<1000)break;from+=1000;}return out;}
+async function loadTable(t){
+  const rows=await fetchAll(t);
+  if(t==='entries')S.live.entries=rows.map(r=>r.data);
+  else if(t==='settings'){const r=rows.find(x=>x.id==='setup');S.live.setup=r?r.data:{};}
+  else{const o={};rows.forEach(r=>{o[r.id]=r.data;});S.live[t]=o;}
+  S.ready[{products:'p',contacts:'c',entries:'d',settings:'m'}[t]]=1;S.ver++;S.cache={};schedule();
+}
+const reloadSoon={};
+function watch(){
+  const ch=S.sb.channel('books');
+  ['products','contacts','entries','settings'].forEach(t=>ch.on('postgres_changes',{event:'*',schema:'public',table:t},()=>{clearTimeout(reloadSoon[t]);reloadSoon[t]=setTimeout(()=>loadTable(t).catch(()=>{}),300);}));
+  ch.subscribe();
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.mode==='live')['products','contacts','entries','settings'].forEach(t=>loadTable(t).catch(()=>{}));});
+}
+async function afterLogin(){
+  const {data:{user}}=await S.sb.auth.getUser();if(!user){S.mode='login';return render();}
+  const email=(user.email||'').toLowerCase();
+  let mem=null;try{mem=(await q(S.sb.from('members').select('*').eq('email',email)))[0];}catch(_){}
+  if(!mem){S.me={email};S.mode='denied';return render();}
+  S.me={id:user.id,email,name:mem.name||email.split('@')[0],role:mem.role};S.mode='live';S.assets=true;S.canWrite=true;render();
+  setTimeout(()=>{if(!allReady()){S.slow=true;schedule();}},10000);
+  try{await Promise.all(['products','contacts','entries','settings'].map(loadTable));await loadMembers();S.slow=false;schedule();}
+  catch(x){S.err='Saved records could not be loaded. '+friendly(x);schedule();}
+  watch();
+}
+
+/* ---------- boot ---------- */
+async function boot(){
+  const cfg=window.BOOKS_CONFIG||{};
+  if(!window.supabase||!cfg.supabaseUrl||/YOUR-/.test(cfg.supabaseUrl+cfg.supabaseAnonKey)){S.mode='noconfig';return render();}
+  S.sb=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{auth:{persistSession:true,detectSessionInUrl:true}});
+  const recovering=/type=recovery/.test(location.hash);
+  S.sb.auth.onAuthStateChange((ev)=>{if(ev==='PASSWORD_RECOVERY'){S.mode='recovery';render();}});
+  const {data:{session}}=await S.sb.auth.getSession();
+  if(recovering&&session){S.mode='recovery';return render();}
+  if(/access_token|type=signup/.test(location.hash))history.replaceState(null,'',location.pathname);
+  if(!session){S.mode='login';return render();}
+  await afterLogin();
+}
+boot();
+})();
+</script>
+</body>
+</html>
