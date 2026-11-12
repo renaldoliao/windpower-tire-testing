@@ -166,6 +166,53 @@ input.price{width:130px;border-bottom-color:var(--carbon)}
 .notano{font-family:var(--mono);letter-spacing:.04em}
 @media (max-width:640px){input,select,textarea{font-size:16px}}
 @media (pointer:coarse){.btn{min-height:46px;padding-inline:22px}.seg button{min-height:42px;padding-inline:16px}.link{padding-block:8px}}
+
+/* v4: simple journey */
+nav a.newbtn{color:var(--sheet);padding:8px 16px;font-size:14px;text-decoration:none}
+.moreLink{display:none;color:var(--muted);text-decoration:none;font-size:14px}
+.moreLink[aria-current]{color:var(--carbon)}
+.tabbar{display:none}
+@media (max-width:760px){
+  nav#nav{display:none}.moreLink{display:inline}
+  header.top{flex-wrap:nowrap}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--sheet);border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;gap:4px;padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-right,0px))}
+  .tabbar a{text-align:center;font-size:12px;letter-spacing:.01em;color:var(--muted);text-decoration:none;padding:10px 0}
+  .tabbar a[aria-current]{color:var(--carbon)}
+  .tabbar a.plus{background:var(--carbon);color:var(--sheet);border-radius:999px;font-size:13px;font-weight:500}
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  #toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+.btn.big{font-size:16px;padding:13px 26px}
+.btn.sm{font-size:13px;padding:6px 14px;min-height:0;white-space:nowrap}
+a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));border-top:1px solid var(--rule);border-left:1px solid var(--rule)}
+.tile{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:8px;align-content:start;padding:22px;min-height:118px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);color:var(--ink)}
+.tile:hover{background:var(--sheet)}
+.tile:focus-visible{outline:1px solid var(--carbon);outline-offset:-1px}
+.tile .tt{font-size:22px;line-height:1.05;letter-spacing:-0.015em}
+.tiles.main .tile{min-height:150px}
+.tiles.main .tile .tt{font-size:clamp(26px,3vw,32px);letter-spacing:-0.02em}
+.tile .td{font-size:13px;line-height:1.4;color:var(--muted);letter-spacing:.01em}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));column-gap:40px}
+.stat{display:grid;gap:8px;align-content:start;padding-block:18px;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none}
+a.stat:hover .bign{color:var(--carbon)}
+.stat .bign{font-size:clamp(32px,4.4vw,46px);line-height:.92;letter-spacing:-0.025em;white-space:nowrap}
+.stat .small{line-height:1.45}
+.txn{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 16px;padding-block:12px;border-bottom:1px solid var(--rule)}
+.txn:hover .tk{color:var(--carbon)}
+.txn:focus-visible{outline:1px solid var(--carbon);outline-offset:2px}
+.txn .tk{font-size:15px;color:var(--ink)}
+.txn .tdsc{font-size:13px;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.txn .tamt{grid-column:2;grid-row:1/3;align-self:center;text-align:right;white-space:nowrap;color:var(--ink)}
+.dayh{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;padding-top:22px;padding-bottom:8px;border-bottom:1px solid var(--ink);margin:0}
+.urow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px 18px;align-items:center;padding-block:13px;border-bottom:1px solid var(--rule)}
+.uamt{white-space:nowrap;font-size:17px}
+@media (max-width:520px){.urow{grid-template-columns:minmax(0,1fr) auto}.urow .btn{grid-column:1/-1;justify-self:start}}
+.stockrow{display:grid;grid-template-columns:minmax(0,2fr) minmax(110px,.7fr) minmax(170px,1.2fr);gap:14px 28px;align-items:center;padding-block:18px;border-bottom:1px solid var(--rule)}
+.stockrow .sq{display:grid;gap:4px}
+.stockrow .sq .bign{font-size:34px;line-height:.95;letter-spacing:-0.02em}
+@media (max-width:640px){.stockrow{grid-template-columns:1fr 1fr}.stockrow .tire{grid-column:1/-1}}
+input[type=search]{-webkit-appearance:none;appearance:none}
 </style>
 </head>
 <body>
@@ -174,13 +221,15 @@ input.price{width:130px;border-bottom-color:var(--carbon)}
   <header class="top">
     <a class="mark" href="#overview"><span id="bizName">Windpower Books</span><span class="micro">Books</span></a>
     <nav id="nav">
-      <a href="#overview">Overview</a><a href="#record">Record</a><a href="#unpaid">Unpaid</a><a href="#journal">Journal</a><a href="#stock">Stock</a><a href="#people">People</a><a href="#reports">Reports</a><a href="#setup">Setup</a>
+      <a href="#overview">Home</a><a href="#journal">Transactions</a><a href="#unpaid">Unpaid</a><a href="#stock">Stock</a><a href="#more">More</a><a class="btn primary newbtn" href="#new">New transaction</a>
     </nav>
+    <a class="moreLink" href="#more">More</a>
   </header>
   <div id="banner"></div>
 </div>
 <main id="main"></main>
 <div class="wrap"><footer><span>All amounts in Rupiah. Tire cost uses the moving average method.</span><a href="#terms">Terms of use</a><a href="#privacy">Privacy</a><span id="who"></span></footer></div>
+<nav class="tabbar" id="tabbar" aria-label="Main"><a href="#overview">Home</a><a href="#journal">Transactions</a><a class="plus" href="#new">+ New</a><a href="#unpaid">Unpaid</a><a href="#stock">Stock</a></nav>
 <div id="toast" hidden></div>
 <input type="file" id="photoPick" accept="image/*" hidden>
 
@@ -212,7 +261,7 @@ const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}};
 
 const ORDER=['sale','recv','purchase','expense','pay','transfer','adjust','capital','draw','opening'];
 const MAIN=['sale','recv','purchase','expense'];
-const TYPES={sale:'Sale',recv:'Payment received',purchase:'Goods received',expense:'Expense',pay:'Paid supplier',transfer:'Money moved',adjust:'Stock count',capital:'Owner put in',draw:'Owner took out',opening:'Opening balances'};
+const TYPES={sale:'Sold tires',recv:'Shop paid',purchase:'Tires arrived',expense:'Paid a cost',pay:'Paid Jakarta',transfer:'Moved money',adjust:'Counted the warehouse',capital:'Owner put money in',draw:'Owner took money out',opening:'Starting balances'};
 const HINTS={
   sale:'Copy one paper nota. If the shop pays later, pick how many days they have. The book keeps the nota open until it is fully paid. A returned tire: enter it with a minus quantity.',
   recv:'A shop paying for a nota. Always pick who received the money, so nothing gets lost. Tick the notas this pays for.',
@@ -232,8 +281,8 @@ const TERMS=[['cash','Paid in full now'],['7','7 days'],['14','14 days'],['30','
 
 const S={mode:'loading',db:null,user:null,uid:null,canWrite:true,demo:false,slow:false,err:'',ready:{p:0,c:0,d:0,m:0},
   live:{products:{},contacts:{},days:{},setup:{}},ver:0,cache:{},draft:null,editing:null,formMounted:false,lastRoute:'',allocKey:null,
-  rp:{preset:'this',from:'',to:'',tab:'pl'},jr:{month:today().slice(0,7),type:''},prodEdit:null,contEdit:null,delArm:null,
-  priceEdits:{},explain:true,assets:null,photoFor:null,sb:null,me:null,authView:'signin',authMsg:''};
+  rp:{preset:'this',from:'',to:'',tab:'pl'},jr:{month:today().slice(0,7),type:'',g:'all',q:''},viewId:null,saved:null,prodEdit:null,contEdit:null,delArm:null,
+  priceEdits:{},explain:false,assets:null,photoFor:null,sb:null,me:null,authView:'signin',authMsg:''};
 S.live.entries=[];S.live.members=[];
 
 /* ---------- example data, only shown in example mode, never saved ---------- */
@@ -278,7 +327,7 @@ const pH=id=>{const p=D().products[id];return p?`<span class="size">${esc(p.size
 const cname=id=>{const c=D().contacts[id];return c?c.name:(id?'Unknown':'No name');};
 const cidByName=name=>{name=(name||'').trim().toLowerCase();if(!name)return '';const C=D().contacts;return Object.keys(C).find(k=>(C[k].name||'').trim().toLowerCase()===name)||'';};
 const thumb=(id,sz)=>{const p=D().products[id];if(p&&p.img)return `<img class="thumb" src="${esc(photoUrl(p.img))}" alt="${esc(pname(id))}" width="${sz}" height="${sz}" loading="lazy" onerror="this.style.visibility='hidden'">`;return `<span class="thumb ph" style="width:${sz}px;height:${sz}px" aria-hidden="true"></span>`;};
-const margin=(price,avg)=>price&&avg?`${M(price-avg)}<div class="small">${((price-avg)/price*100).toFixed(0)}% of the price</div>`:'';
+const margin=(price,avg)=>avg?`Costs about ${rp(avg)}. You make ${M(price-avg)} per tire.`:'';
 
 /* ---------- the accounting engine: replays every entry in date order ---------- */
 function compute(from,to,ex){
@@ -409,14 +458,14 @@ function nextNota(){
 function lastSupplier(){const L=D().entries;for(let i=L.length-1;i>=0;i--)if(L[i].t==='purchase'&&L[i].k)return cname(L[i].k);return 'Windpower Jakarta';}
 
 /* ---------- pages ---------- */
-const PAGES={overview:pageOverview,record:pageRecord,unpaid:pageUnpaid,journal:pageJournal,stock:pageStock,people:pagePeople,reports:pageReports,setup:pageSetup,terms:pageTerms,privacy:pagePrivacy};
+const PAGES={new:pageNew,view:pageView,saved:pageSaved,more:pageMore,overview:pageOverview,record:pageRecord,unpaid:pageUnpaid,journal:pageJournal,stock:pageStock,people:pagePeople,reports:pageReports,setup:pageSetup,terms:pageTerms,privacy:pagePrivacy};
 const allReady=()=>S.ready.p&&S.ready.c&&S.ready.d&&S.ready.m;
 const loaded=()=>S.demo||allReady();
 const route=()=>{const h=(location.hash||'').slice(1);return PAGES[h]?h:'overview';};
 const editable=()=>S.canWrite&&!S.demo&&S.mode==='live';
 
 function banner(){
-  const b=['<span>Mockup with example data. You can record, edit and delete freely. Nothing is saved: reloading the page starts over.</span><button class="link" data-act="demo-on">Reset example data</button><button class="link" data-act="demo-empty">Try an empty book</button>'];
+  const b=['<span class="small">Mockup with example data. Nothing is saved.</span><button class="link" data-act="demo-on">Reset</button><button class="link" data-act="demo-empty">Start empty</button>'];
   if(S.demo)b.push(`<span>Example data. Nothing entered here is saved.</span><button class="link" data-act="demo-off">${S.mode==='live'?'Back to real records':'Back to sign in'}</button>`);
   else if(S.err)b.push(`<span class="neg">${esc(S.err)}</span>`);
   else if(S.slow&&!allReady())b.push('<span>Saved records cannot be reached yet. Check the internet connection.</span>');
@@ -424,65 +473,6 @@ function banner(){
   return b.length?`<div class="banner">${b.join('')}</div>`:'';
 }
 function skeleton(){return `<section class="wrap" aria-busy="true"><span class="skel a"></span><span class="skel b"></span>${'<span class="skel c"></span>'.repeat(6)}</section>`;}
-
-function pageOverview(){
-  const d=D();const [f,t]=monthRange(0);const m=compute(f,t),c=now();
-  if(!d.entries.length){
-    return `<section class="wrap hero"><p class="micro">Nothing recorded yet</p><h1 class="display">Start with what<br>the business has today.</h1>
-    <div class="prose"><p>Record the opening balances once: money each person holds, the bank balance, every tire in the warehouse with what it cost, unpaid notas, and what you still owe Jakarta. After that, copy each nota, each DO and each payment as it happens. Profit, unpaid notas and the reports build themselves.</p></div>
-    <div class="row">${editable()?'<button class="btn primary" data-act="start-opening">Record opening balances</button>':''}<button class="btn" data-act="demo-on">Load example data</button></div></section>`;
-  }
-  const late=c.openAR.filter(o=>status(o).late),lateTot=late.reduce((a,o)=>a+o.open,0);
-  const att=[];
-  if(late.length)att.push(`<div class="lrow"><span class="neg">${late.length} nota${late.length===1?' is':'s are'} past the due date</span><a href="#unpaid">${rp(lateTot)}</a></div>`);
-  const apLate=c.openAP.filter(o=>status(o).late);if(apLate.length)att.push(`<div class="lrow"><span>${apLate.length} DO${apLate.length===1?'':'s'} to Jakarta past the due date</span><a href="#unpaid">${rp(apLate.reduce((a,o)=>a+o.open,0))}</a></div>`);
-  for(const [pid,s] of Object.entries(c.st)){const p=d.products[pid];if(!p)continue;if(s.q<0)att.push(`<div class="lrow"><span>${pH(pid)}</span><span class="tag late">Below zero: ${s.q}</span></div>`);else if(n(p.low)&&s.q<=n(p.low))att.push(`<div class="lrow"><span>${pH(pid)}</span><span class="tag">Low: ${s.q} left</span></div>`);}
-  if(Math.abs(c.diff)>1)att.unshift(`<div class="lrow"><span class="neg">Books are off by ${rp(c.diff)}</span><a href="#reports">Check</a></div>`);
-  if(!d.entries.some(e=>e.t==='opening'))att.unshift('<div class="lrow"><span>No opening balances yet, so money and stock start from zero.</span><button class="link" data-act="start-opening">Add them</button></div>');
-  const recent=d.entries.slice(-7).reverse().map(e=>`<div class="lrow"><span><span class="small">${short(e.d)}</span> ${TYPES[e.t]}: ${describe(e,c)}</span><span class="v" style="font-size:15px">${entryTotal(e)==null?'':M(entryTotal(e))}</span></div>`).join('');
-  const held=accts().map(a=>`<div class="lrow"><span>${esc(a.name)}</span><span class="v">${M(c.bal[a.id]||0)}</span></div>`).join('');
-  const extra=Object.keys(c.bal).filter(k=>!accts().some(a=>a.id===k)&&Math.round(c.bal[k])).map(k=>`<div class="lrow"><span>${esc(aname(k))}</span><span class="v">${M(c.bal[k])}</span></div>`).join('');
-  return `<section class="wrap hero">
-    <p class="micro">Profit so far, ${monthLabel(f)}</p>
-    <h1 class="display ${Math.round(m.P.profit)<0?'neg':''}">${rp(m.P.profit)}</h1>
-    <div class="sub"><span>Sales ${M(m.P.net)}</span><span>${m.P.tires} tires on ${m.P.sales} nota${m.P.sales===1?'':'s'}</span><span>Profit from selling tires ${M(m.P.gross)}</span><span>Running costs ${M(m.P.expTot)}</span></div>
-    <p class="small" style="max-width:62ch">What the business earned this month after paying for the tires that were sold and the running costs. It is not the same as money in hand, because some notas are not paid yet.</p>
-  </section>
-  <div class="band"><section class="wrap"><div class="ledger">
-      <div><p class="micro" style="margin-bottom:4px">Who is holding the money</p>${held}${extra}<div class="lrow"><span><strong>Total money</strong></span><span class="v">${M(c.money)}</span></div></div>
-      <div><p class="micro" style="margin-bottom:4px">Where the business stands</p>
-        <div class="lrow"><span>Shops owe you<span class="ex">${c.openAR.length} unpaid nota${c.openAR.length===1?'':'s'}${late.length?`, ${late.length} late`:''}.</span></span><a class="v" href="#unpaid">${M(c.arTot)}</a></div>
-        <div class="lrow"><span>You owe Jakarta and suppliers<span class="ex">Goods received, not paid yet.</span></span><span class="v">${M(c.apTot)}</span></div>
-        <div class="lrow"><span>Tires in the warehouse<span class="ex">What you paid for the tires you still have.</span></span><span class="v">${M(c.stockVal)}</span></div>
-        <div class="lrow"><span>What the business is worth<span class="ex">Everything it has minus everything it owes.</span></span><span class="v">${M(c.equity)}</span></div></div>
-    </div></section></div>
-  <section class="wrap two">
-    <div><p class="micro" style="margin-bottom:8px">Needs attention</p>${att.join('')||'<div class="lrow"><span class="small">Nothing right now.</span></div>'}</div>
-    <div><p class="micro" style="margin-bottom:8px">Latest entries</p>${recent}<div style="padding-top:14px"><a href="#journal">Open the journal</a></div></div>
-  </section>`;
-}
-
-/* ---------- unpaid notas and DOs ---------- */
-function pageUnpaid(){
-  const c=now(),ed=editable();
-  const tbl=(list,side)=>{if(!list.length)return `<p class="small" style="padding-block:14px">${side==='ar'?'Every nota is paid.':'Nothing owed to suppliers.'}</p>`;
-    const rows=list.map(o=>`<tr><td><span class="notano">${esc(o.nota||'No number')}</span></td><td>${esc(cname(o.k))}</td><td class="small" style="white-space:nowrap">${short(o.d)}</td><td style="white-space:nowrap">${short(o.due)} ${stTag(o)}</td><td class="num">${o.open<o.total-0.5?`<div class="small">of ${rp(o.total)}</div>`:''}${M(o.open)}</td><td class="num">${ed?`<button class="link" data-act="${side==='ar'?'pay-nota':'pay-do'}" data-id="${esc(o.id)}">${side==='ar'?'Record payment':'Record payment'}</button>`:''}</td></tr>`).join('');
-    return `<div class="tbl"><table><thead><tr><th>${side==='ar'?'Nota':'DO'}</th><th>${side==='ar'?'Shop':'Supplier'}</th><th>Date</th><th>Due</th><th class="num">Still owed</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;};
-  const ar=c.openAR,late=ar.filter(o=>status(o).late),soon=ar.filter(o=>!status(o).late&&daysBetween(today(),o.due)<=7),later=ar.filter(o=>!status(o).late&&daysBetween(today(),o.due)>7);
-  const sum=L=>L.reduce((a,o)=>a+o.open,0);
-  const credits=Object.entries(c.credit.ar).filter(([k,v])=>v>0.5);
-  const held=accts().map(a=>`<span>${esc(a.name)} <strong>${M(c.bal[a.id]||0)}</strong></span>`).join('');
-  return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><div class="stack" style="gap:10px"><p class="micro">${ar.length} unpaid nota${ar.length===1?'':'s'}</p><h1 class="h1">Unpaid notas</h1></div>
-    <div style="text-align:right"><p class="micro">Shops owe you</p><p class="h2">${M(c.arTot)}</p></div></div>
-    <p class="hint" style="margin-top:14px">Every credit nota stays here until it is fully paid. When a shop pays anyone, Ci Via, Ci Bella or into the bank, press Record payment and pick who received it.</p>
-    <div class="row" style="gap:8px 28px;margin-top:14px;font-size:14px">${held}</div>
-    <div class="stack" style="margin-top:28px;gap:6px"><p class="micro ${late.length?'neg':''}">Past the due date, ${rp(sum(late))}</p>${tbl(late,'ar')}</div>
-    <div class="stack" style="margin-top:28px;gap:6px"><p class="micro">Due in the next 7 days, ${rp(sum(soon))}</p>${tbl(soon,'ar')}</div>
-    <div class="stack" style="margin-top:28px;gap:6px"><p class="micro">Due later, ${rp(sum(later))}</p>${tbl(later,'ar')}</div>
-    ${credits.length?`<div class="stack" style="margin-top:28px;gap:6px"><p class="micro">Paid more than they owed</p>${credits.map(([k,v])=>`<div class="lrow"><span>${esc(cname(k))}</span><span>${M(v)} <span class="small">will go toward their next nota</span></span></div>`).join('')}</div>`:''}
-  </section>
-  <div class="band"><section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><h2 class="h2">What you owe Jakarta and suppliers</h2><p class="h2">${M(c.apTot)}</p></div><div style="margin-top:16px">${tbl(c.openAP,'ap')}</div></section></div>`;
-}
 
 /* ---------- record ---------- */
 function newDraft(t,d){
@@ -515,10 +505,6 @@ function totals(d){
   else total=n(d.a);
   const paid=(d.t==='sale'||d.t==='purchase')?(d.term==='cash'?total:n(d.paid)):total;
   return {goods,total,paid};
-}
-function pageRecord(){
-  if(!S.draft)S.draft=newDraft('sale');
-  return `<section class="wrap"><p class="micro">${S.editing?'Editing a saved entry':'New entry'}</p><h1 class="h1" style="margin-top:12px">${S.editing?'Edit '+TYPES[S.draft.t].toLowerCase():'Record something'}</h1><div id="formArea"></div></section>`;
 }
 function productOptions(sel){
   const P=D().products;return Object.keys(P).sort((a,b)=>pname(a).localeCompare(pname(b))).map(id=>`<option value="${id}"${id===sel?' selected':''}>${esc(P[id].size)} ${esc(P[id].pattern||'')} (${esc(P[id].brand)})</option>`).join('');
@@ -559,7 +545,7 @@ function termsHTML(paidLabel,accLabel){
 function formHTML(){
   const d=S.draft,t=d.t;
   const pill=k=>`<button type="button" data-act="type" data-t="${k}" aria-pressed="${k===t}">${TYPES[k]}</button>`;
-  const seg=S.editing?'':`<div class="seg" role="group" aria-label="What happened">${MAIN.map(pill).join('')}</div><div class="row" style="gap:6px 10px"><span class="micro">Less often</span><div class="seg">${ORDER.filter(k=>!MAIN.includes(k)).map(pill).join('')}</div></div>`;
+  const seg='';
   let body='';
   const date=F('Date',`<input id="f-d" data-f="d" type="date" value="${esc(d.d)}">`);
   const note=F('Note (optional)',I('note','placeholder="Anything worth remembering"'));
@@ -577,7 +563,7 @@ function formHTML(){
   else if(t==='opening')body=`<div class="grid2">${date}</div><p class="micro">Money on the starting day</p><div class="grid2">${accts().map(a=>F(esc(a.name),`<input id="bal-${esc(a.id)}" class="num" data-money inputmode="numeric" data-bal="${esc(a.id)}" value="${esc(d.bal[a.id]||'')}" placeholder="0">`)).join('')}</div>
     <p class="micro">Tires in the warehouse, with what each one cost</p>${linesHTML('opening')}<p class="micro">Notas not paid yet</p>${peopleRows('recv','Shop','Nota number')}<p class="micro">DOs you have not paid Jakarta for yet</p>${peopleRows('pay','Supplier','DO number')}${note}`;
   return `<div style="margin-top:24px" class="stack">${seg}<p class="hint">${HINTS[t]}</p></div>
-  <div class="recgrid"><form id="recForm" class="stack" novalidate>${body}<p class="err" id="formErr" role="alert"></p><div class="row"><button class="btn primary" id="saveBtn" type="submit"${editable()?'':' disabled'}>${S.editing?'Save changes':'Save '+TYPES[t].toLowerCase()}</button>${S.editing?'<button type="button" class="btn" data-act="cancel-edit">Cancel</button>':''}</div></form>
+  <div class="recgrid"><form id="recForm" class="stack" novalidate>${body}<p class="err" id="formErr" role="alert"></p><div class="row"><button class="btn primary" id="saveBtn" type="submit"${editable()?'':' disabled'}>${S.editing?'Save changes':'Save'}</button>${S.editing?'<button type="button" class="link" data-act="cancel-edit">Cancel</button>':''}</div></form>
   <aside class="nota" id="nota" aria-live="polite"></aside></div>${contactDatalist()}`;
 }
 function drawForm(){const a=$('#formArea');if(!a)return;S.allocKey=null;a.innerHTML=formHTML();updateNota();}
@@ -666,7 +652,7 @@ function mountForm(){
     else if(act==='rmline'){d.lines.splice(+b.dataset.i,1);if(!d.lines.length)d.lines.push({p:'',q:'',qd:'',x:''});drawForm();}
     else if(act==='addrow'){d[b.dataset.l].push({name:'',a:'',nota:'',due:''});drawForm();}
     else if(act==='rmrow'){d[b.dataset.l].splice(+b.dataset.i,1);drawForm();}
-    else if(act==='cancel-edit'){S.editing=null;S.draft=null;location.hash='#journal';}
+    else if(act==='cancel-edit'){const id=S.editing&&S.editing.id;S.editing=null;S.draft=null;S.viewId=id;location.hash='#view';}
     else if(act==='quickprod'){
       const brand=$('#qp-brand').value.trim(),size=$('#qp-size').value.trim();
       if(!brand||!size)return($('#formErr').textContent='A new tire needs at least a brand and a size code.');
@@ -719,58 +705,11 @@ async function doSave(){
     }
     lsSet('tsb-acct',d.acct);
     await saveEntry(e,S.editing?S.editing.d:null);
-    toast(S.editing?'Changes saved':TYPES[t]+' saved');
-    if(S.editing){S.editing=null;S.draft=null;location.hash='#journal';}
-    else{S.draft=newDraft(t,d.d);if(t==='sale')S.draft.nota=nextNotaAfter(nota);drawForm();}
+    S.saved={id:e.id,edited:!!S.editing};S.editing=null;S.draft=null;S.formMounted=false;location.hash='#saved';render();window.scrollTo(0,0);
   }catch(x){err(friendly(x));}
   finally{const b=$('#saveBtn');if(b)b.disabled=!editable();}
 }
 function nextNotaAfter(s){const m=String(s).match(/^(\D*)(\d+)(\D*)$/);if(!m)return nextNota();return m[1]+String(parseInt(m[2],10)+1).padStart(m[2].length,'0')+m[3];}
-
-/* ---------- journal ---------- */
-function pageJournal(){
-  const d=D(),j=S.jr,c=now();
-  const list=d.entries.filter(e=>(!j.month||e.d.slice(0,7)===j.month)&&(!j.type||e.t===j.type)).slice().reverse();
-  const rows=list.map(e=>`<tr><td class="small" style="white-space:nowrap">${nice(e.d)}</td><td style="white-space:nowrap">${TYPES[e.t]}${e.by?`<div class="small">by ${esc(e.by)}</div>`:''}</td><td>${describe(e,c)}${e.note?`<div class="small">${esc(e.note)}</div>`:''}</td><td class="num">${entryTotal(e)==null?'':M(entryTotal(e))}</td>
-    <td class="num">${editable()?`<button class="link" data-act="edit" data-id="${e.id}">Edit</button>&nbsp;&nbsp;<button class="link danger" data-act="del" data-id="${e.id}">${S.delArm===e.id?'Tap again to delete':'Delete'}</button>`:''}</td></tr>`).join('');
-  return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><h1 class="h1">Journal</h1>
-    <div class="row"><label class="fld"><span class="micro">Month</span><input type="month" id="jr-month" value="${esc(j.month)}"></label>
-    <label class="fld"><span class="micro">Kind</span><select id="jr-type"><option value="">Everything</option>${ORDER.map(k=>`<option value="${k}"${k===j.type?' selected':''}>${TYPES[k]}</option>`).join('')}</select></label>
-    <button class="link" data-act="jr-all">${j.month?'Show all months':'This month only'}</button><button class="btn" data-act="export-journal">Download as CSV</button></div></div>
-    <div class="tbl" style="margin-top:24px"><table><thead><tr><th>Date</th><th>Kind</th><th>Details</th><th class="num">Amount</th><th></th></tr></thead><tbody>${rows||`<tr><td colspan="5" class="small">Nothing recorded ${j.month?'in '+monthLabel(j.month+'-01'):'yet'}.</td></tr>`}</tbody></table></div></section>`;
-}
-
-/* ---------- stock and prices ---------- */
-function priceChanged(){const P=D().products;return Object.keys(S.priceEdits).filter(id=>P[id]&&Math.round(n(S.priceEdits[id]))!==Math.round(n(P[id].price)));}
-function priceBtnLabel(k){return k?`Save ${k} price change${k===1?'':'s'}`:'No price changes';}
-function pageStock(){
-  const d=D(),c=now(),P=d.products,ed=editable();const pe=S.prodEdit?(P[S.prodEdit]||{}):{};
-  const ids=Object.keys(P).sort((a,b)=>pname(a).localeCompare(pname(b)));
-  const brands=[...new Set(ids.map(id=>P[id].brand))].sort();
-  const changed=priceChanged();
-  const rows=ids.map(id=>{const p=P[id],s=c.st[id]||{q:0,v:0,last:0},avg=s.q>0?s.v/s.q:s.last;
-    const price=S.priceEdits[id]!=null?n(S.priceEdits[id]):n(p.price);
-    const flag=s.q<0?'<span class="tag late">Below zero</span>':(n(p.low)&&s.q<=n(p.low)?'<span class="tag">Low</span>':'');
-    const priceCell=ed?`<input class="num price" id="pr-${id}" data-price="${id}" inputmode="numeric" value="${fmt(price)}" aria-label="Selling price for ${esc(pname(id))}"><span class="changed" id="ch-${id}"${changed.includes(id)?'':' hidden'}>Not saved yet</span>`:fmt(price);
-    const acts=ed?`<div class="row" style="gap:4px 14px;margin-top:6px">${S.assets?`<button class="link" data-act="photo-change" data-id="${id}">${p.img?'Change photo':'Add photo'}</button>`:''}${S.assets&&p.img?`<button class="link danger" data-act="photo-remove" data-id="${id}">Remove photo</button>`:''}<button class="link" data-act="prod-edit" data-id="${id}">Edit details</button></div>`:'';
-    return `<tr><td><div class="tire">${thumb(id,64)}<div><span class="size" style="font-size:17px">${esc(p.size)}</span> <span style="font-size:17px">${esc(p.pattern||'')}</span><div class="small">${esc(p.brand)}</div>${acts}</div></div></td><td class="num">${s.q} ${flag}</td><td class="num">${fmt(avg)}</td><td class="num">${M(s.v)}</td><td class="num">${priceCell}</td><td class="num" id="mg-${id}">${margin(price,avg)}</td></tr>`;}).join('');
-  const bar=ed&&ids.length?`<div class="pricebar">
-    <label class="fld" style="width:150px"><span class="micro">Change prices by %</span><input id="pp-pct" inputmode="decimal" placeholder="5 or -5"></label>
-    <label class="fld" style="width:200px"><span class="micro">For which tires</span><select id="pp-brand"><option value="">All brands</option>${brands.map(b=>`<option>${esc(b)}</option>`).join('')}</select></label>
-    <button class="btn" data-act="price-pct">Apply to the list</button>
-    <div class="row" style="margin-left:auto"><button class="btn primary" id="savePrices" data-act="price-save"${changed.length?'':' disabled'}>${priceBtnLabel(changed.length)}</button><button class="link" data-act="price-undo" id="undoPrices"${changed.length?'':' hidden'}>Undo</button></div>
-    <p class="hint" style="flex-basis:100%">Type new selling prices straight into the list, or change many at once with a percentage (rounded to the nearest Rp 1.000). Nothing changes until you press Save. A different price can still be typed on a single nota.</p></div>`:'';
-  const form=ed?`<details ${S.prodEdit?'open':''} style="margin-top:20px"><summary>${S.prodEdit?'Editing '+esc(pname(S.prodEdit)):'Add a tire type'}</summary>
-    <form id="prodForm" class="quick grid2" novalidate>${F('Brand',`<input id="pf-brand" value="${esc(pe.brand||'Windpower')}">`)}${F('Size code',`<input id="pf-size" value="${esc(pe.size)}" placeholder="7.50-16">`)}${F('Pattern or type',`<input id="pf-pattern" value="${esc(pe.pattern)}" placeholder="WGC29">`)}
-    ${F('Vehicle',`<select id="pf-cat">${['Truck','Light truck','Car','Motorcycle','Other'].map(x=>`<option${x===(pe.cat||'Truck')?' selected':''}>${x}</option>`).join('')}</select>`)}${F('Selling price',`<input id="pf-price" data-money inputmode="numeric" value="${pe.price?fmt(pe.price):''}">`)}${F('Warn me when stock is at or below',`<input id="pf-low" inputmode="numeric" value="${esc(pe.low||'')}">`)}
-    ${S.assets?F(S.prodEdit&&pe.img?'Replace photo (optional)':'Photo (optional)','<input type="file" id="pf-photo" accept="image/*">'):''}
-    <div class="row" style="align-self:end"><button class="btn primary" type="submit">${S.prodEdit?'Save tire':'Add tire'}</button>${S.prodEdit?'<button type="button" class="link" data-act="prod-cancel">Cancel</button>':''}</div><p class="err" id="pfErr"></p></form></details>`:'';
-  const photoNote='';
-  return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><div class="stack" style="gap:10px"><p class="micro">${ids.length} tire type${ids.length===1?'':'s'}</p><h1 class="h1">Stock and prices</h1></div>
-    <div style="text-align:right"><p class="micro">What the warehouse cost you</p><p class="h2">${M(c.stockVal)}</p></div></div>${form}${photoNote}${bar}
-    <div class="tbl" style="margin-top:20px"><table><thead><tr><th>Tire</th><th class="num">In the warehouse</th><th class="num">Cost per tire<br>(average)</th><th class="num">Value</th><th class="num">Selling price</th><th class="num">You make per tire</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="small">No tire types yet. Add the first one above.</td></tr>'}</tbody></table></div>
-    <p class="hint" style="margin-top:14px">Cost per tire is an average: Jakarta's price changes over time, so the book blends every DO. When a tire is sold, that average is what it cost you.</p></section>`;
-}
 
 /* ---------- people ---------- */
 function pagePeople(){
@@ -785,7 +724,216 @@ function pagePeople(){
     <div class="tbl" style="margin-top:24px"><table><thead><tr><th>Name</th><th>Kind</th><th class="num">Owes you</th><th class="num">You owe</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="small">Shops and suppliers appear here as soon as you name them on a nota or DO.</td></tr>'}</tbody></table></div></section>`;
 }
 
-/* ---------- reports ---------- */
+/* ---------- simple everyday screens ---------- */
+const KDESC={sale:'Copy a paper nota: which shop, which tires, paid now or later.',recv:'A shop paid for one or more notas.',purchase:'A DO from Jakarta arrived at the warehouse.',expense:'Rent, wages, ongkir, fuel, electricity.',pay:'You paid Jakarta for tires that arrived earlier.',transfer:'Ci Bella handed money over, or cash went into the bank.',adjust:'The real count in the warehouse is different from the book.',capital:'The owner added their own money.',draw:'The owner took money for personal use.',opening:'Do this once, on the day you start using the book.'};
+const LESS=['pay','transfer','adjust','capital','draw','opening'];
+const longToday=()=>new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const dayLabel=d=>d===today()?'Today':d===addDays(-1)?'Yesterday':nice(d);
+function shortDesc(e){
+  const q=(e.lines||[]).reduce((a,l)=>a+n(l.q),0),P=[];
+  switch(e.t){
+    case 'sale':P.push(e.nota&&'Nota '+e.nota,cname(e.k),q+' tires');break;
+    case 'recv':P.push(cname(e.k),'to '+aname(e.acct));break;
+    case 'purchase':P.push(e.nota&&'DO '+e.nota,cname(e.k),q+' tires');break;
+    case 'pay':P.push(cname(e.k),'from '+aname(e.acct));break;
+    case 'expense':P.push(e.cat,'from '+aname(e.acct));break;
+    case 'transfer':{const fr=e.from||'cash';P.push(aname(fr)+' to '+aname(e.to||(fr==='bank'?'cash':'bank')));break;}
+    case 'adjust':(e.lines||[]).forEach(l=>P.push((n(l.q)>0?'+':'')+n(l.q)+' '+pname(l.p)));break;
+    case 'capital':P.push('into '+aname(e.acct));break;
+    case 'draw':P.push('from '+aname(e.acct));break;
+    case 'opening':P.push('Money, warehouse and unpaid notas on day one');break;
+  }
+  return esc(P.filter(Boolean).join(' · '));
+}
+function txnRow(e,c){
+  const tot=entryTotal(e),o=c.byId[e.id];let chip='';
+  if(e.t==='sale'&&o&&o.open>0.5)chip=stTag(o);
+  if(e.t==='purchase'&&(e.lines||[]).some(l=>l.qd!=null&&n(l.qd)!==n(l.q)))chip='<span class="tag late">Count differs</span>';
+  return `<button type="button" class="txn" data-act="view" data-id="${e.id}"><span class="tk">${esc(TYPES[e.t])} ${chip}</span><span class="tdsc">${shortDesc(e)}</span><span class="tamt">${tot==null?'':M(tot)}</span></button>`;
+}
+function effects(e){
+  const L=[],qty=(e.lines||[]).reduce((a,l)=>a+n(l.q),0);
+  switch(e.t){
+    case 'sale':{const tot=entryTotal(e),paid=n(e.paid),rest=tot-paid;L.push(`Warehouse: ${qty} tires out`);
+      if(paid)L.push(`${rp(paid)} received by ${aname(e.acct)}`);
+      if(rest>0.5)L.push(`${cname(e.k)} owes ${rp(rest)} more, due ${nice(e.due)}`);
+      if(n(e.ship))L.push(`Ongkir ${rp(e.ship)} paid from ${aname(e.shipAcct||e.acct)}`);break;}
+    case 'recv':L.push(`${rp(e.a)} received by ${aname(e.acct)}`,`${cname(e.k)} owes ${rp(e.a)} less`);break;
+    case 'purchase':{const tot=entryTotal(e),paid=n(e.paid);L.push(`Warehouse: ${qty} tires in`);
+      (e.lines||[]).filter(l=>l.qd!=null&&n(l.qd)!==n(l.q)).forEach(l=>L.push(`${pname(l.p)}: DO says ${n(l.qd)}, warehouse counted ${n(l.q)}`));
+      if(paid)L.push(`${rp(paid)} paid from ${aname(e.acct)}`);
+      if(tot-paid>0.5)L.push(`You owe ${cname(e.k)} ${rp(tot-paid)} more${e.due?', due '+nice(e.due):''}`);break;}
+    case 'pay':L.push(`${rp(e.a)} paid from ${aname(e.acct)}`,`You owe ${cname(e.k)} ${rp(e.a)} less`);break;
+    case 'expense':L.push(`${rp(e.a)} paid from ${aname(e.acct)} for ${e.cat||'Other'}`);break;
+    case 'transfer':{const fr=e.from||'cash',tt=e.to||(fr==='bank'?'cash':'bank');L.push(`${aname(fr)}: ${rp(-n(e.a))}`,`${aname(tt)}: +${rp(e.a)}`);break;}
+    case 'adjust':(e.lines||[]).forEach(l=>L.push(`Warehouse: ${n(l.q)>0?'+':''}${n(l.q)} ${pname(l.p)}`));break;
+    case 'capital':L.push(`${aname(e.acct)}: +${rp(e.a)}`);break;
+    case 'draw':L.push(`${aname(e.acct)}: ${rp(-n(e.a))}`);break;
+    case 'opening':{const b=e.bal||{};Object.keys(b).forEach(k=>L.push(`${aname(k)}: ${rp(b[k])}`));L.push(`Warehouse: ${qty} tires`);
+      if((e.recv||[]).length)L.push(`${e.recv.length} unpaid nota${e.recv.length===1?'':'s'} from before`);if((e.pay||[]).length)L.push(`${e.pay.length} unpaid DO${e.pay.length===1?'':'s'} to Jakarta`);break;}
+  }
+  return L;
+}
+function detailRows(e){
+  const R=[],add=(k,v)=>{if(v!==''&&v!=null)R.push([k,v]);};
+  add('Date',esc(nice(e.d)));
+  if(e.nota)add(e.t==='purchase'?'DO number':'Nota number',`<span class="notano">${esc(e.nota)}</span>`);
+  if(e.k)add(['sale','recv'].includes(e.t)?'Shop':'Supplier',esc(cname(e.k)));
+  if(e.lines&&e.lines.length)add('Tires',e.lines.map(l=>`${n(l.q)} × ${pH(l.p)}${l.u!=null?' at '+fmt(l.u):l.c!=null?' at '+fmt(l.c):''}${l.qd!=null&&n(l.qd)!==n(l.q)?` <span class="small neg">(DO ${n(l.qd)})</span>`:''}`).join('<br>'));
+  if(n(e.disc))add('Discount',rp(e.disc));if(n(e.extra))add('Delivery cost',rp(e.extra));if(n(e.ship))add('Ongkir',rp(e.ship));
+  const tot=entryTotal(e);if(tot!=null&&e.t!=='opening')add('Total',`<strong>${M(tot)}</strong>`);
+  if(e.t==='sale'||e.t==='purchase')add('Payment',!e.term||e.term==='cash'?'Paid in full':`${e.term==='date'?'Credit':e.term+' days'}, due ${esc(nice(e.due))}${n(e.paid)?`, ${rp(e.paid)} paid now`:''}`);
+  if(e.t==='expense')add('For',esc(e.cat));
+  if((e.t==='sale'&&n(e.paid))||e.t==='recv')add('Received by',esc(aname(e.acct)));
+  if(['pay','expense','draw'].includes(e.t)||(e.t==='purchase'&&n(e.paid)))add('Paid from',esc(aname(e.acct)));
+  if(e.t==='capital')add('Into',esc(aname(e.acct)));
+  if(e.t==='transfer'){const fr=e.from||'cash';add('Moved',`${esc(aname(fr))} to ${esc(aname(e.to||(fr==='bank'?'cash':'bank')))}`);}
+  if(e.note)add('Note',esc(e.note));
+  if(e.by)add('Recorded by',esc(e.by)+(e.editedBy&&e.editedBy!==e.by?`, changed by ${esc(e.editedBy)}`:''));
+  return R;
+}
+const kvList=R=>R.map(([k,v])=>`<div class="lrow"><span class="small">${k}</span><span style="text-align:right">${v}</span></div>`).join('');
+const effList=L=>L.map(x=>`<div class="lrow"><span>${esc(x)}</span></div>`).join('');
+
+function pageOverview(){
+  const d=D();
+  if(!d.entries.length)return `<section class="wrap hero"><p class="micro">Nothing recorded yet</p><h1 class="display">Start with what<br>the business has today.</h1>
+    <div class="prose"><p>First, write down what the business has on day one: money each person holds, the bank, tires in the warehouse, unpaid notas, and what you still owe Jakarta. After that, press New transaction every time something happens.</p></div>
+    <div class="row"><button class="btn primary big" data-act="pick" data-t="opening">Enter starting balances</button><button class="btn" data-act="demo-on">Load example data</button></div></section>`;
+  const c=now(),[f,t]=monthRange(0),m=compute(f,t);
+  const late=c.openAR.filter(o=>status(o).late),apLate=c.openAP.filter(o=>status(o).late);
+  const qty=Object.values(c.st).reduce((a,s)=>a+s.q,0);
+  const perTire=Object.keys(d.products).map(id=>`${(c.st[id]||{q:0}).q} ${esc(d.products[id].pattern||pname(id))}`).join(', ');
+  const holders=accts().map(a=>`${esc(a.name)} ${rp(c.bal[a.id]||0)}`).join('<br>');
+  const stat=(href,label,num,sub,cls)=>`<${href?`a href="${href}"`:'div'} class="stat"><span class="micro">${label}</span><span class="bign ${cls||''}">${num}</span><span class="small">${sub}</span></${href?'a':'div'}>`;
+  const todo=[];
+  late.forEach(o=>todo.push(`<div class="lrow"><span><span class="notano">${esc(o.nota||'No number')}</span> ${esc(cname(o.k))}<span class="ex neg">${rp(o.open)}, ${status(o).txt.toLowerCase()}</span></span>${editable()?`<button class="btn sm" data-act="pay-nota" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`));
+  apLate.forEach(o=>todo.push(`<div class="lrow"><span>Pay ${esc(cname(o.k))} <span class="notano">${esc(o.nota||'')}</span><span class="ex">${rp(o.open)}, ${status(o).txt.toLowerCase()}</span></span>${editable()?`<button class="btn sm" data-act="pay-do" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`));
+  for(const [pid,s] of Object.entries(c.st)){const p=d.products[pid];if(!p)continue;if(s.q<0)todo.push(`<div class="lrow"><span>${pH(pid)}<span class="ex neg">Below zero. A DO is probably missing.</span></span><a href="#stock">Check</a></div>`);else if(n(p.low)&&s.q<=n(p.low))todo.push(`<div class="lrow"><span>${pH(pid)}<span class="ex">Only ${s.q} left. Time to request from Jakarta.</span></span></div>`);}
+  const recent=d.entries.slice(-5).reverse().map(e=>txnRow(e,c)).join('');
+  return `<section class="wrap home"><div class="row" style="justify-content:space-between;align-items:end;gap:18px"><div class="stack" style="gap:8px"><p class="micro">${esc(longToday())}</p><h1 class="h1">Today</h1></div><a class="btn primary big" href="#new">New transaction</a></div>
+    <div class="row" style="margin-top:18px;gap:8px 10px"><span class="micro">Quick</span><div class="seg">${['sale','recv','purchase'].map(k=>`<button type="button" data-act="pick" data-t="${k}">${TYPES[k]}</button>`).join('')}</div></div></section>
+  <div class="band"><section class="wrap"><div class="stats">
+    ${stat('','Money we have',rp(c.money),holders)}
+    ${stat('#unpaid','Shops owe us',rp(c.arTot),`${c.openAR.length} unpaid nota${c.openAR.length===1?'':'s'}${late.length?`, <span class="neg">${late.length} late</span>`:''}`)}
+    ${stat('#stock','Tires in the warehouse',String(qty),perTire||'No tires yet')}
+    ${stat('','Profit this month',rp(m.P.profit),`From ${m.P.tires} tires sold, after tire cost and running costs`,Math.round(m.P.profit)<0?'neg':'')}
+  </div></section></div>
+  <section class="wrap two">
+    <div><p class="micro" style="margin-bottom:6px">To do</p>${todo.join('')||'<div class="lrow"><span class="small">Nothing needs attention.</span></div>'}</div>
+    <div><p class="micro" style="margin-bottom:6px">Latest transactions</p>${recent}<div style="padding-top:14px"><a href="#journal">See all transactions</a></div></div>
+  </section>`;
+}
+
+function pageNew(){
+  const tile=k=>`<button type="button" class="tile" data-act="pick" data-t="${k}"><span class="tt">${esc(TYPES[k])}</span><span class="td">${esc(KDESC[k])}</span></button>`;
+  return `<section class="wrap"><p class="micro">New transaction</p><h1 class="h1" style="margin-top:10px">What happened?</h1>
+  <div class="tiles main" style="margin-top:26px">${MAIN.map(tile).join('')}</div>
+  <p class="micro" style="margin-top:34px;margin-bottom:10px">Less often</p><div class="tiles">${LESS.map(tile).join('')}</div></section>`;
+}
+function pageRecord(){
+  if(!S.draft)return pageNew();
+  const t=S.draft.t;
+  return `<section class="wrap">${S.editing?`<button class="link" data-act="view" data-id="${S.editing.id}">Cancel and go back</button>`:'<button class="link" data-act="go" data-h="new">Choose something else</button>'}
+  <h1 class="h1" style="margin-top:16px">${S.editing?'Fix: ':''}${esc(TYPES[t])}</h1><div id="formArea"></div></section>`;
+}
+function pageSaved(){
+  const sv=S.saved,e=sv&&D().entries.find(x=>x.id===sv.id);if(!e)return pageOverview();
+  return `<section class="wrap"><p class="micro">${sv.edited?'Changes saved':'Saved'}</p><h1 class="h1" style="margin-top:10px">${esc(TYPES[e.t])}${e.nota?` <span class="notano">${esc(e.nota)}</span>`:''}</h1>
+  <div style="margin-top:22px;max-width:640px"><p class="micro" style="margin-bottom:4px">What changed</p>${effList(effects(e))}</div>
+  <p class="small" style="margin-top:14px">Home, Unpaid, Stock and the reports are already updated.</p>
+  <div class="row" style="margin-top:24px"><button class="btn primary" data-act="pick" data-t="${e.t==='opening'?'sale':e.t}">${e.t==='opening'?'Record a sale':'Add another'}</button><a class="btn" href="#new">Something else</a><button class="link" data-act="view" data-id="${e.id}">See or fix this one</button><a class="link" href="#overview">Home</a></div></section>`;
+}
+function pageView(){
+  const e=D().entries.find(x=>x.id===S.viewId);if(!e)return pageJournal();
+  const c=now(),o=c.byId[e.id];
+  const st=o?(o.open>0.5?`${stTag(o)} <span class="small">${rp(o.open)} not paid yet</span>`:'<span class="tag ok">Fully paid</span>'):'';
+  return `<section class="wrap"><button class="link" data-act="go" data-h="journal">Back to transactions</button>
+  <p class="micro" style="margin-top:20px">${esc(nice(e.d))}</p><h1 class="h1" style="margin-top:8px">${esc(TYPES[e.t])}</h1>${st?`<div style="margin-top:12px">${st}</div>`:''}
+  <div class="two" style="margin-top:26px"><div><p class="micro" style="margin-bottom:4px">What was recorded</p>${kvList(detailRows(e))}</div>
+  <div><p class="micro" style="margin-bottom:4px">What it changed</p>${effList(effects(e))}
+  ${editable()?`<div class="row" style="margin-top:22px"><button class="btn primary" data-act="edit" data-id="${e.id}">Fix this</button>${o&&o.open>0.5?`<button class="btn" data-act="${o.side==='ar'?'pay-nota':'pay-do'}" data-id="${esc(o.id)}">Mark paid</button>`:''}<button class="link danger" data-act="del" data-id="${e.id}">${S.delArm===e.id?'Tap again to delete':'Delete'}</button></div>
+  <p class="small" style="margin-top:12px">Typed something wrong? Press Fix this, correct it and save. Every number and report updates by itself.</p>`:''}</div></div></section>`;
+}
+
+/* ---------- transactions list ---------- */
+const GROUPS=[['all','All'],['sale','Sales'],['recv','Payments in'],['purchase','Tires arrived'],['expense','Costs'],['other','Other']];
+function journalList(){
+  const j=S.jr,c=now(),q=(j.q||'').trim().toLowerCase(),g=j.g||'all';
+  let L=D().entries.filter(e=>(q||!j.month||e.d.slice(0,7)===j.month)&&(g==='all'||(g==='other'?!MAIN.includes(e.t):e.t===g)));
+  if(q)L=L.filter(e=>(plain(shortDesc(e))+' '+TYPES[e.t]+' '+(e.note||'')).toLowerCase().includes(q));
+  L=L.slice().reverse();
+  if(!L.length)return `<p class="small" style="padding-block:24px">Nothing found${q?` for "${esc(j.q)}"`:j.month?' in '+esc(monthLabel(j.month+'-01')):''}.</p>`;
+  let out='',last='';for(const e of L){if(e.d!==last){out+=`<p class="dayh">${esc(dayLabel(e.d))}</p>`;last=e.d;}out+=txnRow(e,c);}
+  return out;
+}
+function pageJournal(){
+  const j=S.jr;
+  return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><h1 class="h1">Transactions</h1><a class="btn primary" href="#new">New transaction</a></div>
+  <p class="hint" style="margin-top:12px">Tap any transaction to see it, fix it or delete it.</p>
+  <div class="row" style="margin-top:18px;align-items:end"><label class="fld" style="flex:1 1 220px"><span class="micro">Search</span><input id="jr-q" type="search" value="${esc(j.q||'')}" placeholder="Nota number, shop, DO"></label>
+  <label class="fld" style="flex:0 1 190px"><span class="micro">Month</span><input type="month" id="jr-month" value="${esc(j.month)}"></label></div>
+  <div class="seg" style="margin-top:14px">${GROUPS.map(([v,l])=>`<button type="button" data-act="jr-g" data-v="${v}" aria-pressed="${(j.g||'all')===v}">${l}</button>`).join('')}</div>
+  <div id="jrList" style="margin-top:10px">${journalList()}</div>
+  <div class="row" style="margin-top:22px"><button class="link" data-act="jr-all">${j.month?'Show every month':'Show this month only'}</button><button class="link" data-act="export-journal">Download all as a spreadsheet (CSV)</button></div></section>`;
+}
+
+/* ---------- unpaid ---------- */
+function pageUnpaid(){
+  const c=now(),ed=editable(),ar=c.openAR,late=ar.filter(o=>status(o).late);
+  const row=(o,act)=>{const s=status(o);return `<div class="urow"><div><span class="notano">${esc(o.nota||'No number')}</span> ${esc(cname(o.k))}<div class="small ${s.late?'neg':''}">${esc(s.txt)} · ${esc(short(o.due))}${o.open<o.total-0.5?` · ${rp(o.total-o.open)} of ${rp(o.total)} paid`:''}</div></div><span class="uamt ${s.late?'neg':''}">${rp(o.open)}</span>${ed?`<button class="btn sm" data-act="${act}" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`;};
+  const credits=Object.entries(c.credit.ar).filter(([k,v])=>v>0.5);
+  return `<section class="wrap"><h1 class="h1">Unpaid notas</h1>
+  <p style="margin-top:14px;font-size:17px">Shops owe <strong>${rp(c.arTot)}</strong> on ${ar.length} nota${ar.length===1?'':'s'}.${late.length?` <span class="neg">${late.length} ${late.length===1?'is':'are'} late.</span>`:''}</p>
+  <p class="hint" style="margin-top:6px">When a shop pays anyone (Ci Via, Ci Bella or the bank), press Mark paid and choose who received the money.</p>
+  <div style="margin-top:20px">${ar.map(o=>row(o,'pay-nota')).join('')||'<p class="small" style="padding-block:14px">Every nota is paid.</p>'}</div>
+  ${credits.length?`<p class="small" style="margin-top:14px">${credits.map(([k,v])=>`${esc(cname(k))} paid ${rp(v)} too much. It will go toward their next nota.`).join(' ')}</p>`:''}</section>
+  <div class="band"><section class="wrap"><details${c.openAP.length?' open':''}><summary style="font-size:15px">What you still owe Jakarta and suppliers: ${rp(c.apTot)}</summary>
+  <div style="margin-top:12px">${c.openAP.map(o=>row(o,'pay-do')).join('')||'<p class="small">Nothing owed.</p>'}</div></details></section></div>`;
+}
+
+/* ---------- stock and prices ---------- */
+function priceChanged(){const P=D().products;return Object.keys(S.priceEdits).filter(id=>P[id]&&Math.round(n(S.priceEdits[id]))!==Math.round(n(P[id].price)));}
+function priceBtnLabel(k){return k?`Save ${k} new price${k===1?'':'s'}`:'Save prices';}
+function pageStock(){
+  const d=D(),c=now(),P=d.products,ed=editable();const pe=S.prodEdit?(P[S.prodEdit]||{}):{};
+  const ids=Object.keys(P).sort((a,b)=>pname(a).localeCompare(pname(b)));
+  const brands=[...new Set(ids.map(id=>P[id].brand))].sort();
+  const changed=priceChanged(),qty=ids.reduce((a,id)=>a+((c.st[id]||{q:0}).q),0);
+  const rows=ids.map(id=>{const p=P[id],s=c.st[id]||{q:0,v:0,last:0},avg=s.q>0?s.v/s.q:s.last;
+    const price=S.priceEdits[id]!=null?n(S.priceEdits[id]):n(p.price);
+    const flag=s.q<0?'<span class="tag late">Below zero</span>':(n(p.low)&&s.q<=n(p.low)?'<span class="tag">Running low</span>':'');
+    const acts=ed?`<div class="row" style="gap:2px 14px;margin-top:4px"><button class="link" data-act="photo-change" data-id="${id}">${p.img?'Change photo':'Add photo'}</button>${p.img?`<button class="link danger" data-act="photo-remove" data-id="${id}">Remove photo</button>`:''}<button class="link" data-act="prod-edit" data-id="${id}">Edit name</button></div>`:'';
+    return `<div class="stockrow"><div class="tire">${thumb(id,72)}<div><div style="font-size:19px;letter-spacing:-0.01em"><span class="size">${esc(p.size)}</span> ${esc(p.pattern||'')}</div><div class="small">${esc(p.brand)}</div>${acts}</div></div>
+      <div class="sq"><span class="micro">In warehouse</span><span class="bign">${s.q}</span>${flag}</div>
+      <label class="fld"><span class="micro">Selling price</span>${ed?`<input class="num price" id="pr-${id}" data-price="${id}" inputmode="numeric" value="${fmt(price)}"><span class="changed" id="ch-${id}"${changed.includes(id)?'':' hidden'}>Not saved yet</span>`:fmt(price)}<span class="small" id="mg-${id}">${margin(price,avg)}</span></label></div>`;}).join('');
+  const form=ed?`<details ${S.prodEdit?'open':''} style="margin-top:22px"><summary>${S.prodEdit?'Editing '+esc(pname(S.prodEdit)):'Add a new tire type'}</summary>
+    <form id="prodForm" class="quick grid2" novalidate>${F('Brand',`<input id="pf-brand" value="${esc(pe.brand||'Windpower')}">`)}${F('Size',`<input id="pf-size" value="${esc(pe.size)}" placeholder="7.50-16">`)}${F('Type',`<input id="pf-pattern" value="${esc(pe.pattern)}" placeholder="WGC29">`)}
+    ${F('Selling price',`<input id="pf-price" data-money inputmode="numeric" value="${pe.price?fmt(pe.price):''}">`)}${F('Warn me when only this many are left',`<input id="pf-low" inputmode="numeric" value="${esc(pe.low||'')}">`)}<input type="hidden" id="pf-cat" value="${esc(pe.cat||'Truck')}">
+    ${F(S.prodEdit&&pe.img?'Replace photo (optional)':'Photo (optional)','<input type="file" id="pf-photo" accept="image/*">')}
+    <div class="row" style="align-self:end"><button class="btn primary" type="submit">${S.prodEdit?'Save':'Add tire'}</button>${S.prodEdit?'<button type="button" class="link" data-act="prod-cancel">Cancel</button>':''}</div><p class="err" id="pfErr"></p></form></details>`:'';
+  const tools=ed&&ids.length?`<div class="row" style="margin-top:18px"><button class="btn primary" id="savePrices" data-act="price-save"${changed.length?'':' disabled'}>${priceBtnLabel(changed.length)}</button><button class="link" data-act="price-undo" id="undoPrices"${changed.length?'':' hidden'}>Undo</button></div>
+    <details style="margin-top:14px"><summary>Change many prices at once</summary><div class="pricebar" style="border:0;margin-top:0">
+    <label class="fld" style="width:150px"><span class="micro">By how many %</span><input id="pp-pct" inputmode="decimal" placeholder="5 or -5"></label>
+    <label class="fld" style="width:200px"><span class="micro">Which tires</span><select id="pp-brand"><option value="">All</option>${brands.map(b=>`<option>${esc(b)}</option>`).join('')}</select></label>
+    <button class="btn" data-act="price-pct">Apply</button><p class="hint" style="flex-basis:100%">Rounded to the nearest Rp 1.000. Check the new prices, then press Save prices.</p></div></details>`:'';
+  return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><h1 class="h1">Stock and prices</h1><p style="font-size:17px">${qty} tires in the warehouse</p></div>
+    <p class="hint" style="margin-top:12px">Stock goes up and down by itself from your transactions. To change a price, type the new one and press Save prices.</p>${tools}
+    <div style="margin-top:16px;border-top:1px solid var(--ink)">${rows||'<p class="small" style="padding-block:16px">No tire types yet.</p>'}</div>${form}</section>`;
+}
+
+/* ---------- more ---------- */
+function pageMore(){
+  const it=(h,t,d)=>`<a class="tile" href="#${h}"><span class="tt">${t}</span><span class="td">${d}</span></a>`;
+  return `<section class="wrap"><h1 class="h1">More</h1><div class="tiles" style="margin-top:26px">
+    ${it('stock','Stock and prices','Tires in the warehouse, selling prices and photos.')}
+    ${it('people','Shops and suppliers','Everyone you sell to or buy from, and what they owe.')}
+    ${it('reports','Financial reports','Formal statements for your accountant or auditor. Not needed day to day.')}
+    ${it('setup','Setup','Business name, who holds money, kinds of costs, starting balances.')}
+    ${it('terms','Terms of use','')}${it('privacy','Privacy','')}</div></section>`;
+}
+
+/* ---------- formal reports for the accountant ---------- */
 function period(){
   const r=S.rp;const y=new Date().getFullYear();
   if(r.preset==='this')return monthRange(0);
@@ -794,68 +942,62 @@ function period(){
   if(r.preset==='all')return [START,FAR];
   return [r.from||monthRange(0)[0],r.to||monthRange(0)[1]];
 }
-const RNAMES={pl:'Profit',cf:'Money in and out',bs:'What the business owns and owes',st:'Stock value'};
-const RSHORT={pl:'Profit',cf:'Money in and out',bs:'Owns and owes',st:'Stock value'};
-const RACC={pl:'Accountants call this the profit and loss statement.',cf:'Accountants call this the cash flow statement.',bs:'Accountants call this the balance sheet.',st:'Accountants call this the inventory valuation.'};
+const niceID=s=>parseD(s).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+const RID={pl:'Laporan Laba Rugi',bs:'Laporan Posisi Keuangan',cf:'Laporan Arus Kas',ar:'Daftar Umur Piutang',st:'Daftar Persediaan'};
+const REN={pl:'Profit and loss',bs:'Balance sheet',cf:'Cash flow',ar:'Receivables aging',st:'Inventory'};
+const EXPID={'Shipping (ongkir)':'Beban pengiriman (ongkir)','Salaries and wages':'Beban gaji dan upah','Rent':'Beban sewa','Electricity and water':'Beban listrik dan air','Transport and fuel':'Beban transportasi dan BBM','Loading and unloading':'Beban bongkar muat','Phone and internet':'Beban telepon dan internet','Repairs and upkeep':'Beban perbaikan dan pemeliharaan','Taxes and permits':'Beban pajak dan perizinan','Bank fees':'Beban administrasi bank','Other':'Beban lain-lain'};
+const expID=k=>EXPID[k]||('Beban '+k.toLowerCase());
+const kasName=id=>/bank/i.test(id+aname(id))?aname(id):'Kas, '+aname(id);
 function statementRows(tab,from,to){
-  const c=compute(from,to),P=c.P,C=c.C,R=[];let sum='';
+  const c=compute(from,to),P=c.P,C=c.C,R=[];
   const h=l=>R.push({k:'headr',l}),it=(l,v,ind,x)=>R.push({k:ind?'ind':'',l,v,x}),tot=(l,v,x)=>R.push({k:'total',l,v,x}),grand=(l,v,x)=>R.push({k:'grand',l,v,x}),note=l=>R.push({k:'note',l});
-  const acctRows=()=>{const ks=[...accts().map(a=>a.id),...Object.keys(c.bal).filter(k=>!accts().some(a=>a.id===k))];ks.forEach(k=>{if(accts().some(a=>a.id===k)||Math.round(c.bal[k]||0))it(aname(k),c.bal[k]||0,1);});};
+  const kasRows=()=>{const ks=[...accts().map(a=>a.id),...Object.keys(c.bal).filter(k=>!accts().some(a=>a.id===k))];ks.forEach(k=>{if(accts().some(a=>a.id===k)||Math.round(c.bal[k]||0))it(kasName(k),c.bal[k]||0,1);});};
   if(tab==='pl'){
-    h('What shops were charged');
-    it(`Tires sold (${P.tires})`,P.goods,1,'Everything on the notas, paid or not paid yet.');
-    if(P.disc)it('Discounts given',-P.disc,1);
-    tot('Total sales',P.net,'Accountants call this revenue.');
-    it('What those tires cost you',-P.cogs,0,'What you paid Jakarta for the tires that were sold. Accountants call this COGS, cost of goods sold.');
-    tot(`Profit from selling tires${P.net?' ('+(P.gross/P.net*100).toFixed(1)+'% of sales)':''}`,P.gross,'Sales minus what the tires cost. Running costs are not taken off yet. Accountants call this gross profit.');
-    h('Running costs');const ex=Object.entries(P.exp).sort((a,b)=>b[1]-a[1]);ex.forEach(([k,v])=>it(k,-v,1));if(!ex.length)note('No running costs recorded in this period.');
-    tot('Total running costs',-P.expTot,'What it cost to run the business, including ongkir. Accountants call these operating expenses.');
-    if(P.adj)it('Tires missing or found when counting',P.adj,0,'The cost of tires that were not in the warehouse when counted (or extra ones found).');
-    grand(P.profit>=0?'Profit':'Loss',P.profit,'What the business really earned after everything. Accountants call this net profit.');
-    note('Money the owner takes out for personal use is not a business cost, so it is not here. It shows in Money in and out.');
-    sum=`The business sold ${P.tires} tires for ${rp(P.net)}. Those tires had cost ${rp(P.cogs)}, so selling them earned ${rp(P.gross)}. Running costs took ${rp(P.expTot)}.${P.adj?` Counting the warehouse changed things by ${rp(P.adj)}.`:''} ${P.profit>=0?`What is left, ${rp(P.profit)}, is the profit.`:`That leaves a loss of ${rp(-P.profit)}.`}`;
-  }else if(tab==='cf'){
-    const start=c.open.tot;
-    tot('Money at the start',start,'All cash and bank when this period began.');
-    h('Money that came in');if(C.openIn)it('Opening balances entered',C.openIn,1,'The money you had on day one.');
-    it('Paid on the spot when the nota was made',C.saleCash,1);it('Shops paying their notas later',C.arIn,1);it('Owner put money in',C.capIn,1);
-    const tin=C.openIn+C.saleCash+C.arIn+C.capIn;tot('Total in',tin);
-    const by=Object.entries(c.recvBy).filter(([k,v])=>v);if(by.length){h('Who collected it');by.forEach(([k,v])=>it(aname(k),v,1));}
-    h('Money that went out');it('Paid for goods when they arrived',-C.buyCash,1);it('Paying Jakarta and suppliers later',-C.apOut,1);it('Running costs and ongkir',-C.expOut,1);it('Owner took money out',-C.drawOut,1);
-    const tout=C.buyCash+C.apOut+C.expOut+C.drawOut;tot('Total out',-tout);
-    tot(tin-tout>=0?'More came in than went out':'More went out than came in',tin-tout);
-    grand('Money at the end',c.money,'Should match the cash each person holds plus the bank balance.');acctRows();
-    note('Profit and money in hand are different. A credit nota counts as profit before the shop pays. Tires in the warehouse were paid for but are not profit until sold.');
-    sum=`The business started with ${rp(start)}. ${rp(tin)} came in and ${rp(tout)} went out, so it ended with ${rp(c.money)}.`;
+    h('Pendapatan');it('Penjualan',P.goods,1,'Sales: everything invoiced on notas, paid or not.');if(P.disc)it('Potongan penjualan',-P.disc,1,'Discounts given.');
+    tot('Pendapatan bersih',P.net,'Net sales.');
+    it('Beban pokok penjualan',-P.cogs,0,'Cost of goods sold, at moving average cost.');
+    tot('Laba kotor',P.gross,'Gross profit.');
+    h('Beban usaha');const ex=Object.entries(P.exp).sort((a,b)=>b[1]-a[1]);ex.forEach(([k,v])=>it(expID(k),-v,1));if(!ex.length)note('Tidak ada beban usaha pada periode ini.');
+    tot('Jumlah beban usaha',-P.expTot,'Total operating expenses.');
+    tot('Laba usaha',P.gross-P.expTot,'Operating profit.');
+    if(P.adj){h('Pendapatan (beban) lain-lain');it('Selisih persediaan',P.adj,1,'Stock count differences (shrinkage or surplus).');}
+    grand('Laba (rugi) sebelum pajak',P.profit,'Profit before income tax.');
+    note('Pajak penghasilan belum diperhitungkan. Prive pemilik tidak termasuk beban.');
   }else if(tab==='bs'){
-    h('What the business owns');acctRows();
-    it(`Shops owe you (${c.openAR.length} unpaid notas)`,c.arTot,1,'Notas not paid yet. Accountants call this accounts receivable.');
-    it('Tires in the warehouse',c.stockVal,1,'What you paid for the tires you still have. Accountants call this inventory.');tot('Total owned',c.assets,'Accountants call this assets.');
-    h('What the business owes');it('You owe Jakarta and suppliers',c.apTot,1,'Goods received, not paid yet. Accountants call this accounts payable.');tot('Total owed',c.apTot,'Accountants call this liabilities.');
-    h('What belongs to the owner');it('Value on the starting day',c.eqOpen,1,'What the business was worth when you started this book.');it('Owner put in',c.cap,1);it('Owner took out',-c.draw,1);
-    it('Profit since the start',c.profit,1,'All profit earned since the starting day.');tot('Owner\'s share',c.equity,'What is left for the owner after paying everything owed. Accountants call this equity.');
-    grand('Owed plus owner\'s share',c.apTot+c.equity,'This must equal Total owned. When it does, the books balance and nothing is missing.');
-    sum=`The business owns ${rp(c.assets)} in money, unpaid notas and tires. It owes ${rp(c.apTot)}. The difference, ${rp(c.equity)}, belongs to the owner.`;
+    h('Aset');kasRows();it('Piutang usaha',c.arTot,1,'Accounts receivable: unpaid notas.');it('Persediaan barang dagang',c.stockVal,1,'Inventory at moving average cost.');tot('Jumlah aset',c.assets,'Total assets.');
+    h('Liabilitas');it('Utang usaha',c.apTot,1,'Accounts payable: unpaid DOs.');tot('Jumlah liabilitas',c.apTot,'Total liabilities.');
+    h('Ekuitas');it('Modal awal',c.eqOpen,1,'Opening equity from starting balances.');if(c.cap)it('Tambahan setoran modal',c.cap,1);if(c.draw)it('Prive',-c.draw,1,'Owner drawings.');it('Saldo laba',c.profit,1,'Retained earnings since the start of the book.');tot('Jumlah ekuitas',c.equity,'Total equity.');
+    grand('Jumlah liabilitas dan ekuitas',c.apTot+c.equity,'Must equal total assets.');
+  }else if(tab==='cf'){
+    const start=c.open.tot+C.openIn;
+    h('Arus kas dari aktivitas operasi');it('Penerimaan dari pelanggan',C.saleCash+C.arIn,1,'Cash received from customers.');it('Pembayaran kepada pemasok',-(C.buyCash+C.apOut),1,'Cash paid to suppliers.');it('Pembayaran beban usaha',-C.expOut,1,'Operating expenses paid.');
+    const op=C.saleCash+C.arIn-C.buyCash-C.apOut-C.expOut;tot('Arus kas bersih dari aktivitas operasi',op);
+    h('Arus kas dari aktivitas pendanaan');it('Setoran modal pemilik',C.capIn,1);it('Prive',-C.drawOut,1);const fin=C.capIn-C.drawOut;tot('Arus kas bersih dari aktivitas pendanaan',fin);
+    tot('Kenaikan (penurunan) kas',op+fin);it('Kas awal periode',start);grand('Kas akhir periode',c.money);kasRows();
+    note('Metode langsung. Tidak ada aktivitas investasi yang dicatat.');
+  }else if(tab==='ar'){
+    const asOf=to>today()?today():to,B=[['Belum jatuh tempo',-1e9,0],['Terlambat 1 s.d. 30 hari',1,30],['Terlambat 31 s.d. 60 hari',31,60],['Terlambat 61 s.d. 90 hari',61,90],['Terlambat lebih dari 90 hari',91,1e9]];
+    for(const [lab,lo,hi] of B){const L=c.openAR.filter(o=>{const dd=daysBetween(o.due,asOf);return dd>=lo&&dd<=hi;});if(!L.length)continue;h(lab);L.forEach(o=>it(`${o.nota||'Tanpa nomor'}, ${cname(o.k)}, jatuh tempo ${niceID(o.due)}`,o.open,1));tot('Subjumlah',L.reduce((a,o)=>a+o.open,0));}
+    const cr=Object.values(c.credit.ar).reduce((a,v)=>a+v,0);if(cr>0.5)it('Dikurangi: kelebihan bayar pelanggan',-cr);
+    grand('Jumlah piutang usaha',c.arTot);
   }else{
-    const d=D();let q=0;Object.keys(d.products).sort((a,b)=>pname(a).localeCompare(pname(b))).forEach(id=>{const s=c.st[id];if(!s||(!s.q&&!s.v))return;q+=s.q;R.push({k:'',l:`${pname(id)}: ${s.q} tires at ${rp(s.q?s.v/s.q:0)} each`,v:s.v});});
-    if(!R.length)note('No stock on record at this date.');grand('Total warehouse value',c.stockVal,'What you paid for everything in the warehouse.');
-    sum=`There ${q===1?'is 1 tire':'are '+q+' tires'} in the warehouse. They cost ${rp(c.stockVal)} to buy.`;
+    const d=D();Object.keys(d.products).sort((a,b)=>pname(a).localeCompare(pname(b))).forEach(id=>{const s=c.st[id];if(!s||(!s.q&&!s.v))return;it(`${pname(id)}: ${s.q} pcs @ ${rp(s.q?s.v/s.q:0)}`,s.v);});
+    grand('Jumlah persediaan',c.stockVal);note('Metode biaya: rata-rata tertimbang bergerak (moving average).');
   }
-  return {R,c,sum};
+  return {R,c};
 }
 function pageReports(){
-  const r=S.rp,[from,to]=period();const tab=r.tab;
-  const {R,c,sum}=statementRows(tab,from,to);
-  const asOf=tab==='bs'||tab==='st';
-  const plabel=r.preset==='all'&&!asOf?'From the start until today':(asOf?'On '+nice(to===FAR?today():to):`${nice(from)} to ${nice(to)}`);
+  const r=S.rp,[from,to0]=period(),tab=r.tab,asOf=['bs','ar','st'].includes(tab),to=asOf&&to0>today()?today():to0,{R,c}=statementRows(tab,from,to);
+  const plabel=asOf?'Per '+niceID(to===FAR?today():to):(r.preset==='all'?'Sejak awal pencatatan s.d. '+niceID(today()):`Periode ${niceID(from)} s.d. ${niceID(to)}`);
   const seg=(key,opts,cur)=>`<div class="seg" role="group">${opts.map(([v,l])=>`<button type="button" data-act="${key}" data-v="${v}" aria-pressed="${v===cur}">${l}</button>`).join('')}</div>`;
-  const rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*28,700)}ms"><span>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span></div>`).join('');
-  const stamp=tab==='bs'?(Math.abs(c.diff)<1?'<span class="stamp">Books balance</span>':`<span class="stamp off">Off by ${rp(c.diff)}</span>`):'';
-  return `<section class="wrap"><div class="stack">${seg('rp-tab',Object.entries(RSHORT),tab)}${seg('rp-preset',[['this','This month'],['last','Last month'],['year','This year'],['all','All time'],['custom','Choose dates']],r.preset)}
+  const rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*24,600)}ms"><span>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span></div>`).join('');
+  const stamp=tab==='bs'?(Math.abs(c.diff)<1?'<span class="stamp">Seimbang</span>':`<span class="stamp off">Selisih ${rp(c.diff)}</span>`):'';
+  return `<section class="wrap"><h1 class="h1">Financial reports</h1>
+    <div class="prose" style="margin-top:14px"><p>For your accountant or auditor. Day to day you don't need this page: Home, Unpaid and Stock already show what matters. These statements use the usual Indonesian layout (in the style of SAK EMKM) and are built from the same transactions. Have your accountant review them before using them for tax or an audit.</p></div>
+    <div class="stack" style="margin-top:20px">${seg('rp-tab',Object.keys(RID).map(k=>[k,REN[k]]),tab)}${seg('rp-preset',[['this','This month'],['last','Last month'],['year','This year'],['all','All time'],['custom','Choose dates']],r.preset)}
     ${r.preset==='custom'?`<div class="row"><label class="fld"><span class="micro">From</span><input type="date" id="rp-from" value="${esc(from)}"></label><label class="fld"><span class="micro">To</span><input type="date" id="rp-to" value="${esc(to)}"></label></div>`:''}</div>
-    <article class="statement"><div class="head"><p class="micro">${esc(D().setup.name||'Windpower Books')}</p><h1 class="h1">${RNAMES[tab]}</h1><p class="small">${plabel}. ${RACC[tab]}</p>${stamp}</div>
-    <p class="summary">${esc(sum)}</p>
-    <div class="row" style="justify-content:center"><button class="link" data-act="explain">${S.explain?'Hide what each line means':'Show what each line means'}</button></div>
+    <article class="statement"><div class="head"><p class="micro">${esc(D().setup.name||'Windpower Books')}</p><h2 class="h1" style="font-size:clamp(30px,5vw,44px)">${RID[tab]}</h2><p class="small">${esc(plabel)}. Dalam Rupiah.</p>${stamp}</div>
+    <div class="row" style="justify-content:center"><button class="link" data-act="explain">${S.explain?'Hide English explanations':'Show English explanations'}</button></div>
     <div>${rows}</div>
     <div class="row" style="justify-content:center"><button class="btn" data-act="export-report">Download as CSV</button></div></article></section>`;
 }
@@ -864,18 +1006,16 @@ function pageReports(){
 function pageSetup(){
   const s=D().setup,ed=editable();
   return `<section class="wrap two"><div class="stack"><h1 class="h1">Setup</h1>
+    <div class="row"><button class="btn" data-act="pick" data-t="opening">Enter starting balances</button><span class="small">Once, on the day you start.</span></div>
     <form id="setupForm" class="stack" novalidate>${F('Business name',`<input id="sf-name" value="${esc(s.name||'')}" placeholder="Business name">`)}
     <div class="stack" style="gap:8px"><span class="micro">Where money is kept</span><p class="hint">One line for each person who collects money, plus each bank account. Rename freely. Old entries follow the new name.</p>
       ${accts().map((a,i)=>`<input id="sf-acct-${i}" data-acctid="${esc(a.id)}" value="${esc(a.name)}">`).join('')}<input id="sf-acct-new" data-acctid="" placeholder="Add another, for example Bank BCA"></div>
     ${F('Kinds of running costs, one per line',`<textarea id="sf-cats">${esc(cats().join('\n'))}</textarea>`)}
     <div class="row"><button class="btn primary" type="submit"${ed?'':' disabled'}>Save setup</button><span class="err" id="sfErr"></span></div></form></div>
-    <div class="stack prose"><p class="micro">How to use this every day</p>
-    <p>1. Once, on your start date: record opening balances. Count the warehouse, list unpaid notas, and what you owe Jakarta.</p>
-    <p>2. Every DO from Jakarta: record Goods received with what the DO says and what the warehouse counted.</p>
-    <p>3. Every paper nota: record a Sale with the same nota number, the same day.</p>
-    <p>4. Every payment from a shop, whoever receives it: record Payment received and pick who has the money.</p>
-    <p>5. When collected money is handed over or put in the bank: record Money moved.</p>
-    <p>6. Once a month: count the warehouse. If a number is different, record a Stock count with the difference.</p>
+    <div class="stack prose"><p class="micro">How to use it</p>
+    <p>Every time something happens, press <strong>New transaction</strong>, choose what happened, fill in the form and press Save. Everything else (stock, unpaid notas, money, reports) updates by itself.</p>
+    <p>Typed something wrong? Open <strong>Transactions</strong>, tap it, press <strong>Fix this</strong>, correct it and save.</p>
+    <p>Once a month, count the warehouse. If the real count is different, record <strong>Counted the warehouse</strong> with the difference.</p>
     <p class="micro" style="margin-top:12px">Giving access</p>
     <p>In the finished version, each person (including Ci Bella) signs in with their own account on their own phone, and every entry shows who recorded it.</p>
     <p class="micro" style="margin-top:12px">Words used in this book</p>
@@ -893,7 +1033,8 @@ function pagePrivacy(){return `<section class="wrap prose"><h1 class="h1">Privac
 /* ---------- render and routing ---------- */
 function render(){
   const r=route();
-  document.querySelectorAll('#nav a').forEach(a=>{if(a.getAttribute('href')==='#'+r)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  const tab={view:'journal',saved:'new',record:'new',reports:'more',people:'more',setup:'more',terms:'more',privacy:'more'}[r]||r;
+  document.querySelectorAll('#nav a,#tabbar a,.moreLink').forEach(a=>{if(a.getAttribute('href')==='#'+tab)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   $('#bizName').textContent=(D().setup&&D().setup.name)||'Windpower Books';
   $('#banner').innerHTML=banner();
   $('#who').textContent='Mockup by Studio 1801';
@@ -902,7 +1043,7 @@ function render(){
   const m=$('#main');
   if(!loaded()&&r!=='terms'&&r!=='privacy'){m.innerHTML=skeleton();return;}
   m.innerHTML=PAGES[r]();
-  if(r==='record')mountForm();
+  if(r==='record'&&S.draft)mountForm();
 }
 let raf=0;const schedule=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render();});};
 window.addEventListener('hashchange',()=>{S.delArm=null;if(route()!=='record'&&!S.editing)S.formMounted=false;window.scrollTo(0,0);render();});
@@ -917,10 +1058,13 @@ document.addEventListener('click',async ev=>{
   const b=ev.target.closest('[data-act]');if(!b||b.closest('#formArea'))return;const act=b.dataset.act,id=b.dataset.id;
   if(act==='demo-on'){loadBook(true);toast('Example data loaded');}
   else if(act==='demo-empty'){loadBook(false);location.hash='#overview';toast('Empty book. Start with opening balances.');}
-  else if(act==='start-opening'){S.editing=null;S.draft=newDraft('opening');S.lastRoute='';location.hash='#record';render();}
+  else if(act==='start-opening'||act==='pick'){S.editing=null;S.draft=newDraft(act==='pick'?b.dataset.t:'opening');S.lastRoute='';S.formMounted=false;if(location.hash==='#record')render();else location.hash='#record';window.scrollTo(0,0);}
+  else if(act==='view'){S.viewId=id;S.delArm=null;if(location.hash==='#view')render();else location.hash='#view';window.scrollTo(0,0);}
+  else if(act==='go'){S.editing=null;S.draft=null;location.hash='#'+b.dataset.h;}
+  else if(act==='jr-g'){S.jr.g=b.dataset.v;render();}
   else if(act==='edit'){const e=D().entries.find(x=>x.id===id);if(!e)return;S.editing=e;S.draft=draftFrom(e);S.lastRoute='';location.hash='#record';render();}
   else if(act==='del'){if(S.delArm!==id){S.delArm=id;render();setTimeout(()=>{if(S.delArm===id){S.delArm=null;render();}},4000);return;}
-    const e=D().entries.find(x=>x.id===id);S.delArm=null;try{await deleteEntry(e);toast('Entry deleted');}catch(x){toast(friendly(x));}}
+    const e=D().entries.find(x=>x.id===id);S.delArm=null;try{await deleteEntry(e);toast('Deleted. Everything is updated.');if(route()==='view')location.hash='#journal';}catch(x){toast(friendly(x));}}
   else if(act==='pay-nota'||act==='pay-do'){const o=now().byId[id];if(o)startPayment(o.side,o.k,[id]);}
   else if(act==='pay-in'){startPayment('ar',id);}
   else if(act==='pay-out'){startPayment('ap',id);}
@@ -928,7 +1072,7 @@ document.addEventListener('click',async ev=>{
   else if(act==='export-journal'){const c=now();const rows=[['Date','Kind','Nota or DO','Shop or supplier','Details','Total','Paid now','Payment terms','Due date','Money account','Recorded by','Note']];
     D().entries.forEach(e=>{const o=c.byId[e.id];rows.push([e.d,TYPES[e.t],e.nota||'',e.k?cname(e.k):'',plain(describe(e,null)),entryTotal(e)==null?'':Math.round(entryTotal(e)),e.paid!=null?Math.round(n(e.paid)):'',e.term?(e.term==='cash'?'Paid now':e.term==='date'?'Due date':e.term+' days'):'',e.due||'',e.t==='transfer'?aname(e.from)+' to '+aname(e.to):(e.acct?aname(e.acct):''),e.by||'',e.note||'']);});
     download('journal_'+today()+'.csv',rows);}
-  else if(act==='export-report'){const [f,t]=period();const {R}=statementRows(S.rp.tab,f,t);const nm={pl:'profit',cf:'money-in-and-out',bs:'owns-and-owes',st:'stock-value'}[S.rp.tab];download(`${nm}_${f===START?'start':f}_to_${t===FAR?today():t}.csv`,[['Line','Amount (Rp)']].concat(R.map(x=>[x.l,x.v==null?'':Math.round(x.v)])));}
+  else if(act==='export-report'){const [f,t]=period();const {R}=statementRows(S.rp.tab,f,t);const nm={pl:'laba-rugi',cf:'arus-kas',bs:'posisi-keuangan',ar:'umur-piutang',st:'persediaan'}[S.rp.tab];download(`${nm}_${f===START?'start':f}_to_${t===FAR?today():t}.csv`,[['Line','Amount (Rp)']].concat(R.map(x=>[x.l,x.v==null?'':Math.round(x.v)])));}
   else if(act==='rp-tab'){S.rp.tab=b.dataset.v;render();}
   else if(act==='rp-preset'){S.rp.preset=b.dataset.v;if(b.dataset.v==='custom'&&!S.rp.from){[S.rp.from,S.rp.to]=monthRange(0);}render();}
   else if(act==='explain'){S.explain=!S.explain;render();}
@@ -966,6 +1110,9 @@ document.addEventListener('submit',async ev=>{const f=ev.target;if(f.id==='recFo
       await store.setSetup({name:$('#sf-name').value.trim(),cats:list.length?list:DEF_CATS,accts:ac.length?ac:DEF_ACCTS});toast('Setup saved');}
   }catch(x){toast(friendly(x));}
 });
+
+/* ---------- search box on Transactions ---------- */
+document.addEventListener('input',ev=>{if(ev.target.id!=='jr-q')return;S.jr.q=ev.target.value;const L=$('#jrList');if(L)L.innerHTML=journalList();});
 
 /* ---------- prices typed in the stock list ---------- */
 document.addEventListener('input',ev=>{const el=ev.target;if(!el.dataset||!el.dataset.price)return;const id=el.dataset.price;S.priceEdits[id]=el.value;
