@@ -7,25 +7,30 @@
 <title>Windpower Books (mockup)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500&display=swap">
 <style>
-/* Concept: a tire shop's carbon-copy nota book on ruled ledger paper. Tire size codes are stamped in mono like sidewall lettering.
-   Layout: overview anchored left with one huge figure; record is form one side, live nota the other; statements are a centred printed sheet; stock runs edge to edge. */
+/* Concept: a dispatch desk. White delivery slips (cards) on a cool grey desk; tire codes and money in one clean sans.
+   Layout: Overview leads with one large money card and a stacked KPI card beside it, then actions, to-do and a weekly sales chart. */
 :root{
   color-scheme:light;
-  --paper:#e8e6df;   /* Ledger Grey: page canvas */
-  --sheet:#f6f5f0;   /* Top Copy: forms, statements, bands */
-  --ink:#1d1c19;     /* Rubber: all text */
-  --muted:#67645c;   /* Pencil: labels and secondary text */
-  --rule:#c6c2b6;    /* Ruling: every 1px line */
-  --carbon:#2c3c91;  /* Carbon Blue: things you click, nothing else */
-  --loss:#a1302a;    /* Loss Red: negative amounts and warnings only */
-  --sans:"Instrument Sans","Helvetica Neue",Arial,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --paper:#eceef1;      /* Dispatch Grey: page canvas */
+  --sheet:#ffffff;      /* Slip White: cards only, lifted off the grey */
+  --field:#f3f4f6;      /* Field: input and chip fill inside cards */
+  --ink:#15171b;        /* Tire Black: text and all chart marks */
+  --muted:#656b74;      /* Graphite: labels and secondary text */
+  --rule:#e3e6ea;       /* Hairline: separators inside cards */
+  --accent:#2457f5;     /* Dispatch Blue: buttons, links, active state, nothing else */
+  --accent-deep:#1a44cc;
+  --accent-soft:#e6ecff;
+  --loss:#c0392b;       /* Late Red: late invoices and negative money only */
+  --loss-soft:#fbe9e7;
+  --carbon:var(--accent);
+  --sans:"Manrope","Helvetica Neue",Arial,sans-serif;
+  --mono:var(--sans);
   --ease:cubic-bezier(0.16,1,0.3,1);
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#171614;--sheet:#211f1c;--ink:#ebe8df;--muted:#9c978b;--rule:#3b3933;--carbon:#a3b0f2;--loss:#e88d83;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#171614;--sheet:#211f1c;--ink:#ebe8df;--muted:#9c978b;--rule:#3b3933;--carbon:#a3b0f2;--loss:#e88d83;color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#0e1013;--sheet:#181b20;--field:#21252b;--ink:#eceef1;--muted:#9097a1;--rule:#272b32;--accent:#6b8dff;--accent-deep:#5277f5;--accent-soft:#1d2645;--loss:#ef8476;--loss-soft:#3a1f1c;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0e1013;--sheet:#181b20;--field:#21252b;--ink:#eceef1;--muted:#9097a1;--rule:#272b32;--accent:#6b8dff;--accent-deep:#5277f5;--accent-soft:#1d2645;--loss:#ef8476;--loss-soft:#3a1f1c;color-scheme:dark}
 
 html,body{background:var(--paper);margin:0}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -100,7 +105,7 @@ th.num{text-align:right}
 .lrow .v{font-size:20px;letter-spacing:-0.01em;white-space:nowrap}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:40px 56px}
 
-/* record: form one side, nota the other */
+/* record: form one side, invoice the other */
 .recgrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:40px;align-items:start;margin-top:24px}
 @media (max-width:900px){.recgrid{grid-template-columns:1fr}}
 .nota{background:var(--sheet);padding:24px;display:grid;gap:10px;border-top:1px solid var(--ink)}
@@ -213,13 +218,134 @@ a.stat:hover .bign{color:var(--carbon)}
 .stockrow .sq .bign{font-size:34px;line-height:.95;letter-spacing:-0.02em}
 @media (max-width:640px){.stockrow{grid-template-columns:1fr 1fr}.stockrow .tire{grid-column:1/-1}}
 input[type=search]{-webkit-appearance:none;appearance:none}
+
+/* v5: product-dashboard look. White cards on a cool dispatch-grey desk, one blue for actions, charts in ink. */
+body{font:400 15px/1.45 var(--sans);letter-spacing:-0.005em}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px}
+.display{font-size:clamp(46px,8vw,88px);font-weight:500;line-height:.92;letter-spacing:-0.04em}
+.h1{font-size:clamp(30px,4.6vw,44px);font-weight:500;line-height:1;letter-spacing:-0.025em}
+.h2,.ch{font-size:17px;font-weight:500;letter-spacing:-0.01em;line-height:1.3;margin:0}
+.micro{font-size:11px;letter-spacing:.1em;font-weight:500}
+.size,.notano{font-family:var(--sans);letter-spacing:0;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.small{font-size:13px}
+
+/* shell */
+header.top{align-items:center;border-bottom:0;padding-block:18px 10px}
+.mark{display:inline-flex;align-items:center;gap:10px;font-weight:500;font-size:15px}
+.mark .logo{width:28px;height:28px;border-radius:50%;background:var(--ink);display:inline-grid;place-items:center;flex:none}
+.mark .logo::after{content:"";width:12px;height:12px;border-radius:50%;border:2px solid var(--sheet)}
+.mark .micro{display:none}
+nav#nav{background:var(--sheet);border-radius:999px;padding:5px;gap:2px;align-items:center;flex-wrap:nowrap}
+nav#nav a{padding:8px 15px;border-radius:999px;font-size:14px;letter-spacing:0;color:var(--muted)}
+nav#nav a[aria-current="page"]{background:var(--paper);color:var(--ink);text-decoration:none}
+nav#nav a.newbtn{background:var(--accent);color:#fff;margin-left:6px}
+.banner{border:0;justify-content:center;padding-block:4px 6px;font-size:12px;gap:4px 12px}
+.banner .small{font-size:12px}
+.band{background:transparent}
+section{padding-block:22px}
+footer{border-top:0;margin-top:40px}
+
+/* surfaces */
+.card{background:var(--sheet);border-radius:22px;padding:22px 24px}
+.card.list{padding-block:4px}
+.card .lrow:last-child,.card .txn:last-child,.card .urow:last-child,.card .stockrow:last-child{border-bottom:0}
+.lrow,.txn,.urow,.stockrow{border-bottom-color:var(--rule)}
+
+/* controls */
+.btn{border:1px solid var(--rule);background:var(--sheet);font-weight:500;padding:10px 18px}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
+.link{color:var(--accent);text-decoration:none;font-weight:500}
+.link:hover{text-decoration:underline}
+.link.danger{color:var(--loss)}
+details summary{color:var(--accent);text-decoration:none;font-weight:500}
+.seg{gap:6px}
+.seg button{background:var(--sheet);border-color:transparent;color:var(--muted);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+input,select,textarea{background:var(--field);border:1px solid transparent;border-radius:12px;padding:10px 12px}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:0}
+select{background-position:right 14px top 55%,right 9px top 55%;padding-right:30px}
+input.price{width:150px;border-color:transparent}
+.fld .micro{letter-spacing:.06em;text-transform:none;font-size:12.5px;color:var(--muted);font-weight:500}
+.tag{border:0;background:var(--field);color:var(--muted);padding:3px 9px;font-size:10.5px;letter-spacing:.06em;font-weight:500}
+.tag.late{background:var(--loss-soft);color:var(--loss)}
+.alloc{border-top:0}
+.changed{color:var(--accent)}
+.hint{color:var(--muted)}
+
+/* home */
+.hello{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px 24px}
+.hgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;margin-top:22px}
+.hgrid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:14px}
+@media (max-width:860px){.hgrid,.hgrid2{grid-template-columns:1fr}}
+.hero{display:grid;gap:18px;align-content:start;padding:28px}
+.hero-n{font-size:clamp(44px,6.6vw,80px);font-weight:500;line-height:.92;letter-spacing:-0.04em;white-space:nowrap}
+.hero-n .cur{font-size:.36em;letter-spacing:0;color:var(--muted);margin-right:.25em;vertical-align:.95em}
+.splitbar{display:flex;height:12px;border-radius:999px;overflow:hidden;gap:3px}
+.splitbar span{display:block;height:100%;border-radius:999px;min-width:6px}
+.legend{display:grid;gap:8px}
+.legend div{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:1px}
+.side{display:grid;padding:6px 24px}
+.kpi{display:grid;gap:5px;padding-block:16px;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none}
+.kpi:last-child{border-bottom:0}
+a.kpi:hover .mid{color:var(--accent)}
+.mid{font-size:clamp(24px,2.7vw,32px);font-weight:500;letter-spacing:-0.025em;line-height:1;white-space:nowrap}
+.actions4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:14px}
+@media (max-width:860px){.actions4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.act{all:unset;box-sizing:border-box;cursor:pointer;background:var(--sheet);border-radius:22px;padding:18px 20px;display:grid;gap:4px;border:1px solid transparent}
+.act:hover{border-color:var(--accent)}
+.act:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.act .at{font-size:16px;font-weight:500;color:var(--ink)}
+.act .ad{font-size:12.5px;color:var(--muted);line-height:1.35}
+.act .plus{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:18px;line-height:1;margin-bottom:8px}
+.chart{display:block;width:100%;height:150px}
+.chartx{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px}
+.chart .bar{fill:var(--ink);opacity:.18}
+.chart .bar.now{opacity:1}
+.chart text{fill:var(--muted);font-size:10px;font-family:var(--sans)}
+.chead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
+
+/* other pages */
+.tiles{border:0;gap:14px}
+.tile{background:var(--sheet);border:1px solid transparent;border-radius:22px;padding:22px 24px}
+.tile:hover{background:var(--sheet);border-color:var(--accent)}
+.tiles.main .tile .tt{font-size:clamp(22px,2.4vw,28px);font-weight:500}
+.tile .tt{font-weight:500;font-size:19px}
+.dayh{border-bottom:1px solid var(--rule);letter-spacing:.08em;padding-top:18px}
+.recgrid{gap:14px}
+#recForm{background:var(--sheet);border-radius:22px;padding:24px}
+.nota{border-top:0;border-radius:22px;background:var(--sheet);padding:24px;position:sticky;top:16px}
+.nota .big{font-weight:500}
+.lineRow{border-bottom-color:var(--rule)}
+.statement{border-radius:24px;max-width:820px}
+.srow.headr{border-bottom-color:var(--ink)}
+.stamp{border:0;background:var(--field)}
+.stamp.off{background:var(--loss-soft)}
+.stockrow{padding-inline:2px}
+.thumb{border-radius:16px;border:0;background:var(--field)}
+.thumb.ph{border-radius:50%}
+.urow{padding-block:14px}
+.pricebar{border:0}
+@media (max-width:760px){
+  .tabbar{background:var(--sheet);border-top:1px solid var(--rule)}
+  .tabbar a.plus{background:var(--accent);color:#fff}
+  .tabbar a[aria-current]{color:var(--ink);font-weight:500}
+  .card{padding:18px}
+  .hero{padding:22px}
+  .side{padding:2px 18px}
+  #recForm,.nota{padding:18px;position:static}
+}
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <header class="top">
-    <a class="mark" href="#overview"><span id="bizName">Windpower Books</span><span class="micro">Books</span></a>
+    <a class="mark" href="#overview"><span class="logo" aria-hidden="true"></span><span id="bizName">Windpower Books</span><span class="micro">Books</span></a>
     <nav id="nav">
       <a href="#overview">Home</a><a href="#journal">Transactions</a><a href="#unpaid">Unpaid</a><a href="#stock">Stock</a><a href="#more">More</a><a class="btn primary newbtn" href="#new">New transaction</a>
     </nav>
@@ -263,18 +389,18 @@ const ORDER=['sale','recv','purchase','expense','pay','transfer','adjust','capit
 const MAIN=['sale','recv','purchase','expense'];
 const TYPES={sale:'Sold tires',recv:'Shop paid',purchase:'Tires arrived',expense:'Paid a cost',pay:'Paid Jakarta',transfer:'Moved money',adjust:'Counted the warehouse',capital:'Owner put money in',draw:'Owner took money out',opening:'Starting balances'};
 const HINTS={
-  sale:'Copy one paper nota. If the shop pays later, pick how many days they have. The book keeps the nota open until it is fully paid. A returned tire: enter it with a minus quantity.',
-  recv:'A shop paying for a nota. Always pick who received the money, so nothing gets lost. Tick the notas this pays for.',
+  sale:'Copy one paper invoice. If the shop pays later, pick how many days they have. The book keeps the invoice open until it is fully paid. A returned tire: enter it with a minus quantity.',
+  recv:'A shop paying for a invoice. Always pick who received the money, so nothing gets lost. Tick the invoices this pays for.',
   purchase:'Tires arriving from Jakarta. Type what the DO says and what the warehouse counted. The stock goes up by the counted number.',
   pay:'Paying Jakarta (or another supplier) for goods received earlier. Tick the DOs this pays for.',
-  expense:'Running costs: rent, wages, electricity, fuel, ongkir not linked to a nota. Tire purchases go under Goods received, not here.',
+  expense:'Running costs: rent, wages, electricity, fuel, shipping not linked to a invoice. Tire purchases go under Goods received, not here.',
   transfer:'Money changing hands inside the business. For example Ci Bella handing collected money to Ci Via, or cash deposited into the bank. Profit does not change.',
   adjust:'After counting the warehouse, enter only the difference. Missing or damaged tires: a minus number. Extra tires found: a plus number.',
   capital:'The owner\'s own money put into the business.',
   draw:'Money the owner takes out for personal use. This is not a business cost, so it does not lower profit.',
-  opening:'Do this once, on your start date. Write down what the business has on day one: money each person holds, the bank, tires in the warehouse, unpaid notas, and what you owe Jakarta.'
+  opening:'Do this once, on your start date. Write down what the business has on day one: money each person holds, the bank, tires in the warehouse, unpaid invoices, and what you owe Jakarta.'
 };
-const SHIP='Shipping (ongkir)';
+const SHIP='Shipping';
 const DEF_CATS=[SHIP,'Salaries and wages','Rent','Electricity and water','Transport and fuel','Loading and unloading','Phone and internet','Repairs and upkeep','Taxes and permits','Bank fees','Other'];
 const DEF_ACCTS=[{id:'cash',name:'Cash (Ci Via)'},{id:'bella',name:'Cash (Ci Bella)'},{id:'bank',name:'Bank'}];
 const TERMS=[['cash','Paid in full now'],['7','7 days'],['14','14 days'],['30','30 days'],['date','Pick a date']];
@@ -527,11 +653,11 @@ function linesHTML(kind){
 function peopleRows(list,label,numLabel){
   const rows=S.draft[list].map((r,i)=>`<div class="grid2" style="padding-block:6px;border-bottom:1px solid var(--rule)">
     <label class="fld"><span class="micro">${label}</span><input id="${list}-${i}-n" list="dl-contacts" data-rl="${list}" data-ri="${i}" data-rf="name" value="${esc(r.name)}"></label>
-    <label class="fld"><span class="micro">${numLabel}</span><input id="${list}-${i}-o" data-rl="${list}" data-ri="${i}" data-rf="nota" value="${esc(r.nota)}"></label>
+    <label class="fld"><span class="micro">${numLabel}</span><input id="${list}-${i}-o" data-rl="${list}" data-ri="${i}" data-rf="invoice" value="${esc(r.nota)}"></label>
     <label class="fld"><span class="micro">Due date</span><input type="date" id="${list}-${i}-d" data-rl="${list}" data-ri="${i}" data-rf="due" value="${esc(r.due)}"></label>
     <label class="fld"><span class="micro">Still owed</span><input id="${list}-${i}-a" class="num" data-money inputmode="numeric" data-rl="${list}" data-ri="${i}" data-rf="a" value="${esc(r.a)}"></label>
     <div style="align-self:end"><button type="button" class="link" data-act="rmrow" data-l="${list}" data-i="${i}">Remove</button></div></div>`).join('');
-  return rows+`<div><button type="button" class="link" data-act="addrow" data-l="${list}">Add ${list==='recv'?'an unpaid nota':'an unpaid DO'}</button></div>`;
+  return rows+`<div><button type="button" class="link" data-act="addrow" data-l="${list}">Add ${list==='recv'?'an unpaid invoice':'an unpaid DO'}</button></div>`;
 }
 function contactDatalist(){return `<datalist id="dl-contacts">${Object.values(D().contacts).map(c=>`<option value="${esc(c.name)}"></option>`).join('')}</datalist>`;}
 function termsHTML(paidLabel,accLabel){
@@ -549,22 +675,22 @@ function formHTML(){
   let body='';
   const date=F('Date',`<input id="f-d" data-f="d" type="date" value="${esc(d.d)}">`);
   const note=F('Note (optional)',I('note','placeholder="Anything worth remembering"'));
-  if(t==='sale')body=`<div class="grid2">${date}${F('Nota number',I('nota','class="notano" placeholder="00657"'))}${F('Shop (customer)',I('k','list="dl-contacts" placeholder="Shop name"'))}</div>${linesHTML('sale')}
-    <div class="grid2">${F('Discount',I('disc',MONEY+' placeholder="0"'))}${F('Ongkir paid by you',I('ship',MONEY+' placeholder="0"'))}${n(d.ship)?F('Ongkir paid from',acctSel('shipAcct',d.shipAcct)):''}</div>
+  if(t==='sale')body=`<div class="grid2">${date}${F('Invoice number',I('nota','class="notano" placeholder="00657"'))}${F('Shop (customer)',I('k','list="dl-contacts" placeholder="Shop name"'))}</div>${linesHTML('sale')}
+    <div class="grid2">${F('Discount',I('disc',MONEY+' placeholder="0"'))}${F('Shipping paid by you',I('ship',MONEY+' placeholder="0"'))}${n(d.ship)?F('Shipping paid from',acctSel('shipAcct',d.shipAcct)):''}</div>
     ${termsHTML('Paid now as a deposit (optional)','Money received by')}${note}`;
   else if(t==='purchase')body=`<div class="grid2">${date}${F('DO number',I('nota','class="notano" placeholder="DO number"'))}${F('Supplier',I('k','list="dl-contacts"'))}</div>${linesHTML('purchase')}
     <div class="grid2">${F('Truck or delivery cost',I('extra',MONEY+' placeholder="0"'))}</div>${termsHTML('Paid now (optional)','Paid from')}${note}`;
   else if(t==='recv'||t==='pay')body=`<div class="grid2">${date}${F(t==='recv'?'Shop':'Supplier',I('k','list="dl-contacts"'))}${F('Amount',I('a',MONEY))}${F(t==='recv'?'Money received by':'Paid from',acctSel('acct',d.acct))}</div>
-    <div class="stack" style="gap:6px"><span class="micro">${t==='recv'?'Which notas does this pay?':'Which DOs does this pay?'}</span><div id="allocBox"></div></div>${note}`;
+    <div class="stack" style="gap:6px"><span class="micro">${t==='recv'?'Which invoices does this pay?':'Which DOs does this pay?'}</span><div id="allocBox"></div></div>${note}`;
   else if(t==='expense')body=`<div class="grid2">${date}${F('What for',`<select id="f-cat" data-f="cat">${cats().map(c=>`<option${c===d.cat?' selected':''}>${esc(c)}</option>`).join('')}</select>`)}${F('Amount',I('a',MONEY))}${F('Paid from',acctSel('acct',d.acct))}</div>${note}`;
   else if(t==='adjust')body=`<div class="grid2">${date}</div>${linesHTML('adjust')}${note}`;
   else if(t==='capital'||t==='draw')body=`<div class="grid2">${date}${F('Amount',I('a',MONEY))}${F(t==='capital'?'Into':'Out of',acctSel('acct',d.acct))}</div>${note}`;
   else if(t==='transfer')body=`<div class="grid2">${date}${F('From',acctSel('from',d.from))}${F('To',acctSel('to',d.to))}${F('Amount',I('a',MONEY))}</div>${note}`;
   else if(t==='opening')body=`<div class="grid2">${date}</div><p class="micro">Money on the starting day</p><div class="grid2">${accts().map(a=>F(esc(a.name),`<input id="bal-${esc(a.id)}" class="num" data-money inputmode="numeric" data-bal="${esc(a.id)}" value="${esc(d.bal[a.id]||'')}" placeholder="0">`)).join('')}</div>
-    <p class="micro">Tires in the warehouse, with what each one cost</p>${linesHTML('opening')}<p class="micro">Notas not paid yet</p>${peopleRows('recv','Shop','Nota number')}<p class="micro">DOs you have not paid Jakarta for yet</p>${peopleRows('pay','Supplier','DO number')}${note}`;
+    <p class="micro">Tires in the warehouse, with what each one cost</p>${linesHTML('opening')}<p class="micro">Invoices not paid yet</p>${peopleRows('recv','Shop','Invoice number')}<p class="micro">DOs you have not paid Jakarta for yet</p>${peopleRows('pay','Supplier','DO number')}${note}`;
   return `<div style="margin-top:24px" class="stack">${seg}<p class="hint">${HINTS[t]}</p></div>
   <div class="recgrid"><form id="recForm" class="stack" novalidate>${body}<p class="err" id="formErr" role="alert"></p><div class="row"><button class="btn primary" id="saveBtn" type="submit"${editable()?'':' disabled'}>${S.editing?'Save changes':'Save'}</button>${S.editing?'<button type="button" class="link" data-act="cancel-edit">Cancel</button>':''}</div></form>
-  <aside class="nota" id="nota" aria-live="polite"></aside></div>${contactDatalist()}`;
+  <aside class="invoice" id="invoice" aria-live="polite"></aside></div>${contactDatalist()}`;
 }
 function drawForm(){const a=$('#formArea');if(!a)return;S.allocKey=null;a.innerHTML=formHTML();updateNota();}
 function openFor(side,k){const ex=S.editing?S.editing.id:null;const c=compute(START,FAR,ex);return (c.inv[side][k]||[]).filter(o=>o.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);}
@@ -577,7 +703,7 @@ function drawAlloc(){
   const key=side+'|'+k+'|'+S.ver;if(S.allocKey===key)return;S.allocKey=key;
   if(!k){box.innerHTML=`<p class="small">Type the ${side==='ar'?'shop':'supplier'} name to see what is unpaid.</p>`;return;}
   const list=openFor(side,k);
-  if(!list.length){box.innerHTML=`<p class="small">Nothing unpaid for ${esc(d.k)}. The money will be kept as credit toward their next ${side==='ar'?'nota':'DO'}.</p>`;return;}
+  if(!list.length){box.innerHTML=`<p class="small">Nothing unpaid for ${esc(d.k)}. The money will be kept as credit toward their next ${side==='ar'?'invoice':'DO'}.</p>`;return;}
   box.innerHTML=`<div class="alloc">${list.map(o=>`<label><input type="checkbox" id="al-${esc(o.id)}" data-alloc="${esc(o.id)}"${d.alloc.includes(o.id)?' checked':''}><span><span class="notano">${esc(o.nota||'No number')}</span> <span class="small">${short(o.d)}</span> ${stTag(o)}</span><span class="amt">${rp(o.open)}</span></label>`).join('')}</div>
   <p class="small">Nothing ticked? The money goes to the oldest ones first.</p>`;
 }
@@ -586,7 +712,7 @@ function updateNota(){
   d.lines.forEach((l,i)=>{const el=$('#lt-'+i);if(!el)return;if(t==='adjust'){el.textContent=l.p?'On record: '+(c.st[l.p]?c.st[l.p].q:0):'';}else el.textContent=n(l.q)&&n(l.x)?fmt(n(l.q)*n(l.x)):'';});
   if(t==='recv'||t==='pay')drawAlloc();
   const ln=(a,b,cls)=>`<div class="ln ${cls||''}"><span>${a}</span><span>${b}</span></div>`;
-  let h=`<div class="ln"><span class="micro">${t==='sale'?'Nota kredit':t==='purchase'?'Goods received':TYPES[t]}</span><span class="small">${nice(d.d)}</span></div>`;
+  let h=`<div class="ln"><span class="micro">${t==='sale'?'Invoice':t==='purchase'?'Goods received':TYPES[t]}</span><span class="small">${nice(d.d)}</span></div>`;
   if((t==='sale'||t==='purchase')&&(d.nota||d.k))h+=`<div class="ln"><span><span class="notano">${esc(d.nota)}</span></span><span>${esc(d.k)}</span></div>`;
   h+='<hr>';
   const valid=d.lines.filter(l=>l.p&&(n(l.q)||n(l.qd)));
@@ -596,7 +722,7 @@ function updateNota(){
       else if(valid.length&&valid.every(l=>l.qd!==''))h+='<p class="small">Count matches the DO.</p>';}
     if(t==='sale'&&n(d.disc))h+=ln('Discount','-'+fmt(n(d.disc)));
     if(t==='purchase'&&n(d.extra))h+=ln('Truck or delivery','+'+fmt(n(d.extra)));
-    if(t==='opening'){const r=d.recv.reduce((a,x)=>a+n(x.a),0),p=d.pay.reduce((a,x)=>a+n(x.a),0);accts().forEach(a=>{if(n(d.bal[a.id]))h+=ln(esc(a.name),fmt(n(d.bal[a.id])));});if(r)h+=ln('Unpaid notas',fmt(r));if(p)h+=ln('You owe','-'+fmt(p));
+    if(t==='opening'){const r=d.recv.reduce((a,x)=>a+n(x.a),0),p=d.pay.reduce((a,x)=>a+n(x.a),0);accts().forEach(a=>{if(n(d.bal[a.id]))h+=ln(esc(a.name),fmt(n(d.bal[a.id])));});if(r)h+=ln('Unpaid invoices',fmt(r));if(p)h+=ln('You owe','-'+fmt(p));
       h+=`<hr><span class="micro">Starting value of the business</span><div class="big">${M(T.total+r-p)}</div>`;nota.innerHTML=h;return;}
     h+=`<hr><span class="micro">${t==='sale'?'Jumlah (total)':'Total owed for this DO'}</span><div class="big">${M(T.total)}</div>`;
     const rest=T.total-T.paid,due=dueOf(d);
@@ -604,7 +730,7 @@ function updateNota(){
     else{if(T.paid)h+=ln(`Paid now, ${esc(aname(d.acct))}`,fmt(T.paid));h+=ln(t==='sale'?'Still to collect':'Still to pay',`<span class="${rest<0?'neg':''}">${fmt(rest)}</span>`);h+=ln('Due',due?nice(due):'<span class="neg">Pick a date</span>');}
     if(t==='sale'&&valid.length){
       let cost=0;const w=[];valid.forEach(l=>{const s=c.st[l.p]||{q:0,v:0,last:0};const a=s.q>0?s.v/s.q:s.last;cost+=n(l.q)*a;if(n(l.q)>s.q&&!S.editing)w.push(`Only ${s.q} of ${pH(l.p)} on record.`);});
-      h+='<hr>'+ln('What these tires cost you',fmt(cost));if(n(d.ship))h+=ln('Ongkir',`-${fmt(n(d.ship))}`);h+=ln('You make on this nota',M(T.total-cost-n(d.ship)));
+      h+='<hr>'+ln('What these tires cost you',fmt(cost));if(n(d.ship))h+=ln('Shipping',`-${fmt(n(d.ship))}`);h+=ln('You make on this invoice',M(T.total-cost-n(d.ship)));
       if(w.length)h+=`<p class="small neg">${w.join(' ')} Record the goods received first, or the profit will look too high.</p>`;
     }
   }else if(t==='adjust'){
@@ -615,7 +741,7 @@ function updateNota(){
     h+=`<div class="big">${M(T.total)}</div>`+ln(t==='recv'?'Received by':'Paid from',esc(aname(d.acct)));
     const k=cidByName(d.k);if(k){const side=t==='recv'?'ar':'ap';const list=openFor(side,k);const sim=simulate(list,T.total,d.alloc);
       const used=sim.L.filter(x=>x.take>0);if(used.length)h+='<hr>'+used.map(x=>ln(`<span class="notano">${esc(x.o.nota||'No number')}</span>`,x.left<0.5?'Fully paid':`${fmt(x.take)} paid, ${fmt(x.left)} left`)).join('');
-      if(sim.left>0.5)h+=`<p class="small">${fmt(sim.left)} more than what is owed. Kept as credit for the next ${side==='ar'?'nota':'DO'}.</p>`;
+      if(sim.left>0.5)h+=`<p class="small">${fmt(sim.left)} more than what is owed. Kept as credit for the next ${side==='ar'?'invoice':'DO'}.</p>`;
       const tot=list.reduce((a,o)=>a+o.open,0);h+='<hr>'+ln(t==='recv'?'They owed before':'You owed before',fmt(tot))+ln('Left after this',M(Math.max(0,tot-T.total)));}
   }else{
     h+=`<div class="big">${M(T.total)}</div>`;
@@ -673,8 +799,8 @@ async function doSave(){
   const needAmt=()=>{if(!(n(d.a)>0)){err('Enter an amount above zero.');return false;}return true;};
   const nota=(d.nota||'').trim();
   if(t==='sale'||t==='purchase'){
-    if(t==='sale'&&!nota)return err('Type the nota number from the paper nota.');
-    if(nota){const dup=D().entries.find(x=>x.t===t&&x.id!==e.id&&String(x.nota||'').trim().toLowerCase()===nota.toLowerCase());if(dup)return err(`${t==='sale'?'Nota':'DO'} ${nota} is already recorded on ${nice(dup.d)}. Open it from the Journal instead.`);}
+    if(t==='sale'&&!nota)return err('Type the invoice number from the paper invoice.');
+    if(nota){const dup=D().entries.find(x=>x.t===t&&x.id!==e.id&&String(x.nota||'').trim().toLowerCase()===nota.toLowerCase());if(dup)return err(`${t==='sale'?'Invoice':'DO'} ${nota} is already recorded on ${nice(dup.d)}. Open it from the Journal instead.`);}
     if(!d.k.trim())return err(t==='sale'?'Add the shop\'s name.':'Add the supplier\'s name.');
     if(!lines.length)return err('Add at least one tire.');
     if(lines.some(l=>!n(l.x)))return err(t==='sale'?'Every tire needs a price.':'Every tire needs its cost.');
@@ -721,18 +847,18 @@ function pagePeople(){
   const form=editable()&&S.contEdit?`<form id="contForm" class="quick grid2" novalidate style="margin-top:20px">${F('Name',`<input id="cf-name" value="${esc(ce.name)}">`)}${F('Phone or WhatsApp',`<input id="cf-phone" value="${esc(ce.phone)}">`)}${F('Kind',`<select id="cf-kind">${[['customer','Shop'],['supplier','Supplier'],['both','Both']].map(([v,l])=>`<option value="${v}"${v===ce.kind?' selected':''}>${l}</option>`).join('')}</select>`)}<div class="row" style="align-self:end"><button class="btn primary" type="submit">Save</button><button type="button" class="link" data-act="cont-cancel">Cancel</button></div></form>`:'';
   return `<section class="wrap"><h1 class="h1">Shops and suppliers</h1>
     <div class="row" style="margin-top:18px;gap:10px 40px"><span>Shops owe you <strong>${M(c.arTot)}</strong></span><span>You owe suppliers <strong>${M(c.apTot)}</strong></span></div>${form}
-    <div class="tbl" style="margin-top:24px"><table><thead><tr><th>Name</th><th>Kind</th><th class="num">Owes you</th><th class="num">You owe</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="small">Shops and suppliers appear here as soon as you name them on a nota or DO.</td></tr>'}</tbody></table></div></section>`;
+    <div class="tbl" style="margin-top:24px"><table><thead><tr><th>Name</th><th>Kind</th><th class="num">Owes you</th><th class="num">You owe</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="small">Shops and suppliers appear here as soon as you name them on a invoice or DO.</td></tr>'}</tbody></table></div></section>`;
 }
 
 /* ---------- simple everyday screens ---------- */
-const KDESC={sale:'Copy a paper nota: which shop, which tires, paid now or later.',recv:'A shop paid for one or more notas.',purchase:'A DO from Jakarta arrived at the warehouse.',expense:'Rent, wages, ongkir, fuel, electricity.',pay:'You paid Jakarta for tires that arrived earlier.',transfer:'Ci Bella handed money over, or cash went into the bank.',adjust:'The real count in the warehouse is different from the book.',capital:'The owner added their own money.',draw:'The owner took money for personal use.',opening:'Do this once, on the day you start using the book.'};
+const KDESC={sale:'Copy a paper invoice: which shop, which tires, paid now or later.',recv:'A shop paid for one or more invoices.',purchase:'A DO from Jakarta arrived at the warehouse.',expense:'Rent, wages, shipping, fuel, electricity.',pay:'You paid Jakarta for tires that arrived earlier.',transfer:'Ci Bella handed money over, or cash went into the bank.',adjust:'The real count in the warehouse is different from the book.',capital:'The owner added their own money.',draw:'The owner took money for personal use.',opening:'Do this once, on the day you start using the book.'};
 const LESS=['pay','transfer','adjust','capital','draw','opening'];
 const longToday=()=>new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
 const dayLabel=d=>d===today()?'Today':d===addDays(-1)?'Yesterday':nice(d);
 function shortDesc(e){
   const q=(e.lines||[]).reduce((a,l)=>a+n(l.q),0),P=[];
   switch(e.t){
-    case 'sale':P.push(e.nota&&'Nota '+e.nota,cname(e.k),q+' tires');break;
+    case 'sale':P.push(e.nota&&'Invoice '+e.nota,cname(e.k),q+' tires');break;
     case 'recv':P.push(cname(e.k),'to '+aname(e.acct));break;
     case 'purchase':P.push(e.nota&&'DO '+e.nota,cname(e.k),q+' tires');break;
     case 'pay':P.push(cname(e.k),'from '+aname(e.acct));break;
@@ -741,7 +867,7 @@ function shortDesc(e){
     case 'adjust':(e.lines||[]).forEach(l=>P.push((n(l.q)>0?'+':'')+n(l.q)+' '+pname(l.p)));break;
     case 'capital':P.push('into '+aname(e.acct));break;
     case 'draw':P.push('from '+aname(e.acct));break;
-    case 'opening':P.push('Money, warehouse and unpaid notas on day one');break;
+    case 'opening':P.push('Money, warehouse and unpaid invoices on day one');break;
   }
   return esc(P.filter(Boolean).join(' · '));
 }
@@ -757,7 +883,7 @@ function effects(e){
     case 'sale':{const tot=entryTotal(e),paid=n(e.paid),rest=tot-paid;L.push(`Warehouse: ${qty} tires out`);
       if(paid)L.push(`${rp(paid)} received by ${aname(e.acct)}`);
       if(rest>0.5)L.push(`${cname(e.k)} owes ${rp(rest)} more, due ${nice(e.due)}`);
-      if(n(e.ship))L.push(`Ongkir ${rp(e.ship)} paid from ${aname(e.shipAcct||e.acct)}`);break;}
+      if(n(e.ship))L.push(`Shipping ${rp(e.ship)} paid from ${aname(e.shipAcct||e.acct)}`);break;}
     case 'recv':L.push(`${rp(e.a)} received by ${aname(e.acct)}`,`${cname(e.k)} owes ${rp(e.a)} less`);break;
     case 'purchase':{const tot=entryTotal(e),paid=n(e.paid);L.push(`Warehouse: ${qty} tires in`);
       (e.lines||[]).filter(l=>l.qd!=null&&n(l.qd)!==n(l.q)).forEach(l=>L.push(`${pname(l.p)}: DO says ${n(l.qd)}, warehouse counted ${n(l.q)}`));
@@ -770,17 +896,17 @@ function effects(e){
     case 'capital':L.push(`${aname(e.acct)}: +${rp(e.a)}`);break;
     case 'draw':L.push(`${aname(e.acct)}: ${rp(-n(e.a))}`);break;
     case 'opening':{const b=e.bal||{};Object.keys(b).forEach(k=>L.push(`${aname(k)}: ${rp(b[k])}`));L.push(`Warehouse: ${qty} tires`);
-      if((e.recv||[]).length)L.push(`${e.recv.length} unpaid nota${e.recv.length===1?'':'s'} from before`);if((e.pay||[]).length)L.push(`${e.pay.length} unpaid DO${e.pay.length===1?'':'s'} to Jakarta`);break;}
+      if((e.recv||[]).length)L.push(`${e.recv.length} unpaid invoice${e.recv.length===1?'':'s'} from before`);if((e.pay||[]).length)L.push(`${e.pay.length} unpaid DO${e.pay.length===1?'':'s'} to Jakarta`);break;}
   }
   return L;
 }
 function detailRows(e){
   const R=[],add=(k,v)=>{if(v!==''&&v!=null)R.push([k,v]);};
   add('Date',esc(nice(e.d)));
-  if(e.nota)add(e.t==='purchase'?'DO number':'Nota number',`<span class="notano">${esc(e.nota)}</span>`);
+  if(e.nota)add(e.t==='purchase'?'DO number':'Invoice number',`<span class="notano">${esc(e.nota)}</span>`);
   if(e.k)add(['sale','recv'].includes(e.t)?'Shop':'Supplier',esc(cname(e.k)));
   if(e.lines&&e.lines.length)add('Tires',e.lines.map(l=>`${n(l.q)} × ${pH(l.p)}${l.u!=null?' at '+fmt(l.u):l.c!=null?' at '+fmt(l.c):''}${l.qd!=null&&n(l.qd)!==n(l.q)?` <span class="small neg">(DO ${n(l.qd)})</span>`:''}`).join('<br>'));
-  if(n(e.disc))add('Discount',rp(e.disc));if(n(e.extra))add('Delivery cost',rp(e.extra));if(n(e.ship))add('Ongkir',rp(e.ship));
+  if(n(e.disc))add('Discount',rp(e.disc));if(n(e.extra))add('Delivery cost',rp(e.extra));if(n(e.ship))add('Shipping',rp(e.ship));
   const tot=entryTotal(e);if(tot!=null&&e.t!=='opening')add('Total',`<strong>${M(tot)}</strong>`);
   if(e.t==='sale'||e.t==='purchase')add('Payment',!e.term||e.term==='cash'?'Paid in full':`${e.term==='date'?'Credit':e.term+' days'}, due ${esc(nice(e.due))}${n(e.paid)?`, ${rp(e.paid)} paid now`:''}`);
   if(e.t==='expense')add('For',esc(e.cat));
@@ -795,33 +921,50 @@ function detailRows(e){
 const kvList=R=>R.map(([k,v])=>`<div class="lrow"><span class="small">${k}</span><span style="text-align:right">${v}</span></div>`).join('');
 const effList=L=>L.map(x=>`<div class="lrow"><span>${esc(x)}</span></div>`).join('');
 
+function weeklySales(k){const out=[];for(let i=k-1;i>=0;i--){const to=addDays(-7*i),from=addDays(-7*i-6);out.push({from,to,v:compute(from,to).P.net});}return out;}
+function salesChart(W){
+  const max=Math.max(1,...W.map(w=>w.v)),n=W.length,h=100;
+  const bars=W.map((x,i)=>{const bh=Math.max(2,(x.v/max)*h);return `<rect class="bar${i===n-1?' now':''}" x="${i*10+1.5}" y="${h-bh}" width="7" height="${bh}"><title>${esc(short(x.from))} to ${esc(short(x.to))}: ${esc(rp(x.v))}</title></rect>`;}).join('');
+  return `<svg class="chart" viewBox="0 0 ${n*10} ${h}" preserveAspectRatio="none" role="img" aria-label="Sales per week, last ${n} weeks">${bars}</svg><div class="chartx"><span>${n} weeks ago</span><span>This week</span></div>`;
+}
 function pageOverview(){
   const d=D();
-  if(!d.entries.length)return `<section class="wrap hero"><p class="micro">Nothing recorded yet</p><h1 class="display">Start with what<br>the business has today.</h1>
-    <div class="prose"><p>First, write down what the business has on day one: money each person holds, the bank, tires in the warehouse, unpaid notas, and what you still owe Jakarta. After that, press New transaction every time something happens.</p></div>
-    <div class="row"><button class="btn primary big" data-act="pick" data-t="opening">Enter starting balances</button><button class="btn" data-act="demo-on">Load example data</button></div></section>`;
+  if(!d.entries.length)return `<section class="wrap"><div class="card hero" style="padding:clamp(24px,5vw,56px)"><p class="micro">Nothing recorded yet</p><h1 class="display">Start with what<br>the business has today.</h1>
+    <p style="max-width:58ch;color:var(--muted)">First, write down what the business has on day one: money each person holds, the bank, tires in the warehouse, unpaid invoices, and what you still owe Jakarta. After that, press New transaction every time something happens.</p>
+    <div class="row"><button class="btn primary" data-act="pick" data-t="opening">Enter starting balances</button><button class="btn" data-act="demo-on">Load example data</button></div></div></section>`;
   const c=now(),[f,t]=monthRange(0),m=compute(f,t);
   const late=c.openAR.filter(o=>status(o).late),apLate=c.openAP.filter(o=>status(o).late);
   const qty=Object.values(c.st).reduce((a,s)=>a+s.q,0);
-  const perTire=Object.keys(d.products).map(id=>`${(c.st[id]||{q:0}).q} ${esc(d.products[id].pattern||pname(id))}`).join(', ');
-  const holders=accts().map(a=>`${esc(a.name)} ${rp(c.bal[a.id]||0)}`).join('<br>');
-  const stat=(href,label,num,sub,cls)=>`<${href?`a href="${href}"`:'div'} class="stat"><span class="micro">${label}</span><span class="bign ${cls||''}">${num}</span><span class="small">${sub}</span></${href?'a':'div'}>`;
+  const perTire=Object.keys(d.products).map(id=>`${(c.st[id]||{q:0}).q} ${esc(d.products[id].pattern||pname(id))}`).join(' · ');
+  const tones=[1,.55,.28,.15,.08];
+  const holders=accts().map((a,i)=>({name:a.name,v:c.bal[a.id]||0,o:tones[i]||.1}));
+  const pos=holders.reduce((s,h)=>s+Math.max(0,h.v),0)||1;
+  const split=holders.filter(h=>h.v>0).map(h=>`<span style="flex:${h.v/pos};background:var(--ink);opacity:${h.o}"></span>`).join('');
+  const legend=holders.map(h=>`<div><span><i style="background:var(--ink);opacity:${h.o}"></i>${esc(h.name)}</span><span>${M(h.v)}</span></div>`).join('');
   const todo=[];
   late.forEach(o=>todo.push(`<div class="lrow"><span><span class="notano">${esc(o.nota||'No number')}</span> ${esc(cname(o.k))}<span class="ex neg">${rp(o.open)}, ${status(o).txt.toLowerCase()}</span></span>${editable()?`<button class="btn sm" data-act="pay-nota" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`));
   apLate.forEach(o=>todo.push(`<div class="lrow"><span>Pay ${esc(cname(o.k))} <span class="notano">${esc(o.nota||'')}</span><span class="ex">${rp(o.open)}, ${status(o).txt.toLowerCase()}</span></span>${editable()?`<button class="btn sm" data-act="pay-do" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`));
-  for(const [pid,s] of Object.entries(c.st)){const p=d.products[pid];if(!p)continue;if(s.q<0)todo.push(`<div class="lrow"><span>${pH(pid)}<span class="ex neg">Below zero. A DO is probably missing.</span></span><a href="#stock">Check</a></div>`);else if(n(p.low)&&s.q<=n(p.low))todo.push(`<div class="lrow"><span>${pH(pid)}<span class="ex">Only ${s.q} left. Time to request from Jakarta.</span></span></div>`);}
+  for(const [pid,s] of Object.entries(c.st)){const p=d.products[pid];if(!p)continue;if(s.q<0)todo.push(`<div class="lrow"><span>${pH(pid)}<span class="ex neg">Below zero. A DO is probably missing.</span></span><a class="link" href="#stock">Check</a></div>`);else if(n(p.low)&&s.q<=n(p.low))todo.push(`<div class="lrow"><span>${pH(pid)}<span class="ex">Only ${s.q} left. Time to request from Jakarta.</span></span></div>`);}
   const recent=d.entries.slice(-5).reverse().map(e=>txnRow(e,c)).join('');
-  return `<section class="wrap home"><div class="row" style="justify-content:space-between;align-items:end;gap:18px"><div class="stack" style="gap:8px"><p class="micro">${esc(longToday())}</p><h1 class="h1">Today</h1></div><a class="btn primary big" href="#new">New transaction</a></div>
-    <div class="row" style="margin-top:18px;gap:8px 10px"><span class="micro">Quick</span><div class="seg">${['sale','recv','purchase'].map(k=>`<button type="button" data-act="pick" data-t="${k}">${TYPES[k]}</button>`).join('')}</div></div></section>
-  <div class="band"><section class="wrap"><div class="stats">
-    ${stat('','Money we have',rp(c.money),holders)}
-    ${stat('#unpaid','Shops owe us',rp(c.arTot),`${c.openAR.length} unpaid nota${c.openAR.length===1?'':'s'}${late.length?`, <span class="neg">${late.length} late</span>`:''}`)}
-    ${stat('#stock','Tires in the warehouse',String(qty),perTire||'No tires yet')}
-    ${stat('','Profit this month',rp(m.P.profit),`From ${m.P.tires} tires sold, after tire cost and running costs`,Math.round(m.P.profit)<0?'neg':'')}
-  </div></section></div>
-  <section class="wrap two">
-    <div><p class="micro" style="margin-bottom:6px">To do</p>${todo.join('')||'<div class="lrow"><span class="small">Nothing needs attention.</span></div>'}</div>
-    <div><p class="micro" style="margin-bottom:6px">Latest transactions</p>${recent}<div style="padding-top:14px"><a href="#journal">See all transactions</a></div></div>
+  const W=weeklySales(8),wk=W[W.length-1].v;
+  const act=k=>`<button type="button" class="act" data-act="pick" data-t="${k}"><span class="plus" aria-hidden="true">+</span><span class="at">${esc(TYPES[k])}</span><span class="ad">${esc(KDESC[k])}</span></button>`;
+  return `<section class="wrap">
+    <div class="hello"><div class="stack" style="gap:6px"><p class="small">${esc(longToday())}</p><h1 class="h1">Overview</h1></div></div>
+    <div class="hgrid">
+      <div class="card hero"><span class="micro">Money we have</span><span class="hero-n"><span class="cur">Rp</span>${fmt(c.money)}</span>
+        <div class="stack" style="gap:12px"><span class="small">Who is holding it</span><div class="splitbar">${split}</div><div class="legend">${legend}</div></div></div>
+      <div class="card side">
+        <a class="kpi" href="#unpaid"><span class="micro">Shops owe us</span><span class="mid">${rp(c.arTot)}</span><span class="small">${c.openAR.length} unpaid invoice${c.openAR.length===1?'':'s'}${late.length?` · <span class="neg">${late.length} late</span>`:''}</span></a>
+        <a class="kpi" href="#stock"><span class="micro">Tires in the warehouse</span><span class="mid">${qty}</span><span class="small">${perTire||'No tires yet'}</span></a>
+        <div class="kpi"><span class="micro">Profit this month</span><span class="mid ${Math.round(m.P.profit)<0?'neg':''}">${rp(m.P.profit)}</span><span class="small">${m.P.tires} tires sold, after tire cost and running costs</span></div>
+      </div>
+    </div>
+    <div class="actions4">${MAIN.map(act).join('')}</div>
+    <div class="hgrid2">
+      <div class="card"><div class="chead"><h2 class="ch">To do</h2><span class="small">${todo.length||'All clear'}</span></div>${todo.join('')||'<p class="small" style="padding-block:10px">Nothing needs attention.</p>'}</div>
+      <div class="card"><div class="chead"><h2 class="ch">Sales per week</h2><span class="small">This week ${rp(wk)}</span></div>${salesChart(W)}</div>
+    </div>
+    <div class="card list" style="margin-top:14px"><div class="chead" style="padding-top:18px;margin-bottom:0"><h2 class="ch">Latest transactions</h2><a class="link" href="#journal">See all</a></div>${recent}</div>
   </section>`;
 }
 
@@ -840,7 +983,7 @@ function pageRecord(){
 function pageSaved(){
   const sv=S.saved,e=sv&&D().entries.find(x=>x.id===sv.id);if(!e)return pageOverview();
   return `<section class="wrap"><p class="micro">${sv.edited?'Changes saved':'Saved'}</p><h1 class="h1" style="margin-top:10px">${esc(TYPES[e.t])}${e.nota?` <span class="notano">${esc(e.nota)}</span>`:''}</h1>
-  <div style="margin-top:22px;max-width:640px"><p class="micro" style="margin-bottom:4px">What changed</p>${effList(effects(e))}</div>
+  <div class="card" style="margin-top:22px;max-width:680px"><h2 class="ch" style="margin-bottom:6px">What changed</h2>${effList(effects(e))}</div>
   <p class="small" style="margin-top:14px">Home, Unpaid, Stock and the reports are already updated.</p>
   <div class="row" style="margin-top:24px"><button class="btn primary" data-act="pick" data-t="${e.t==='opening'?'sale':e.t}">${e.t==='opening'?'Record a sale':'Add another'}</button><a class="btn" href="#new">Something else</a><button class="link" data-act="view" data-id="${e.id}">See or fix this one</button><a class="link" href="#overview">Home</a></div></section>`;
 }
@@ -850,8 +993,8 @@ function pageView(){
   const st=o?(o.open>0.5?`${stTag(o)} <span class="small">${rp(o.open)} not paid yet</span>`:'<span class="tag ok">Fully paid</span>'):'';
   return `<section class="wrap"><button class="link" data-act="go" data-h="journal">Back to transactions</button>
   <p class="micro" style="margin-top:20px">${esc(nice(e.d))}</p><h1 class="h1" style="margin-top:8px">${esc(TYPES[e.t])}</h1>${st?`<div style="margin-top:12px">${st}</div>`:''}
-  <div class="two" style="margin-top:26px"><div><p class="micro" style="margin-bottom:4px">What was recorded</p>${kvList(detailRows(e))}</div>
-  <div><p class="micro" style="margin-bottom:4px">What it changed</p>${effList(effects(e))}
+  <div class="hgrid2" style="margin-top:22px"><div class="card"><h2 class="ch" style="margin-bottom:6px">What was recorded</h2>${kvList(detailRows(e))}</div>
+  <div class="card"><h2 class="ch" style="margin-bottom:6px">What it changed</h2>${effList(effects(e))}
   ${editable()?`<div class="row" style="margin-top:22px"><button class="btn primary" data-act="edit" data-id="${e.id}">Fix this</button>${o&&o.open>0.5?`<button class="btn" data-act="${o.side==='ar'?'pay-nota':'pay-do'}" data-id="${esc(o.id)}">Mark paid</button>`:''}<button class="link danger" data-act="del" data-id="${e.id}">${S.delArm===e.id?'Tap again to delete':'Delete'}</button></div>
   <p class="small" style="margin-top:12px">Typed something wrong? Press Fix this, correct it and save. Every number and report updates by itself.</p>`:''}</div></div></section>`;
 }
@@ -871,10 +1014,10 @@ function pageJournal(){
   const j=S.jr;
   return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><h1 class="h1">Transactions</h1><a class="btn primary" href="#new">New transaction</a></div>
   <p class="hint" style="margin-top:12px">Tap any transaction to see it, fix it or delete it.</p>
-  <div class="row" style="margin-top:18px;align-items:end"><label class="fld" style="flex:1 1 220px"><span class="micro">Search</span><input id="jr-q" type="search" value="${esc(j.q||'')}" placeholder="Nota number, shop, DO"></label>
+  <div class="row" style="margin-top:18px;align-items:end"><label class="fld" style="flex:1 1 220px"><span class="micro">Search</span><input id="jr-q" type="search" value="${esc(j.q||'')}" placeholder="Invoice number, shop, DO"></label>
   <label class="fld" style="flex:0 1 190px"><span class="micro">Month</span><input type="month" id="jr-month" value="${esc(j.month)}"></label></div>
   <div class="seg" style="margin-top:14px">${GROUPS.map(([v,l])=>`<button type="button" data-act="jr-g" data-v="${v}" aria-pressed="${(j.g||'all')===v}">${l}</button>`).join('')}</div>
-  <div id="jrList" style="margin-top:10px">${journalList()}</div>
+  <div id="jrList" class="card list" style="margin-top:14px">${journalList()}</div>
   <div class="row" style="margin-top:22px"><button class="link" data-act="jr-all">${j.month?'Show every month':'Show this month only'}</button><button class="link" data-act="export-journal">Download all as a spreadsheet (CSV)</button></div></section>`;
 }
 
@@ -883,12 +1026,12 @@ function pageUnpaid(){
   const c=now(),ed=editable(),ar=c.openAR,late=ar.filter(o=>status(o).late);
   const row=(o,act)=>{const s=status(o);return `<div class="urow"><div><span class="notano">${esc(o.nota||'No number')}</span> ${esc(cname(o.k))}<div class="small ${s.late?'neg':''}">${esc(s.txt)} · ${esc(short(o.due))}${o.open<o.total-0.5?` · ${rp(o.total-o.open)} of ${rp(o.total)} paid`:''}</div></div><span class="uamt ${s.late?'neg':''}">${rp(o.open)}</span>${ed?`<button class="btn sm" data-act="${act}" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`;};
   const credits=Object.entries(c.credit.ar).filter(([k,v])=>v>0.5);
-  return `<section class="wrap"><h1 class="h1">Unpaid notas</h1>
-  <p style="margin-top:14px;font-size:17px">Shops owe <strong>${rp(c.arTot)}</strong> on ${ar.length} nota${ar.length===1?'':'s'}.${late.length?` <span class="neg">${late.length} ${late.length===1?'is':'are'} late.</span>`:''}</p>
+  return `<section class="wrap"><h1 class="h1">Unpaid invoices</h1>
+  <p style="margin-top:14px;font-size:17px">Shops owe <strong>${rp(c.arTot)}</strong> on ${ar.length} invoice${ar.length===1?'':'s'}.${late.length?` <span class="neg">${late.length} ${late.length===1?'is':'are'} late.</span>`:''}</p>
   <p class="hint" style="margin-top:6px">When a shop pays anyone (Ci Via, Ci Bella or the bank), press Mark paid and choose who received the money.</p>
-  <div style="margin-top:20px">${ar.map(o=>row(o,'pay-nota')).join('')||'<p class="small" style="padding-block:14px">Every nota is paid.</p>'}</div>
-  ${credits.length?`<p class="small" style="margin-top:14px">${credits.map(([k,v])=>`${esc(cname(k))} paid ${rp(v)} too much. It will go toward their next nota.`).join(' ')}</p>`:''}</section>
-  <div class="band"><section class="wrap"><details${c.openAP.length?' open':''}><summary style="font-size:15px">What you still owe Jakarta and suppliers: ${rp(c.apTot)}</summary>
+  <div class="card list" style="margin-top:20px">${ar.map(o=>row(o,'pay-nota')).join('')||'<p class="small" style="padding-block:14px">Every invoice is paid.</p>'}</div>
+  ${credits.length?`<p class="small" style="margin-top:14px">${credits.map(([k,v])=>`${esc(cname(k))} paid ${rp(v)} too much. It will go toward their next invoice.`).join(' ')}</p>`:''}</section>
+  <div><section class="wrap"><details class="card" ${c.openAP.length?'open':''}><summary style="font-size:15px">What you still owe Jakarta and suppliers: ${rp(c.apTot)}</summary>
   <div style="margin-top:12px">${c.openAP.map(o=>row(o,'pay-do')).join('')||'<p class="small">Nothing owed.</p>'}</div></details></section></div>`;
 }
 
@@ -919,7 +1062,7 @@ function pageStock(){
     <button class="btn" data-act="price-pct">Apply</button><p class="hint" style="flex-basis:100%">Rounded to the nearest Rp 1.000. Check the new prices, then press Save prices.</p></div></details>`:'';
   return `<section class="wrap"><div class="row" style="justify-content:space-between;align-items:end"><h1 class="h1">Stock and prices</h1><p style="font-size:17px">${qty} tires in the warehouse</p></div>
     <p class="hint" style="margin-top:12px">Stock goes up and down by itself from your transactions. To change a price, type the new one and press Save prices.</p>${tools}
-    <div style="margin-top:16px;border-top:1px solid var(--ink)">${rows||'<p class="small" style="padding-block:16px">No tire types yet.</p>'}</div>${form}</section>`;
+    <div class="card list" style="margin-top:16px">${rows||'<p class="small" style="padding-block:16px">No tire types yet.</p>'}</div>${form}</section>`;
 }
 
 /* ---------- more ---------- */
@@ -942,62 +1085,61 @@ function period(){
   if(r.preset==='all')return [START,FAR];
   return [r.from||monthRange(0)[0],r.to||monthRange(0)[1]];
 }
-const niceID=s=>parseD(s).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
-const RID={pl:'Laporan Laba Rugi',bs:'Laporan Posisi Keuangan',cf:'Laporan Arus Kas',ar:'Daftar Umur Piutang',st:'Daftar Persediaan'};
+const niceL=s=>parseD(s).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+const RID={pl:'Profit and Loss Statement',bs:'Balance Sheet',cf:'Cash Flow Statement',ar:'Receivables Aging',st:'Inventory Listing'};
 const REN={pl:'Profit and loss',bs:'Balance sheet',cf:'Cash flow',ar:'Receivables aging',st:'Inventory'};
-const EXPID={'Shipping (ongkir)':'Beban pengiriman (ongkir)','Salaries and wages':'Beban gaji dan upah','Rent':'Beban sewa','Electricity and water':'Beban listrik dan air','Transport and fuel':'Beban transportasi dan BBM','Loading and unloading':'Beban bongkar muat','Phone and internet':'Beban telepon dan internet','Repairs and upkeep':'Beban perbaikan dan pemeliharaan','Taxes and permits':'Beban pajak dan perizinan','Bank fees':'Beban administrasi bank','Other':'Beban lain-lain'};
-const expID=k=>EXPID[k]||('Beban '+k.toLowerCase());
-const kasName=id=>/bank/i.test(id+aname(id))?aname(id):'Kas, '+aname(id);
+const expID=k=>k;
+const kasName=id=>aname(id);
 function statementRows(tab,from,to){
   const c=compute(from,to),P=c.P,C=c.C,R=[];
   const h=l=>R.push({k:'headr',l}),it=(l,v,ind,x)=>R.push({k:ind?'ind':'',l,v,x}),tot=(l,v,x)=>R.push({k:'total',l,v,x}),grand=(l,v,x)=>R.push({k:'grand',l,v,x}),note=l=>R.push({k:'note',l});
   const kasRows=()=>{const ks=[...accts().map(a=>a.id),...Object.keys(c.bal).filter(k=>!accts().some(a=>a.id===k))];ks.forEach(k=>{if(accts().some(a=>a.id===k)||Math.round(c.bal[k]||0))it(kasName(k),c.bal[k]||0,1);});};
   if(tab==='pl'){
-    h('Pendapatan');it('Penjualan',P.goods,1,'Sales: everything invoiced on notas, paid or not.');if(P.disc)it('Potongan penjualan',-P.disc,1,'Discounts given.');
-    tot('Pendapatan bersih',P.net,'Net sales.');
-    it('Beban pokok penjualan',-P.cogs,0,'Cost of goods sold, at moving average cost.');
-    tot('Laba kotor',P.gross,'Gross profit.');
-    h('Beban usaha');const ex=Object.entries(P.exp).sort((a,b)=>b[1]-a[1]);ex.forEach(([k,v])=>it(expID(k),-v,1));if(!ex.length)note('Tidak ada beban usaha pada periode ini.');
-    tot('Jumlah beban usaha',-P.expTot,'Total operating expenses.');
-    tot('Laba usaha',P.gross-P.expTot,'Operating profit.');
-    if(P.adj){h('Pendapatan (beban) lain-lain');it('Selisih persediaan',P.adj,1,'Stock count differences (shrinkage or surplus).');}
-    grand('Laba (rugi) sebelum pajak',P.profit,'Profit before income tax.');
-    note('Pajak penghasilan belum diperhitungkan. Prive pemilik tidak termasuk beban.');
+    h('Revenue');it('Sales',P.goods,1,'Everything invoiced on invoices, paid or not.');if(P.disc)it('Sales discounts',-P.disc,1);
+    tot('Net revenue',P.net);
+    it('Cost of goods sold',-P.cogs,0,'What the sold tires cost, at moving average cost.');
+    tot('Gross profit',P.gross);
+    h('Operating expenses');const ex=Object.entries(P.exp).sort((a,b)=>b[1]-a[1]);ex.forEach(([k,v])=>it(expID(k),-v,1));if(!ex.length)note('No operating expenses in this period.');
+    tot('Total operating expenses',-P.expTot);
+    tot('Operating profit',P.gross-P.expTot);
+    if(P.adj){h('Other income and expenses');it('Inventory count difference',P.adj,1,'Tires missing or found when the warehouse was counted.');}
+    grand('Profit before income tax',P.profit);
+    note('Income tax is not calculated. Owner drawings are not an expense.');
   }else if(tab==='bs'){
-    h('Aset');kasRows();it('Piutang usaha',c.arTot,1,'Accounts receivable: unpaid notas.');it('Persediaan barang dagang',c.stockVal,1,'Inventory at moving average cost.');tot('Jumlah aset',c.assets,'Total assets.');
-    h('Liabilitas');it('Utang usaha',c.apTot,1,'Accounts payable: unpaid DOs.');tot('Jumlah liabilitas',c.apTot,'Total liabilities.');
-    h('Ekuitas');it('Modal awal',c.eqOpen,1,'Opening equity from starting balances.');if(c.cap)it('Tambahan setoran modal',c.cap,1);if(c.draw)it('Prive',-c.draw,1,'Owner drawings.');it('Saldo laba',c.profit,1,'Retained earnings since the start of the book.');tot('Jumlah ekuitas',c.equity,'Total equity.');
-    grand('Jumlah liabilitas dan ekuitas',c.apTot+c.equity,'Must equal total assets.');
+    h('Assets');kasRows();it('Accounts receivable',c.arTot,1,'Unpaid invoices.');it('Inventory',c.stockVal,1,'Tires in the warehouse at moving average cost.');tot('Total assets',c.assets);
+    h('Liabilities');it('Accounts payable',c.apTot,1,'Unpaid DOs to Jakarta and other suppliers.');tot('Total liabilities',c.apTot);
+    h('Equity');it('Opening equity',c.eqOpen,1,'From the starting balances.');if(c.cap)it('Additional owner capital',c.cap,1);if(c.draw)it('Owner drawings',-c.draw,1);it('Retained earnings',c.profit,1,'All profit since the book started.');tot('Total equity',c.equity);
+    grand('Total liabilities and equity',c.apTot+c.equity,'Must equal total assets.');
   }else if(tab==='cf'){
     const start=c.open.tot+C.openIn;
-    h('Arus kas dari aktivitas operasi');it('Penerimaan dari pelanggan',C.saleCash+C.arIn,1,'Cash received from customers.');it('Pembayaran kepada pemasok',-(C.buyCash+C.apOut),1,'Cash paid to suppliers.');it('Pembayaran beban usaha',-C.expOut,1,'Operating expenses paid.');
-    const op=C.saleCash+C.arIn-C.buyCash-C.apOut-C.expOut;tot('Arus kas bersih dari aktivitas operasi',op);
-    h('Arus kas dari aktivitas pendanaan');it('Setoran modal pemilik',C.capIn,1);it('Prive',-C.drawOut,1);const fin=C.capIn-C.drawOut;tot('Arus kas bersih dari aktivitas pendanaan',fin);
-    tot('Kenaikan (penurunan) kas',op+fin);it('Kas awal periode',start);grand('Kas akhir periode',c.money);kasRows();
-    note('Metode langsung. Tidak ada aktivitas investasi yang dicatat.');
+    h('Cash flows from operating activities');it('Cash received from customers',C.saleCash+C.arIn,1);it('Cash paid to suppliers',-(C.buyCash+C.apOut),1);it('Operating expenses paid',-C.expOut,1);
+    const op=C.saleCash+C.arIn-C.buyCash-C.apOut-C.expOut;tot('Net cash from operating activities',op);
+    h('Cash flows from financing activities');it('Owner capital added',C.capIn,1);it('Owner drawings',-C.drawOut,1);const fin=C.capIn-C.drawOut;tot('Net cash from financing activities',fin);
+    tot('Net increase (decrease) in cash',op+fin);it('Cash at the start of the period',start);grand('Cash at the end of the period',c.money);kasRows();
+    note('Direct method. No investing activities recorded.');
   }else if(tab==='ar'){
-    const asOf=to>today()?today():to,B=[['Belum jatuh tempo',-1e9,0],['Terlambat 1 s.d. 30 hari',1,30],['Terlambat 31 s.d. 60 hari',31,60],['Terlambat 61 s.d. 90 hari',61,90],['Terlambat lebih dari 90 hari',91,1e9]];
-    for(const [lab,lo,hi] of B){const L=c.openAR.filter(o=>{const dd=daysBetween(o.due,asOf);return dd>=lo&&dd<=hi;});if(!L.length)continue;h(lab);L.forEach(o=>it(`${o.nota||'Tanpa nomor'}, ${cname(o.k)}, jatuh tempo ${niceID(o.due)}`,o.open,1));tot('Subjumlah',L.reduce((a,o)=>a+o.open,0));}
-    const cr=Object.values(c.credit.ar).reduce((a,v)=>a+v,0);if(cr>0.5)it('Dikurangi: kelebihan bayar pelanggan',-cr);
-    grand('Jumlah piutang usaha',c.arTot);
+    const asOf=to>today()?today():to,B=[['Not yet due',-1e9,0],['1 to 30 days late',1,30],['31 to 60 days late',31,60],['61 to 90 days late',61,90],['More than 90 days late',91,1e9]];
+    for(const [lab,lo,hi] of B){const L=c.openAR.filter(o=>{const dd=daysBetween(o.due,asOf);return dd>=lo&&dd<=hi;});if(!L.length)continue;h(lab);L.forEach(o=>it(`${o.nota||'No number'}, ${cname(o.k)}, due ${niceL(o.due)}`,o.open,1));tot('Subtotal',L.reduce((a,o)=>a+o.open,0));}
+    const cr=Object.values(c.credit.ar).reduce((a,v)=>a+v,0);if(cr>0.5)it('Less: customer overpayments',-cr);
+    grand('Total accounts receivable',c.arTot);
   }else{
-    const d=D();Object.keys(d.products).sort((a,b)=>pname(a).localeCompare(pname(b))).forEach(id=>{const s=c.st[id];if(!s||(!s.q&&!s.v))return;it(`${pname(id)}: ${s.q} pcs @ ${rp(s.q?s.v/s.q:0)}`,s.v);});
-    grand('Jumlah persediaan',c.stockVal);note('Metode biaya: rata-rata tertimbang bergerak (moving average).');
+    const d=D();Object.keys(d.products).sort((a,b)=>pname(a).localeCompare(pname(b))).forEach(id=>{const s=c.st[id];if(!s||(!s.q&&!s.v))return;it(`${pname(id)}: ${s.q} pcs at ${rp(s.q?s.v/s.q:0)}`,s.v);});
+    grand('Total inventory',c.stockVal);note('Cost method: moving weighted average.');
   }
   return {R,c};
 }
 function pageReports(){
   const r=S.rp,[from,to0]=period(),tab=r.tab,asOf=['bs','ar','st'].includes(tab),to=asOf&&to0>today()?today():to0,{R,c}=statementRows(tab,from,to);
-  const plabel=asOf?'Per '+niceID(to===FAR?today():to):(r.preset==='all'?'Sejak awal pencatatan s.d. '+niceID(today()):`Periode ${niceID(from)} s.d. ${niceID(to)}`);
+  const plabel=asOf?'As of '+niceL(to===FAR?today():to):(r.preset==='all'?'From the start of the book to '+niceL(today()):`${niceL(from)} to ${niceL(to)}`);
   const seg=(key,opts,cur)=>`<div class="seg" role="group">${opts.map(([v,l])=>`<button type="button" data-act="${key}" data-v="${v}" aria-pressed="${v===cur}">${l}</button>`).join('')}</div>`;
   const rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*24,600)}ms"><span>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span></div>`).join('');
-  const stamp=tab==='bs'?(Math.abs(c.diff)<1?'<span class="stamp">Seimbang</span>':`<span class="stamp off">Selisih ${rp(c.diff)}</span>`):'';
+  const stamp=tab==='bs'?(Math.abs(c.diff)<1?'<span class="stamp">Balanced</span>':`<span class="stamp off">Off by ${rp(c.diff)}</span>`):'';
   return `<section class="wrap"><h1 class="h1">Financial reports</h1>
-    <div class="prose" style="margin-top:14px"><p>For your accountant or auditor. Day to day you don't need this page: Home, Unpaid and Stock already show what matters. These statements use the usual Indonesian layout (in the style of SAK EMKM) and are built from the same transactions. Have your accountant review them before using them for tax or an audit.</p></div>
+    <div class="prose" style="margin-top:14px"><p>For your accountant or auditor. Day to day you don't need this page: Home, Unpaid and Stock already show what matters. These statements are built from the same transactions and follow the standard layout (SAK EMKM style). Have your accountant review them before using them for tax or an audit.</p></div>
     <div class="stack" style="margin-top:20px">${seg('rp-tab',Object.keys(RID).map(k=>[k,REN[k]]),tab)}${seg('rp-preset',[['this','This month'],['last','Last month'],['year','This year'],['all','All time'],['custom','Choose dates']],r.preset)}
     ${r.preset==='custom'?`<div class="row"><label class="fld"><span class="micro">From</span><input type="date" id="rp-from" value="${esc(from)}"></label><label class="fld"><span class="micro">To</span><input type="date" id="rp-to" value="${esc(to)}"></label></div>`:''}</div>
-    <article class="statement"><div class="head"><p class="micro">${esc(D().setup.name||'Windpower Books')}</p><h2 class="h1" style="font-size:clamp(30px,5vw,44px)">${RID[tab]}</h2><p class="small">${esc(plabel)}. Dalam Rupiah.</p>${stamp}</div>
-    <div class="row" style="justify-content:center"><button class="link" data-act="explain">${S.explain?'Hide English explanations':'Show English explanations'}</button></div>
+    <article class="statement"><div class="head"><p class="micro">${esc(D().setup.name||'Windpower Books')}</p><h2 class="h1" style="font-size:clamp(30px,5vw,44px)">${RID[tab]}</h2><p class="small">${esc(plabel)}. In Rupiah.</p>${stamp}</div>
+    <div class="row" style="justify-content:center"><button class="link" data-act="explain">${S.explain?'Hide explanations':'Show explanations'}</button></div>
     <div>${rows}</div>
     <div class="row" style="justify-content:center"><button class="btn" data-act="export-report">Download as CSV</button></div></article></section>`;
 }
@@ -1013,17 +1155,17 @@ function pageSetup(){
     ${F('Kinds of running costs, one per line',`<textarea id="sf-cats">${esc(cats().join('\n'))}</textarea>`)}
     <div class="row"><button class="btn primary" type="submit"${ed?'':' disabled'}>Save setup</button><span class="err" id="sfErr"></span></div></form></div>
     <div class="stack prose"><p class="micro">How to use it</p>
-    <p>Every time something happens, press <strong>New transaction</strong>, choose what happened, fill in the form and press Save. Everything else (stock, unpaid notas, money, reports) updates by itself.</p>
+    <p>Every time something happens, press <strong>New transaction</strong>, choose what happened, fill in the form and press Save. Everything else (stock, unpaid invoices, money, reports) updates by itself.</p>
     <p>Typed something wrong? Open <strong>Transactions</strong>, tap it, press <strong>Fix this</strong>, correct it and save.</p>
     <p>Once a month, count the warehouse. If the real count is different, record <strong>Counted the warehouse</strong> with the difference.</p>
     <p class="micro" style="margin-top:12px">Giving access</p>
     <p>In the finished version, each person (including Ci Bella) signs in with their own account on their own phone, and every entry shows who recorded it.</p>
     <p class="micro" style="margin-top:12px">Words used in this book</p>
-    <p><strong>Nota:</strong> the paper nota kredit given to the shop. The nota number links the paper to the entry here.</p>
+    <p><strong>Nota:</strong> the paper invoice kredit given to the shop. The invoice number links the paper to the entry here.</p>
     <p><strong>DO:</strong> the delivery order from Jakarta listing what was sent.</p>
-    <p><strong>Credit or tempo:</strong> the shop takes the tires now and pays within 7, 14 or 30 days. The due date is when it should be paid.</p>
+    <p><strong>Credit:</strong> the shop takes the tires now and pays within 7, 14 or 30 days. The due date is when it should be paid.</p>
     <p><strong>Cost per tire (average):</strong> Jakarta's price changes over time. The book blends every DO into one average and uses it as the cost when a tire is sold.</p>
-    <p><strong>Profit and money in hand:</strong> profit counts a nota even before the shop pays. Money in hand only counts what was actually paid.</p>
+    <p><strong>Profit and money in hand:</strong> profit counts a invoice even before the shop pays. Money in hand only counts what was actually paid.</p>
     <p><strong>Owner took out:</strong> money taken from the business for personal use. It lowers money, not profit.</p>
     <div class="row" style="margin-top:8px"><button class="btn" data-act="export-journal">Download every entry as CSV</button></div>${membersHTML()}<div></div></div></section>`;
 }
@@ -1069,10 +1211,10 @@ document.addEventListener('click',async ev=>{
   else if(act==='pay-in'){startPayment('ar',id);}
   else if(act==='pay-out'){startPayment('ap',id);}
   else if(act==='jr-all'){S.jr.month=S.jr.month?'':today().slice(0,7);render();}
-  else if(act==='export-journal'){const c=now();const rows=[['Date','Kind','Nota or DO','Shop or supplier','Details','Total','Paid now','Payment terms','Due date','Money account','Recorded by','Note']];
+  else if(act==='export-journal'){const c=now();const rows=[['Date','Kind','Invoice or DO','Shop or supplier','Details','Total','Paid now','Payment terms','Due date','Money account','Recorded by','Note']];
     D().entries.forEach(e=>{const o=c.byId[e.id];rows.push([e.d,TYPES[e.t],e.nota||'',e.k?cname(e.k):'',plain(describe(e,null)),entryTotal(e)==null?'':Math.round(entryTotal(e)),e.paid!=null?Math.round(n(e.paid)):'',e.term?(e.term==='cash'?'Paid now':e.term==='date'?'Due date':e.term+' days'):'',e.due||'',e.t==='transfer'?aname(e.from)+' to '+aname(e.to):(e.acct?aname(e.acct):''),e.by||'',e.note||'']);});
     download('journal_'+today()+'.csv',rows);}
-  else if(act==='export-report'){const [f,t]=period();const {R}=statementRows(S.rp.tab,f,t);const nm={pl:'laba-rugi',cf:'arus-kas',bs:'posisi-keuangan',ar:'umur-piutang',st:'persediaan'}[S.rp.tab];download(`${nm}_${f===START?'start':f}_to_${t===FAR?today():t}.csv`,[['Line','Amount (Rp)']].concat(R.map(x=>[x.l,x.v==null?'':Math.round(x.v)])));}
+  else if(act==='export-report'){const [f,t]=period();const {R}=statementRows(S.rp.tab,f,t);const nm={pl:'profit-and-loss',cf:'cash-flow',bs:'balance-sheet',ar:'receivables-aging',st:'inventory'}[S.rp.tab];download(`${nm}_${f===START?'start':f}_to_${t===FAR?today():t}.csv`,[['Line','Amount (Rp)']].concat(R.map(x=>[x.l,x.v==null?'':Math.round(x.v)])));}
   else if(act==='rp-tab'){S.rp.tab=b.dataset.v;render();}
   else if(act==='rp-preset'){S.rp.preset=b.dataset.v;if(b.dataset.v==='custom'&&!S.rp.from){[S.rp.from,S.rp.to]=monthRange(0);}render();}
   else if(act==='explain'){S.explain=!S.explain;render();}
