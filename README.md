@@ -10,12 +10,12 @@ A clickable mockup of a record book for a Windpower tire distributor. It covers 
 - **Financial reports** (under More) are the formal statements for an accountant, in the usual Indonesian layout. Nobody needs them day to day.
 
 ## What it shows
-- **Sale:** copy a paper nota (nota number, shop, tires, discount, ongkir, paid now or 7, 14 or 30 days credit).
-- **Payment received:** tick which notas are paid and pick who received the money (Ci Via, Ci Bella or the bank).
+- **Sold tires:** copy a paper nota (nota number, shop, tires, discount, ongkir, paid now or 7, 14 or 30 days credit).
+- **Shop paid:** tick which notas are paid and pick who received the money (Ci Via, Ci Bella or the bank).
 - **Unpaid:** every open nota, sorted into late, due soon and later, plus what is still owed to Jakarta.
-- **Goods received:** DO quantity compared with what the warehouse counted.
+- **Tires arrived:** DO quantity compared with what the warehouse counted.
 - **Stock and prices:** change prices one by one or by a percentage, and add tire photos.
-- **Reports in plain words:** profit, money in and out, what the business owns and owes, stock value.
+- **Home:** money each person holds, what shops owe, tires in the warehouse, profit this month, and a to-do list.
 
 The bar at the top of the page has **Reset example data** and **Try an empty book**.
 
