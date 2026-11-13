@@ -415,28 +415,37 @@ S.live.entries=[];S.live.members=[];
 let _demo=null;
 function DEMO(){
   if(_demo)return _demo;
-  const products={p1:{brand:'Windpower',size:'7.50-16',pattern:'WGC29',cat:'Truck',price:2050000,low:15},p2:{brand:'Windpower',size:'7.50-16',pattern:'WSR81',cat:'Truck',price:2050000,low:15}};
-  const contacts={c1:{name:'Windpower Jakarta (example)',kind:'supplier',phone:''},c2:{name:'Toko Sumber Ban (example)',kind:'customer',phone:''},c3:{name:'Toko Maju Jaya (example)',kind:'customer',phone:''},c4:{name:'UD Lancar Lahat (example)',kind:'customer',phone:''}};
+  const products={p1:{brand:'Windpower',size:'7.50-16',pattern:'WGC29',cat:'Truck',price:1950000,low:15},p2:{brand:'Windpower',size:'7.50-16',pattern:'WSR81',cat:'Truck',price:1950000,low:15},p3:{brand:'Windpower',size:'7.50-16',pattern:'WDC57',cat:'Truck',price:1950000,low:0}};
+  const contacts={c1:{name:'Windpower Jakarta (example)',kind:'supplier',phone:''},c2:{name:'Toko Sumber Ban (example)',kind:'customer',phone:''},c3:{name:'Toko Maju Jaya (example)',kind:'customer',phone:''},c4:{name:'UD Lancar Lahat (example)',kind:'customer',phone:''},c5:{name:'Bengkel Roda Mas (example)',kind:'customer',phone:''}};
   let i=0;const E=(off,o)=>Object.assign({id:'x'+(++i),d:addDays(off),ts:i,note:''},o);
   const entries=[
-    E(-45,{t:'opening',bal:{cash:15000000,bella:0,bank:120000000},lines:[{p:'p1',q:30,c:1760000},{p:'p2',q:20,c:1790000}],recv:[{k:'c3',a:12300000,nota:'00640',due:addDays(-6)}],pay:[{k:'c1',a:35000000,nota:'DO-2291',due:addDays(-15)}]}),
-    E(-40,{t:'purchase',k:'c1',nota:'DO-2307',lines:[{p:'p1',qd:40,q:40,c:1765000},{p:'p2',qd:30,q:29,c:1795000}],extra:1500000,paid:0,acct:'bank',term:'30',due:addDays(-10),note:'One WSR81 short, claimed to Jakarta'}),
-    E(-38,{t:'sale',k:'c2',nota:'00651',lines:[{p:'p1',q:10,u:2050000}],disc:0,ship:0,term:'14',due:addDays(-24),paid:0,acct:'cash'}),
+    E(-45,{t:'opening',bal:{cash:15000000,bella:0,bank:120000000},lines:[{p:'p1',q:30,c:1660000},{p:'p2',q:20,c:1690000},{p:'p3',q:12,c:1640000}],recv:[{k:'c3',a:12300000,nota:'00640',due:addDays(-6)}],pay:[{k:'c1',a:35000000,nota:'DO-2291',due:addDays(-15)}]}),
+    E(-40,{t:'purchase',k:'c1',nota:'DO-2307',lines:[{p:'p1',qd:40,q:40,c:1665000},{p:'p2',qd:30,q:29,c:1695000}],extra:1500000,paid:0,acct:'bank',term:'30',due:addDays(-10),note:'One WSR81 short, claimed to Jakarta'}),
+    E(-38,{t:'sale',k:'c2',nota:'00651',lines:[{p:'p1',q:10,u:1935000}],disc:0,ship:0,term:'14',due:addDays(-24),paid:0,acct:'cash'}),
+    E(-36,{t:'sale',k:'c5',nota:'00652',lines:[{p:'p3',q:4,u:1950000},{p:'p1',q:2,u:1950000}],disc:0,ship:0,term:'cash',paid:11700000,acct:'cash'}),
     E(-30,{t:'pay',k:'c1',a:35000000,acct:'bank',alloc:[]}),
-    E(-28,{t:'recv',k:'c2',a:20500000,acct:'bella',alloc:[]}),
+    E(-28,{t:'recv',k:'c2',a:19350000,acct:'bella',alloc:[],method:'cash'}),
     E(-25,{t:'expense',cat:'Rent',a:3500000,acct:'bank'}),
-    E(-20,{t:'sale',k:'c3',nota:'00654',lines:[{p:'p2',q:8,u:2050000}],disc:0,ship:0,term:'cash',paid:16400000,acct:'cash'}),
-    E(-15,{t:'sale',k:'c4',nota:'00655',lines:[{p:'p1',q:12,u:2050000},{p:'p2',q:6,u:2050000}],disc:0,ship:450000,shipAcct:'cash',term:'30',due:addDays(15),paid:5000000,acct:'bank'}),
-    E(-12,{t:'transfer',from:'bella',to:'bank',a:20500000}),
-    E(-10,{t:'sale',k:'c2',nota:'00656',lines:[{p:'p1',q:6,u:2050000}],disc:0,ship:0,term:'7',due:addDays(-3),paid:0,acct:'cash'}),
+    E(-20,{t:'sale',k:'c3',nota:'00654',lines:[{p:'p2',q:8,u:1950000}],disc:0,ship:0,term:'cash',paid:15600000,acct:'bank'}),
+    E(-15,{t:'sale',k:'c4',nota:'00655',lines:[{p:'p1',q:12,u:1925000},{p:'p2',q:6,u:1925000}],disc:0,ship:450000,shipAcct:'cash',term:'30',due:addDays(15),paid:5000000,acct:'bank'}),
+    E(-12,{t:'transfer',from:'bella',to:'bank',a:19350000}),
+    E(-10,{t:'sale',k:'c2',nota:'00656',lines:[{p:'p1',q:6,u:1940000}],disc:0,ship:0,term:'7',due:addDays(-3),paid:0,acct:'cash'}),
+    E(-9,{t:'sale',k:'c5',nota:'00657',lines:[{p:'p1',q:2,u:2000000}],disc:0,ship:0,term:'30',due:addDays(21),paid:0,acct:'cash'}),
     E(-8,{t:'expense',cat:'Salaries and wages',a:6000000,acct:'cash'}),
-    E(-5,{t:'sale',k:'c3',nota:'00657',lines:[{p:'p2',q:15,u:2050000},{p:'p1',q:10,u:2050000}],disc:0,ship:0,term:'30',due:addDays(25),paid:0,acct:'cash'}),
-    E(-3,{t:'recv',k:'c3',a:12300000,acct:'bella',alloc:[]}),
+    E(-6,{t:'recv',k:'c5',a:4000000,acct:'bank',alloc:[],method:'cheque',chqBank:'Permata',clear:addDays(2)}),
+    E(-5,{t:'sale',k:'c3',nota:'00658',lines:[{p:'p2',q:15,u:1935000},{p:'p1',q:10,u:1935000}],disc:0,ship:0,term:'30',due:addDays(25),paid:0,acct:'cash'}),
+    E(-3,{t:'recv',k:'c3',a:12300000,acct:'bella',alloc:[],method:'cash'}),
     E(-2,{t:'adjust',lines:[{p:'p2',q:-1}],note:'One tire damaged in the warehouse'}),
     E(-1,{t:'draw',a:3000000,acct:'cash'}),
-    E(-1,{t:'purchase',k:'c1',nota:'DO-2318',lines:[{p:'p1',qd:30,q:30,c:1770000}],extra:0,paid:0,acct:'bank',term:'30',due:addDays(29)})
+    E(-1,{t:'purchase',k:'c1',nota:'DO-2318',lines:[{p:'p1',qd:30,q:30,c:1670000}],extra:0,paid:0,acct:'bank',term:'30',due:addDays(29)})
   ];
   _demo={products,contacts,setup:{name:'Example Windpower Distributor'},entries};return _demo;
+}
+const effDate=e=>(e.t==='recv'&&e.method==='cheque'&&e.clear)?e.clear:e.d;
+function ordered(){
+  const k='ord'+S.ver+'|'+S.demo;if(S.cache[k])return S.cache[k];
+  const pri=t=>t==='opening'?0:t==='purchase'?1:2;
+  return S.cache[k]=D().entries.slice().sort((a,b)=>{const x=effDate(a),y=effDate(b);return x<y?-1:x>y?1:(pri(a.t)-pri(b.t))||((a.ts||0)-(b.ts||0));});
 }
 function liveEntries(){
   const k='le'+S.ver;if(S.cache[k])return S.cache[k];
@@ -463,7 +472,7 @@ function compute(from,to,ex){
   let eqOpen=0,cap=0,draw=0,profit=0,open=null;
   const P={goods:0,disc:0,cogs:0,trueUp:0,exp:{},adj:0,sales:0,tires:0};
   const C={openIn:0,saleCash:0,arIn:0,capIn:0,buyCash:0,apOut:0,expOut:0,drawOut:0};
-  const recvBy={},warn=[];
+  const recvBy={},warn=[];let curD='';
   const sk=p=>st[p]||(st[p]={q:0,v:0,last:0});
   const mv=(a,x)=>{a=a||'cash';bal[a]=(bal[a]||0)+x;};
   const avg=s=>s.q>0?s.v/s.q:s.last;
@@ -474,14 +483,16 @@ function compute(from,to,ex){
   const putIn=(s,q,v)=>{let varc=0;if(s.q<0&&q>0){const cover=Math.min(-s.q,q),oldUnit=s.v/s.q,newUnit=v/q;varc=Math.round(cover*(newUnit-oldUnit));}s.q+=q;s.v+=v-varc;settle(s);return varc;};
   const addInv=(side,k,o)=>{const c=credit[side][k]||0;if(c>0){const t=Math.min(c,o.open);o.open-=t;credit[side][k]=c-t;}o.k=k;o.side=side;(inv[side][k]||(inv[side][k]=[])).push(o);byId[o.id]=o;};
   const payInv=(side,k,amt,alloc)=>{const L=inv[side][k]||[];let left=amt;
-    for(const id of alloc||[]){const o=L.find(x=>x.id===id);if(o&&left>0&&o.open>0){const t=Math.min(o.open,left);o.open-=t;left-=t;}}
-    for(const o of L.filter(x=>x.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0)){if(left<=0)break;const t=Math.min(o.open,left);o.open-=t;left-=t;}
+    for(const id of alloc||[]){const o=L.find(x=>x.id===id);if(o&&left>0&&o.open>0){const t=Math.min(o.open,left);o.open-=t;left-=t;if(o.open<0.5)o.paidOn=curD;}}
+    for(const o of L.filter(x=>x.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0)){if(left<=0)break;const t=Math.min(o.open,left);o.open-=t;left-=t;if(o.open<0.5)o.paidOn=curD;}
     if(left>0.5)credit[side][k]=(credit[side][k]||0)+left;};
   const owe=(side,e,tot,paid)=>{const o=tot-paid;if(o>0.5)addInv(side,e.k,{id:e.id,nota:e.nota||'',d:e.d,due:e.due||e.d,total:tot,open:o});else if(o<-0.5)credit[side][e.k]=(credit[side][e.k]||0)-o;};
-  for(const e of D().entries){
-    if(e.d>to)break;
+  const T0=today(),pending=[];
+  for(const e of ordered()){
+    const ed=effDate(e);if(ed>to)break;curD=ed;
+    if(e.t==='recv'&&e.method==='cheque'&&ed>T0){if(!(ex&&e.id===ex))pending.push(e);continue;}
     if(ex&&e.id===ex)continue;
-    const inP=e.d>=from;
+    const inP=ed>=from;
     if(inP&&!open)open={tot:Object.values(bal).reduce((a,b)=>a+b,0)};
     switch(e.t){
       case 'opening':{let tot=0;const b=Object.assign({},e.bal||{});if(e.cash)b.cash=(b.cash||0)+n(e.cash);if(e.bank)b.bank=(b.bank||0)+n(e.bank);
@@ -518,7 +529,7 @@ function compute(from,to,ex){
   const openInv=sd=>Object.values(inv[sd]).flat().filter(o=>o.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);
   const stockVal=Object.values(st).reduce((a,s)=>a+s.v,0);
   const assets=money+arTot+stockVal,equity=eqOpen+cap-draw+profit;
-  return S.cache[key]={st,bal,money,ar,ap,arTot,apTot,arGross:gross('ar'),arCredit:cred('ar'),apGross:gross('ap'),apCredit:cred('ap'),inv,byId,openAR:openInv('ar'),openAP:openInv('ap'),credit,open,P,C,recvBy,warn,stockVal,assets,equity,eqOpen,cap,draw,profit,diff:assets-apTot-equity};
+  return S.cache[key]={pending,st,bal,money,ar,ap,arTot,apTot,arGross:gross('ar'),arCredit:cred('ar'),apGross:gross('ap'),apCredit:cred('ap'),inv,byId,openAR:openInv('ar'),openAP:openInv('ap'),credit,open,P,C,recvBy,warn,stockVal,assets,equity,eqOpen,cap,draw,profit,diff:assets-apTot-equity};
 }
 const now=()=>compute(START,FAR);
 function status(o){const t=today();if(o.due<t){const k=daysBetween(o.due,t);return {late:true,txt:`Late ${k} day${k===1?'':'s'}`};}const k=daysBetween(t,o.due);return {late:false,txt:k===0?'Due today':`Due in ${k} day${k===1?'':'s'}`};}
@@ -584,6 +595,7 @@ function describe(e,c){
     default:return '';
   }
 }
+function lastPrice(k,p){if(!k||!p)return 0;const L=D().entries;for(let i=L.length-1;i>=0;i--){const e=L[i];if(e.t==='sale'&&e.k===k){const l=(e.lines||[]).find(x=>x.p===p&&n(x.q)>0);if(l)return n(l.u);}}return 0;}
 function nextNota(){
   let best=null;for(const e of D().entries){if(e.t!=='sale'||!e.nota)continue;const m=String(e.nota).match(/^(\D*)(\d+)(\D*)$/);if(!m)continue;const v=parseInt(m[2],10);if(!best||v>best.v)best={v,m};}
   if(!best)return '';return best.m[1]+String(best.v+1).padStart(best.m[2].length,'0')+best.m[3];
@@ -611,7 +623,7 @@ function skeleton(){return `<section class="wrap" aria-busy="true"><span class="
 function newDraft(t,d){
   const la=lsGet('tsb-acct')||accts()[0].id;
   const dr={t,d:d||today(),k:'',nota:'',term:'cash',due:'',lines:[{p:'',q:'',qd:'',x:''}],disc:'',ship:'',shipAcct:la,extra:'',paid:'',acct:la,a:'',cat:cats()[0],note:'',
-    from:accts().some(a=>a.id==='bella')?'bella':accts()[0].id,to:accts().some(a=>a.id==='bank')?'bank':accts()[accts().length-1].id,bal:{},recv:[],pay:[],alloc:[]};
+    from:accts().some(a=>a.id==='bella')?'bella':accts()[0].id,to:accts().some(a=>a.id==='bank')?'bank':accts()[accts().length-1].id,bal:{},recv:[],pay:[],alloc:[],method:'cash',chqBank:'',clear:''};
   if(t==='sale')dr.nota=nextNota();
   if(t==='purchase'){dr.k=lastSupplier();dr.term='30';dr.acct=accts().some(a=>a.id==='bank')?'bank':la;}
   if(t==='pay'){dr.k=lastSupplier();dr.acct=accts().some(a=>a.id==='bank')?'bank':la;}
@@ -625,7 +637,7 @@ function draftFrom(e){
   d.cat=e.cat||d.cat;d.from=e.from||'cash';d.to=e.to||(d.from==='bank'?'cash':'bank');
   const b=Object.assign({},e.bal||{});if(e.cash)b.cash=(b.cash||0)+n(e.cash);if(e.bank)b.bank=(b.bank||0)+n(e.bank);d.bal={};for(const k in b)d.bal[k]=fmt(b[k]);
   d.recv=(e.recv||[]).map(r=>({name:cname(r.k),a:fmt(r.a),nota:r.nota||'',due:r.due||''}));d.pay=(e.pay||[]).map(r=>({name:cname(r.k),a:fmt(r.a),nota:r.nota||'',due:r.due||''}));
-  d.alloc=(e.alloc||[]).slice();
+  d.alloc=(e.alloc||[]).slice();d.method=e.method||'cash';d.chqBank=e.chqBank||'';d.clear=e.clear||'';
   return d;
 }
 function dueOf(d){if(d.term==='cash')return '';if(d.term==='date')return d.due||'';return addDaysTo(d.d,parseInt(d.term,10)||0);}
@@ -687,7 +699,9 @@ function formHTML(){
     ${termsHTML('Paid now as a deposit (optional)','Money received by')}${note}`;
   else if(t==='purchase')body=`<div class="grid2">${date}${F('DO number',I('nota','class="notano" placeholder="DO number"'))}${F('Supplier',I('k','list="dl-contacts"'))}</div>${linesHTML('purchase')}
     <div class="grid2">${F('Truck or delivery cost',I('extra',MONEY+' placeholder="0"'))}</div>${termsHTML('Paid now (optional)','Paid from')}${note}`;
-  else if(t==='recv'||t==='pay')body=`<div class="grid2">${date}${F(t==='recv'?'Shop':'Supplier',I('k','list="dl-contacts"'))}${F('Amount',I('a',MONEY))}${F(t==='recv'?'Money received by':'Paid from',acctSel('acct',d.acct))}</div>
+  else if(t==='recv'||t==='pay')body=`${t==='recv'?`<div class="stack" style="gap:10px"><span class="micro">How did they pay?</span><div class="seg" role="group" aria-label="How did they pay">${[['cash','Cash'],['transfer','Bank transfer'],['cheque','Cheque or giro']].map(([v,l])=>`<button type="button" data-act="method" data-v="${v}" aria-pressed="${d.method===v}">${l}</button>`).join('')}</div></div>`:''}
+    <div class="grid2">${date}${F(t==='recv'?'Shop':'Supplier',I('k','list="dl-contacts"'))}${F('Amount',I('a',MONEY))}${F(t==='recv'?(d.method==='cheque'?'Will be deposited into':d.method==='transfer'?'Transferred into':'Money received by'):'Paid from',acctSel('acct',d.acct))}
+    ${t==='recv'&&d.method==='cheque'?F('Bank on the cheque',I('chqBank','placeholder="Permata, BCA, BRI"'))+F('Clears on',`<input type="date" id="f-clear" data-f="clear" value="${esc(d.clear)}">`):''}</div>
     <div class="stack" style="gap:6px"><span class="micro">${t==='recv'?'Which invoices does this pay?':'Which DOs does this pay?'}</span><div id="allocBox"></div></div>${note}`;
   else if(t==='expense')body=`<div class="grid2">${date}${F('What for',`<select id="f-cat" data-f="cat">${cats().map(c=>`<option${c===d.cat?' selected':''}>${esc(c)}</option>`).join('')}</select>`)}${F('Amount',I('a',MONEY))}${F('Paid from',acctSel('acct',d.acct))}</div>${note}`;
   else if(t==='adjust')body=`<div class="grid2">${date}</div>${linesHTML('adjust')}${note}`;
@@ -737,6 +751,7 @@ function updateNota(){
     else{if(T.paid)h+=ln(`Paid now, ${esc(aname(d.acct))}`,fmt(T.paid));h+=ln(t==='sale'?'Still to collect':'Still to pay',`<span class="${rest<0?'neg':''}">${fmt(rest)}</span>`);h+=ln('Due',due?nice(due):'<span class="neg">Pick a date</span>');}
     if(t==='sale'&&valid.length){
       let cost=0;const w=[];valid.forEach(l=>{const s=c.st[l.p]||{q:0,v:0,last:0};const a=s.q>0?s.v/s.q:s.last;cost+=n(l.q)*a;if(n(l.q)>s.q&&!S.editing)w.push(`Only ${s.q} of ${pH(l.p)} on record.`);});
+      const kk=cidByName(d.k);valid.forEach(l=>{const lp=lastPrice(kk,l.p);if(lp&&lp!==n(l.x))h+=`<p class="small">${esc(d.k)} paid ${rp(lp)} for ${pH(l.p)} last time.</p>`;});
       h+='<hr>'+ln('What these tires cost you',fmt(cost));if(n(d.ship))h+=ln('Shipping',`-${fmt(n(d.ship))}`);h+=ln('You make on this invoice',M(T.total-cost-n(d.ship)));
       if(w.length)h+=`<p class="small neg">${w.join(' ')} Record the goods received first, or the profit will look too high.</p>`;
     }
@@ -745,7 +760,8 @@ function updateNota(){
     const tot=valid.reduce((a,l)=>{const s=c.st[l.p]||{q:0,v:0,last:0};return a+n(l.q)*(s.q>0?s.v/s.q:s.last);},0);
     h+=`<hr><span class="micro">Effect on profit</span><div class="big">${M(tot)}</div>`;
   }else if(t==='recv'||t==='pay'){
-    h+=`<div class="big">${M(T.total)}</div>`+ln(t==='recv'?'Received by':'Paid from',esc(aname(d.acct)));
+    h+=`<div class="big">${M(T.total)}</div>`+ln(t==='recv'?(d.method==='cheque'?'Deposit into':'Received by'):'Paid from',esc(aname(d.acct)));
+    if(t==='recv'&&d.method==='cheque'&&d.clear)h+=`<p class="small">Cheque${d.chqBank?' '+esc(d.chqBank):''}, clears ${esc(nice(d.clear))}. ${d.clear>today()?'Until then the invoice stays unpaid, marked as cheque waiting, and the money is not counted yet.':'Already cleared, so it counts as paid.'}</p>`;
     const k=cidByName(d.k);if(k){const side=t==='recv'?'ar':'ap';const list=openFor(side,k);const sim=simulate(list,T.total,d.alloc);
       const used=sim.L.filter(x=>x.take>0);if(used.length)h+='<hr>'+used.map(x=>ln(`<span class="notano">${esc(x.o.nota||'No number')}</span>`,x.left<0.5?'Fully paid':`${fmt(x.take)} paid, ${fmt(x.left)} left`)).join('');
       if(sim.left>0.5)h+=`<p class="small">${fmt(sim.left)} more than what is owed. Kept as credit for the next ${side==='ar'?'invoice':'DO'}.</p>`;
@@ -775,7 +791,7 @@ function mountForm(){
     if(el.dataset.alloc){const id=el.dataset.alloc;d.alloc=d.alloc.filter(x=>x!==id);if(el.checked)d.alloc.push(id);
       const k=cidByName(d.k),list=openFor(d.t==='recv'?'ar':'ap',k);const sum=list.filter(o=>d.alloc.includes(o.id)).reduce((s,o)=>s+o.open,0);
       if(d.alloc.length){d.a=fmt(sum);const ai=$('#f-a');if(ai)ai.value=d.a;}updateNota();return;}
-    if(el.dataset.lf==='p'&&d.t==='sale'){const l=d.lines[+el.dataset.li];const p=D().products[l.p];if(p&&!n(l.x)&&n(p.price)){l.x=fmt(p.price);const x=$('#l-'+el.dataset.li+'-x');if(x)x.value=l.x;}updateNota();}
+    if(el.dataset.lf==='p'&&d.t==='sale'){const l=d.lines[+el.dataset.li];const p=D().products[l.p];const lp=lastPrice(cidByName(d.k),l.p);if(p&&!n(l.x)&&(lp||n(p.price))){l.x=fmt(lp||p.price);const x=$('#l-'+el.dataset.li+'-x');if(x)x.value=l.x;}updateNota();}
     if(el.dataset.f==='ship'){drawForm();return;}
     if(el.dataset.f==='acct'){lsSet('tsb-acct',el.value);}
     if(el.dataset.f)updateNota();});
@@ -783,6 +799,7 @@ function mountForm(){
   a.addEventListener('submit',ev=>{ev.preventDefault();doSave();});
   a.addEventListener('click',async ev=>{const b=ev.target.closest('[data-act]');if(!b)return;const d=S.draft,act=b.dataset.act;
     if(act==='type'){S.draft=newDraft(b.dataset.t,d.d);drawForm();}
+    else if(act==='method'){d.method=b.dataset.v;if(d.method==='cheque'&&!d.clear)d.clear=addDaysTo(d.d,14);if(d.method!=='cash'&&accts().some(a=>a.id==='bank'))d.acct='bank';drawForm();}
     else if(act==='term'){d.term=b.dataset.v;if(d.term==='date'&&!d.due)d.due=addDaysTo(d.d,30);drawForm();}
     else if(act==='addline'){d.lines.push({p:'',q:'',qd:'',x:''});drawForm();}
     else if(act==='rmline'){d.lines.splice(+b.dataset.i,1);if(!d.lines.length)d.lines.push({p:'',q:'',qd:'',x:''});drawForm();}
@@ -823,6 +840,7 @@ async function doSave(){
     if(d.term!=='cash'&&!dueOf(d))return err('Pick the due date.');
   }
   if((t==='recv'||t==='pay')&&!d.k.trim())return err(t==='recv'?'Which shop paid?':'Who did you pay?');
+  if(t==='recv'&&d.method==='cheque'){if(!d.clear)return err('Pick the date the cheque clears.');if(d.clear<d.d)return err('The cheque cannot clear before the day you received it.');}
   if(['recv','pay','expense','capital','draw','transfer'].includes(t)&&!needAmt())return;
   if(t==='transfer'&&d.from===d.to)return err('From and To must be different.');
   if(t==='adjust'&&!lines.length)return err('Add at least one tire with a difference.');
@@ -833,6 +851,7 @@ async function doSave(){
     if(t==='sale')Object.assign(e,{nota,lines:lines.map(l=>({p:l.p,q:n(l.q),u:n(l.x)})),disc:n(d.disc),ship:n(d.ship),shipAcct:d.shipAcct||d.acct,term:d.term,due:dueOf(d),paid:T.paid,acct:d.acct});
     if(t==='purchase')Object.assign(e,{nota,lines:lines.map(l=>({p:l.p,qd:l.qd===''?n(l.q):n(l.qd),q:n(l.q),c:n(l.x)})),extra:n(d.extra),term:d.term,due:dueOf(d),paid:T.paid,acct:d.acct});
     if(t==='recv'||t==='pay')Object.assign(e,{a:n(d.a),acct:d.acct,alloc:d.alloc.slice()});
+    if(t==='recv'){e.method=d.method;if(d.method==='cheque'){e.chqBank=(d.chqBank||'').trim();e.clear=d.clear;}}
     if(t==='capital'||t==='draw')Object.assign(e,{a:n(d.a),acct:d.acct});
     if(t==='expense')Object.assign(e,{a:n(d.a),acct:d.acct,cat:d.cat});
     if(t==='transfer')Object.assign(e,{a:n(d.a),from:d.from,to:d.to});
@@ -873,7 +892,7 @@ function shortDesc(e){
   const q=(e.lines||[]).reduce((a,l)=>a+n(l.q),0),P=[];
   switch(e.t){
     case 'sale':P.push(e.nota&&'Invoice '+e.nota,cname(e.k),q+' tires');break;
-    case 'recv':P.push(cname(e.k),'to '+aname(e.acct));break;
+    case 'recv':P.push(cname(e.k),e.method==='cheque'?`cheque${e.chqBank?' '+e.chqBank:''}, clears ${short(e.clear)}`:(e.method==='transfer'?'transfer to ':'to ')+aname(e.acct));break;
     case 'purchase':P.push(e.nota&&'DO '+e.nota,cname(e.k),q+' tires');break;
     case 'pay':P.push(cname(e.k),'from '+aname(e.acct));break;
     case 'expense':P.push(e.cat,'from '+aname(e.acct));break;
@@ -889,6 +908,7 @@ function txnRow(e,c){
   const tot=entryTotal(e),o=c.byId[e.id];let chip='';
   if(e.t==='sale'&&o&&o.open>0.5)chip=stTag(o);
   if(e.t==='purchase'&&(e.lines||[]).some(l=>l.qd!=null&&n(l.qd)!==n(l.q)))chip='<span class="tag late">Count differs</span>';
+  if(e.t==='recv'&&e.method==='cheque'&&e.clear>today())chip='<span class="tag">Cheque waiting</span>';
   return `<button type="button" class="txn" data-act="view" data-id="${e.id}"><span class="tk">${esc(TYPES[e.t])} ${chip}</span><span class="tdsc">${shortDesc(e)}</span><span class="tamt">${tot==null?'':M(tot)}</span></button>`;
 }
 function effects(e){
@@ -898,7 +918,8 @@ function effects(e){
       if(paid)L.push(`${rp(paid)} received by ${aname(e.acct)}`);
       if(rest>0.5)L.push(`${cname(e.k)} owes ${rp(rest)} more, due ${nice(e.due)}`);
       if(n(e.ship))L.push(`Shipping ${rp(e.ship)} paid from ${aname(e.shipAcct||e.acct)}`);break;}
-    case 'recv':L.push(`${rp(e.a)} received by ${aname(e.acct)}`,`${cname(e.k)} owes ${rp(e.a)} less`);break;
+    case 'recv':if(e.method==='cheque'&&e.clear>today())L.push(`Cheque${e.chqBank?' '+e.chqBank:''} for ${rp(e.a)} waiting, clears ${nice(e.clear)}`,`From that day: ${aname(e.acct)} +${rp(e.a)}, ${cname(e.k)} owes ${rp(e.a)} less`);
+      else L.push(`${rp(e.a)} received${e.method==='cheque'?' (cheque cleared '+nice(e.clear)+')':''} by ${aname(e.acct)}`,`${cname(e.k)} owes ${rp(e.a)} less`);break;
     case 'purchase':{const tot=entryTotal(e),paid=n(e.paid);L.push(`Warehouse: ${qty} tires in`);
       (e.lines||[]).filter(l=>l.qd!=null&&n(l.qd)!==n(l.q)).forEach(l=>L.push(`${pname(l.p)}: DO says ${n(l.qd)}, warehouse counted ${n(l.q)}`));
       if(paid)L.push(`${rp(paid)} paid from ${aname(e.acct)}`);
@@ -924,6 +945,7 @@ function detailRows(e){
   const tot=entryTotal(e);if(tot!=null&&e.t!=='opening')add('Total',`<strong>${M(tot)}</strong>`);
   if(e.t==='sale'||e.t==='purchase')add('Payment',!e.term||e.term==='cash'?'Paid in full':`${e.term==='date'?'Credit':e.term+' days'}, due ${esc(nice(e.due))}${n(e.paid)?`, ${rp(e.paid)} paid now`:''}`);
   if(e.t==='expense')add('For',esc(e.cat));
+  if(e.t==='recv')add('How paid',e.method==='cheque'?`Cheque${e.chqBank?' '+esc(e.chqBank):''}, clears ${esc(nice(e.clear))}`:e.method==='transfer'?'Bank transfer':'Cash');
   if((e.t==='sale'&&n(e.paid))||e.t==='recv')add('Received by',esc(aname(e.acct)));
   if(['pay','expense','draw'].includes(e.t)||(e.t==='purchase'&&n(e.paid)))add('Paid from',esc(aname(e.acct)));
   if(e.t==='capital')add('Into',esc(aname(e.acct)));
@@ -957,6 +979,7 @@ function pageOverview(){
   const legend=holders.map(h=>`<div><span><i style="background:var(--ink);opacity:${h.o}"></i>${esc(h.name)}</span><span>${M(h.v)}</span></div>`).join('');
   const todo=[];
   late.forEach(o=>todo.push(`<div class="lrow"><span><span class="notano">${esc(o.nota||'No number')}</span> ${esc(cname(o.k))}<span class="ex neg">${rp(o.open)}, ${status(o).txt.toLowerCase()}</span></span>${editable()?`<button class="btn sm" data-act="pay-nota" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`));
+  c.pending.filter(e=>daysBetween(today(),e.clear)<=3).sort((a,b)=>a.clear<b.clear?-1:1).forEach(e=>todo.push(`<div class="lrow"><span>Deposit cheque from ${esc(cname(e.k))}${e.chqBank?' ('+esc(e.chqBank)+')':''}<span class="ex">${rp(e.a)}, clears ${esc(short(e.clear))}</span></span><button class="link" data-act="view" data-id="${e.id}">Open</button></div>`));
   apLate.forEach(o=>todo.push(`<div class="lrow"><span>Pay ${esc(cname(o.k))} <span class="notano">${esc(o.nota||'')}</span><span class="ex">${rp(o.open)}, ${status(o).txt.toLowerCase()}</span></span>${editable()?`<button class="btn sm" data-act="pay-do" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`));
   for(const [pid,s] of Object.entries(c.st)){const p=d.products[pid];if(!p)continue;if(s.q<0)todo.push(`<div class="lrow"><span>${pH(pid)}<span class="ex neg">Below zero. A DO is probably missing.</span></span><a class="link" href="#stock">Check</a></div>`);else if(n(p.low)&&s.q<=n(p.low))todo.push(`<div class="lrow"><span>${pH(pid)}<span class="ex">Only ${s.q} left. Time to request from Jakarta.</span></span></div>`);}
   const recent=d.entries.slice(-5).reverse().map(e=>txnRow(e,c)).join('');
@@ -968,7 +991,7 @@ function pageOverview(){
       <div class="card hero"><span class="micro">Money we have</span><span class="hero-n"><span class="cur">Rp</span>${fmt(c.money)}</span>
         <div class="stack" style="gap:12px"><span class="small">Who is holding it</span><div class="splitbar">${split}</div><div class="legend">${legend}</div></div></div>
       <div class="card side">
-        <a class="kpi" href="#unpaid"><span class="micro">Shops owe us</span><span class="mid">${rp(c.arTot)}</span><span class="small">${c.openAR.length} unpaid invoice${c.openAR.length===1?'':'s'}${late.length?` · <span class="neg">${late.length} late</span>`:''}</span></a>
+        <a class="kpi" href="#unpaid"><span class="micro">Shops owe us</span><span class="mid">${rp(c.arTot)}</span><span class="small">${c.openAR.length} unpaid invoice${c.openAR.length===1?'':'s'}${late.length?` · <span class="neg">${late.length} late</span>`:''}${c.pending.length?` · ${rp(c.pending.reduce((a,e)=>a+n(e.a),0))} in cheques waiting`:''}</span></a>
         <a class="kpi" href="#stock"><span class="micro">Tires in the warehouse</span><span class="mid">${qty}</span><span class="small">${perTire||'No tires yet'}</span></a>
         <div class="kpi"><span class="micro">Profit this month</span><span class="mid ${Math.round(m.P.profit)<0?'neg':''}">${rp(m.P.profit)}</span><span class="small">${m.P.tires} tires sold, after tire cost and running costs</span></div>
       </div>
@@ -1010,7 +1033,7 @@ function pageView(){
   <div class="hgrid2" style="margin-top:22px"><div class="card"><h2 class="ch" style="margin-bottom:6px">What was recorded</h2>${kvList(detailRows(e))}</div>
   <div class="card"><h2 class="ch" style="margin-bottom:6px">What it changed</h2>${effList(effects(e))}
   ${editable()?`<div class="row" style="margin-top:22px"><button class="btn primary" data-act="edit" data-id="${e.id}">Fix this</button>${o&&o.open>0.5?`<button class="btn" data-act="${o.side==='ar'?'pay-nota':'pay-do'}" data-id="${esc(o.id)}">Mark paid</button>`:''}<button class="link danger" data-act="del" data-id="${e.id}">${S.delArm===e.id?'Tap again to delete':'Delete'}</button></div>
-  <p class="small" style="margin-top:12px">Typed something wrong? Press Fix this, correct it and save. Every number and report updates by itself.</p>`:''}</div></div></section>`;
+  <p class="small" style="margin-top:12px">Typed something wrong? Press Fix this, correct it and save. Every number and report updates by itself.${e.t==='recv'&&e.method==='cheque'?' Cheque bounced? Delete this payment and the invoice becomes unpaid again.':''}</p>`:''}</div></div></section>`;
 }
 
 /* ---------- transactions list ---------- */
@@ -1032,18 +1055,21 @@ function pageJournal(){
   <label class="fld" style="flex:0 1 190px"><span class="micro">Month</span><input type="month" id="jr-month" value="${esc(j.month)}"></label></div>
   <div class="seg" style="margin-top:14px">${GROUPS.map(([v,l])=>`<button type="button" data-act="jr-g" data-v="${v}" aria-pressed="${(j.g||'all')===v}">${l}</button>`).join('')}</div>
   <div id="jrList" class="card list" style="margin-top:14px">${journalList()}</div>
-  <div class="row" style="margin-top:22px"><button class="link" data-act="jr-all">${j.month?'Show every month':'Show this month only'}</button><button class="link" data-act="export-journal">Download all as a spreadsheet (CSV)</button></div></section>`;
+  <div class="row" style="margin-top:22px"><button class="link" data-act="jr-all">${j.month?'Show every month':'Show this month only'}</button><button class="link" data-act="export-sheet">Download this month's sales in Ci Via's Excel layout</button><button class="link" data-act="export-journal">Download everything (CSV)</button></div></section>`;
 }
 
 /* ---------- unpaid ---------- */
 function pageUnpaid(){
   const c=now(),ed=editable(),ar=c.openAR,late=ar.filter(o=>status(o).late);
-  const row=(o,act)=>{const s=status(o);return `<div class="urow"><div><span class="notano">${esc(o.nota||'No number')}</span> ${esc(cname(o.k))}<div class="small ${s.late?'neg':''}">${esc(s.txt)} · ${esc(short(o.due))}${o.open<o.total-0.5?` · ${rp(o.total-o.open)} of ${rp(o.total)} paid`:''}</div></div><span class="uamt ${s.late?'neg':''}">${rp(o.open)}</span>${ed?`<button class="btn sm" data-act="${act}" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`;};
+  const row=(o,act)=>{const s=status(o);return `<div class="urow"><div><span class="notano">${esc(o.nota||'No number')}</span> ${esc(cname(o.k))}<div class="small ${s.late?'neg':''}">${esc(s.txt)} · ${esc(short(o.due))}${o.open<o.total-0.5?` · ${rp(o.total-o.open)} of ${rp(o.total)} paid`:''}</div>${o.side==='ar'?chqFor(o).map(e=>`<div class="small"><span class="tag">Cheque waiting</span> ${rp(e.a)}${e.chqBank?' '+esc(e.chqBank):''}, clears ${esc(short(e.clear))}</div>`).join(''):''}</div><span class="uamt ${s.late?'neg':''}">${rp(o.open)}</span>${ed?`<button class="btn sm" data-act="${act}" data-id="${esc(o.id)}">Mark paid</button>`:''}</div>`;};
   const credits=Object.entries(c.credit.ar).filter(([k,v])=>v>0.5);
+  const chq=c.pending.slice().sort((a,b)=>a.clear<b.clear?-1:1),chqTot=chq.reduce((a,e)=>a+n(e.a),0);
+  const chqFor=o=>chq.filter(e=>e.k===o.k&&(!(e.alloc||[]).length||(e.alloc||[]).includes(o.id)));
   return `<section class="wrap"><h1 class="h1">Unpaid invoices</h1>
   <p style="margin-top:14px;font-size:17px">Shops owe <strong>${rp(c.arTot)}</strong> on ${ar.length} invoice${ar.length===1?'':'s'}.${late.length?` <span class="neg">${late.length} ${late.length===1?'is':'are'} late.</span>`:''}</p>
   <p class="hint" style="margin-top:6px">When a shop pays anyone (Ci Via, Ci Bella or the bank), press Mark paid and choose who received the money.</p>
   <div class="card list" style="margin-top:20px">${ar.map(o=>row(o,'pay-nota')).join('')||'<p class="small" style="padding-block:14px">Every invoice is paid.</p>'}</div>
+  ${chq.length?`<div class="card list" style="margin-top:14px"><div class="chead" style="padding-top:16px;margin-bottom:0"><h2 class="ch">Cheques waiting to clear</h2><span class="small">${rp(chqTot)}</span></div>${chq.map(e=>`<button type="button" class="txn" data-act="view" data-id="${e.id}"><span class="tk">${esc(cname(e.k))}${e.chqBank?' · '+esc(e.chqBank):''}</span><span class="tdsc">Clears ${esc(nice(e.clear))}. Counted as paid from that day.</span><span class="tamt">${rp(e.a)}</span></button>`).join('')}</div>`:''}
   ${credits.length?`<p class="small" style="margin-top:14px">${credits.map(([k,v])=>`${esc(cname(k))} paid ${rp(v)} too much. It will go toward their next invoice.`).join(' ')}</p>`:''}</section>
   <div><section class="wrap"><details class="card" ${c.openAP.length?'open':''}><summary style="font-size:15px">What you still owe Jakarta and suppliers: ${rp(c.apTot)}</summary>
   <div style="margin-top:12px">${c.openAP.map(o=>row(o,'pay-do')).join('')||'<p class="small">Nothing owed.</p>'}</div></details></section></div>`;
@@ -1226,6 +1252,15 @@ document.addEventListener('click',async ev=>{
   else if(act==='pay-in'){startPayment('ar',id);}
   else if(act==='pay-out'){startPayment('ap',id);}
   else if(act==='jr-all'){S.jr.month=S.jr.month?'':today().slice(0,7);render();}
+  else if(act==='export-sheet'){const m=S.jr.month||today().slice(0,7),c=now(),dm=x=>x?x.slice(8,10)+'-'+x.slice(5,7)+'-'+x.slice(2,4):'';
+    const rows=[[`Windpower ${monthLabel(m+'-01').toUpperCase()}`],['No','Faktur','Tgl','Store/Customer','Type','Qty','Harga/qty','Total','Payment','Notes']];let no=0;
+    D().entries.filter(e=>e.t==='sale'&&e.d.slice(0,7)===m).forEach(e=>{const o=c.byId[e.id],tot=entryTotal(e);no++;
+      const pay=o&&o.open>0.5?'due '+dm(o.due):o&&o.paidOn?'Lunas '+dm(o.paidOn):((e.acct||'cash')==='bank'?'Trf ':'Tunai ')+dm(e.d);
+      const notes=[e.note,o&&o.open>0.5&&o.open<o.total-0.5?`paid ${rp(o.total-o.open)}, ${rp(o.open)} left`:'',...c.pending.filter(x=>x.k===e.k&&(!(x.alloc||[]).length||(x.alloc||[]).includes(e.id))).map(x=>`cheque${x.chqBank?' '+x.chqBank:''} ${dm(x.clear)}`),n(e.disc)?`discount ${rp(e.disc)}`:''].filter(Boolean).join('; ');
+      (e.lines||[]).forEach((l,i)=>{const pr=D().products[l.p];rows.push(i===0?[no,e.nota||'',dm(e.d),cname(e.k),pr?pr.size+' '+(pr.pattern||''):'',n(l.q),Math.round(n(l.u)),Math.round(n(l.q)*n(l.u)),pay,notes]:['','','','',pr?pr.size+' '+(pr.pattern||''):'',n(l.q),Math.round(n(l.u)),Math.round(n(l.q)*n(l.u)),'','']);});
+      if(n(e.disc))rows.push(['','','','','Discount','','',-Math.round(n(e.disc)),'','']);});
+    if(rows.length===2)return toast('No sales in '+monthLabel(m+'-01')+'.');
+    download(`windpower-${m}.csv`,rows);}
   else if(act==='export-journal'){const c=now();const rows=[['Date','Kind','Invoice or DO','Shop or supplier','Details','Total','Paid now','Payment terms','Due date','Money account','Recorded by','Note']];
     D().entries.forEach(e=>{const o=c.byId[e.id];rows.push([e.d,TYPES[e.t],e.nota||'',e.k?cname(e.k):'',plain(describe(e,null)),entryTotal(e)==null?'':Math.round(entryTotal(e)),e.paid!=null?Math.round(n(e.paid)):'',e.term?(e.term==='cash'?'Paid now':e.term==='date'?'Due date':e.term+' days'):'',e.due||'',e.t==='transfer'?aname(e.from)+' to '+aname(e.to):(e.acct?aname(e.acct):''),e.by||'',e.note||'']);});
     download('journal_'+today()+'.csv',rows);}
