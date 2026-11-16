@@ -416,6 +416,7 @@ details.extras summary{font-size:14px}
 #tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--paper);font-size:12.5px;padding:7px 12px;border-radius:999px;white-space:nowrap;opacity:0;transition:opacity .15s}
 #tip.on{opacity:1}
 [data-tip]{cursor:default}
+.srow .hasx{text-decoration:underline dotted var(--muted);text-underline-offset:4px;cursor:help}
 
 /* v9: report periods and comparison columns */
 .rpctl .micro{margin-bottom:8px}
@@ -640,7 +641,7 @@ function compute(from,to,ex){
   const key=[S.demo,S.ver,from,to,ex||''].join('|');if(S.cache[key])return S.cache[key];
   const st={},bal={},inv={ar:{},ap:{}},credit={ar:{},ap:{}},byId={};
   let eqOpen=0,cap=0,draw=0,profit=0,open=null;
-  const P={goods:0,disc:0,cogs:0,trueUp:0,exp:{},adj:0,sales:0,tires:0};
+  const P={goods:0,disc:0,cogs:0,trueUp:0,exp:{},adj:0,adjList:[],sales:0,tires:0};
   const C={openIn:0,saleCash:0,arIn:0,capIn:0,buyCash:0,apOut:0,expOut:0,drawOut:0};
   const recvBy={},warn=[];let curD='';
   const sk=p=>st[p]||(st[p]={q:0,v:0,last:0});
@@ -685,7 +686,7 @@ function compute(from,to,ex){
       case 'recv':{const a=n(e.a);mv(e.acct,a);payInv('ar',e.k,a,e.alloc,e);if(inP){C.arIn+=a;recvBy[e.acct||'cash']=(recvBy[e.acct||'cash']||0)+a;}break;}
       case 'pay':{const a=n(e.a);mv(e.acct,-a);payInv('ap',e.k,a,e.alloc,e);if(inP)C.apOut+=a;break;}
       case 'expense':{const a=n(e.a);mv(e.acct,-a);profit-=a;if(inP){P.exp[e.cat||'Other']=(P.exp[e.cat||'Other']||0)+a;C.expOut+=a;}break;}
-      case 'adjust':{let tot=0;(e.lines||[]).forEach(l=>{const s=sk(l.p),q=n(l.q);if(q<0)tot-=takeOut(s,-q);else if(q>0){const v=Math.round(q*avg(s));putIn(s,q,v);tot+=v;}});profit+=tot;if(inP)P.adj+=tot;break;}
+      case 'adjust':{let tot=0;(e.lines||[]).forEach(l=>{const s=sk(l.p),q=n(l.q);let v=0;if(q<0)v=-takeOut(s,-q);else if(q>0){v=Math.round(q*avg(s));putIn(s,q,v);}tot+=v;if(inP&&q)P.adjList.push({id:e.id,d:e.d,p:l.p,q,v,note:e.note||''});});profit+=tot;if(inP)P.adj+=tot;break;}
       case 'capital':{const a=n(e.a);mv(e.acct,a);cap+=a;if(inP)C.capIn+=a;break;}
       case 'draw':{const a=n(e.a);mv(e.acct,-a);draw+=a;if(inP)C.drawOut+=a;break;}
       case 'transfer':{const a=n(e.a),fr=e.from||'cash',tt=e.to||(fr==='bank'?'cash':'bank');mv(fr,-a);mv(tt,a);break;}
@@ -1459,7 +1460,9 @@ function statementRows(tab,from,to){
     h('Operating expenses');const ex=Object.entries(P.exp).sort((a,b)=>b[1]-a[1]);ex.forEach(([k,v])=>it(expID(k),-v,1));if(!ex.length)note('No operating expenses in this period.');
     tot('Total operating expenses',-P.expTot);
     tot('Operating profit',P.gross-P.expTot);
-    if(P.adj){h('Other income and expenses');it('Inventory count difference',P.adj,1,'Tires missing or found when the warehouse was counted.');}
+    if(P.adj||P.adjList.length){h('Other income and expenses');
+      P.adjList.forEach(a=>it(`Warehouse count ${short(a.d)}: ${a.q>0?'+':''}${a.q} ${D().products[a.p]?(D().products[a.p].pattern||pname(a.p)):'tire'}${a.note?', '+a.note.toLowerCase():''}`,a.v,1,`${Math.abs(a.q)} tire${Math.abs(a.q)===1?'':'s'} ${a.q<0?'missing or damaged':'found'}, valued at the average cost of ${rp(Math.abs(a.v/a.q))} each.`));
+      tot('Inventory count difference',P.adj,'Tires missing, damaged or found when the warehouse was counted, at average cost. Fix it in Transactions if a count was typed wrong.');}
     grand('Profit before income tax',P.profit);
     if(P.trueUp)note(`Cost of goods sold includes ${rp(P.trueUp)} of cost correction for tires that were sold before their DO was recorded.`);
     note('Income tax is not calculated. Owner drawings are not an expense.');
@@ -1527,8 +1530,8 @@ function pageReports(){
   const stepper=!['all','custom'].includes(r.preset)?`<div class="tstep"><button type="button" data-act="rp-step" data-v="-1" aria-label="Earlier period">‹</button><span>${esc(P0.short)}</span><button type="button" data-act="rp-step" data-v="1"${(r.off||0)>=0?' disabled':''} aria-label="Later period">›</button></div>`:'';
   let rows;
   if(R2){const L=mergeRows(R,R2);
-    rows=`<div class="srow cmp headc"><span></span><span>${esc(P0.short)}</span><span>${esc(CP.short)}</span><span>Change</span></div>`+L.map((x,i)=>x.k==='note'?(x.only2?'':`<div class="srow note">${esc(x.l)}</div>`):`<div class="srow cmp ${x.k}" style="animation-delay:${Math.min(i*20,500)}ms"><span>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span><span class="was">${x.v2==null?'':esc(rp(x.v2))}</span><span class="dl">${x.v==null?'':chg(x.v,x.v2)}</span></div>`).join('');}
-  else rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*24,600)}ms"><span>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span></div>`).join('');
+    rows=`<div class="srow cmp headc"><span></span><span>${esc(P0.short)}</span><span>${esc(CP.short)}</span><span>Change</span></div>`+L.map((x,i)=>x.k==='note'?(x.only2?'':`<div class="srow note">${esc(x.l)}</div>`):`<div class="srow cmp ${x.k}" style="animation-delay:${Math.min(i*20,500)}ms"><span${x.x&&!S.explain?` data-tip="${esc(x.x)}" class="hasx"`:''}>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span><span class="was">${x.v2==null?'':esc(rp(x.v2))}</span><span class="dl">${x.v==null?'':chg(x.v,x.v2)}</span></div>`).join('');}
+  else rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*24,600)}ms"><span${x.x&&!S.explain?` data-tip="${esc(x.x)}" class="hasx"`:''}>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span></div>`).join('');
   const stamp=tab==='bs'?(Math.abs(c.diff)<1?'<span class="stamp">Balanced</span>':`<span class="stamp off">Off by ${rp(c.diff)}</span>`):'';
   const running=!asOf&&P0.t>today()&&P0.f<=today();
   const sub=R2?`${esc(P0.short)} vs ${esc(CP.short)} · in Rupiah`:`${esc(when(P0,to)).replace(/^./,ch=>ch.toUpperCase())} · in Rupiah`;
