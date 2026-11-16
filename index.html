@@ -373,6 +373,47 @@ a.kpi:hover .mid{color:var(--accent)}
 .minisum strong{font-weight:500}
 details.extras summary{font-size:14px}
 @media (max-width:760px){.banner{flex-wrap:nowrap;white-space:nowrap;overflow-x:auto}}
+
+/* v8: Home as charts. Bars in ink on a field track, red only for late or not handed over. */
+:root{--chart-soft:#c3c8cf}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--chart-soft:#454b55}}
+:root[data-theme="dark"]{--chart-soft:#454b55}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:0;margin-top:22px}
+.kpi{display:grid;gap:8px;padding:20px 24px;color:inherit;text-decoration:none;border-left:1px solid var(--rule);min-width:0}
+.kpi:first-child{border-left:0}
+.kv{font-size:clamp(24px,2.6vw,34px);font-weight:500;letter-spacing:-0.02em;line-height:.95;white-space:nowrap}
+@media (max-width:760px){.kpis{grid-template-columns:1fr 1fr}.kpi{padding:16px 18px}.kpi:nth-child(3){border-left:0}.kpi:nth-child(n+3){border-top:1px solid var(--rule)}}
+.segbar{display:flex;gap:2px;height:16px;border-radius:999px;overflow:hidden;background:var(--field)}
+.segbar i{display:block;height:100%;min-width:6px}
+.s-late{background:var(--loss)!important}.s-soon{background:var(--ink)}.s-later{background:var(--chart-soft)!important}.s-in{background:var(--ink)}
+.s-tick{background:transparent;border-left:2px solid var(--muted);border-radius:0!important;width:2px!important}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted);margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend b{font-weight:500;color:var(--ink);margin-left:2px}
+.legend .key{display:inline-block;width:10px;height:10px;border-radius:999px}
+.hb{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) auto;gap:6px 16px;align-items:center;padding-block:12px;border-bottom:1px solid var(--rule)}
+.card .hb:last-of-type{border-bottom:0}
+.hb .hn{font-size:15px;min-width:0}
+.hb .tr{position:relative;display:flex;gap:2px;height:10px;background:var(--field);border-radius:999px;overflow:visible}
+.hb .fl{display:block;height:100%;background:var(--ink);border-radius:999px;transform-origin:left;animation:grow .6s var(--ease) both}
+.hb .tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--muted);margin-left:-1px}
+.hb .hv{text-align:right;white-space:nowrap;font-size:15px}
+.hb .hv.big{font-size:22px;font-weight:500;letter-spacing:-0.01em;min-width:3ch}
+@media (max-width:520px){.hb{grid-template-columns:minmax(0,1fr) auto}.hb .tr{grid-column:1/-1;grid-row:2}}
+.cols{display:flex;align-items:flex-end;gap:8px;height:190px;border-bottom:1px solid var(--rule);margin-top:30px}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:6px;min-width:0}
+.col i{position:relative;display:block;width:100%;max-width:38px;min-height:2px;background:var(--chart-soft);border-radius:4px 4px 0 0;transform-origin:bottom;animation:rise .65s var(--ease) both}
+.col.cur i{background:var(--ink)}
+.col .cv{position:absolute;left:50%;bottom:100%;transform:translate(-50%,-6px);font-size:13px;font-weight:500;font-style:normal}
+.cx{display:flex;gap:8px;margin-top:8px}
+.cx span{flex:1;text-align:center;font-size:11px;letter-spacing:.02em;color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden}
+@media (max-width:520px){.cx span:nth-child(even):not(:last-child){visibility:hidden}}
+@keyframes rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.col i,.hb .fl{animation:none}}
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--paper);font-size:12.5px;padding:7px 12px;border-radius:999px;white-space:nowrap;opacity:0;transition:opacity .15s}
+#tip.on{opacity:1}
+[data-tip]{cursor:default}
 </style>
 </head>
 <body>
@@ -402,6 +443,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const n=v=>{if(typeof v==='number')return isFinite(v)?v:0;let s=String(v??'').trim();if(!s)return 0;s=s.replace(/rp/ig,'').replace(/\s/g,'');const neg=/^-/.test(s);s=s.replace(/[^0-9.,]/g,'').replace(/\./g,'').replace(',','.');const x=parseFloat(s);return isFinite(x)?(neg?-x:x):0;};
 const fmt=x=>Math.round(x||0).toLocaleString('id-ID');
 const rp=x=>{const v=Math.round(x||0);return (v<0?'-':'')+'Rp '+Math.abs(v).toLocaleString('id-ID');};
+const fmtShort=x=>{const v=Math.round(x||0),a=Math.abs(v),sg=v<0?'-':'';const f=(k,u)=>sg+'Rp '+(a/k).toLocaleString('id-ID',{maximumFractionDigits:a/k<10?2:1})+' '+u;return a>=1e9?f(1e9,'M'):a>=1e6?f(1e6,'jt'):rp(v);};
 const M=x=>`<span class="${Math.round(x||0)<0?'neg':''}">${rp(x)}</span>`;
 const pad=x=>String(x).padStart(2,'0');
 const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
@@ -1075,53 +1117,75 @@ function pageOverview(){
     <p style="max-width:58ch;color:var(--muted)">First, write down what the business has on day one: money each person holds, the bank, tires in the warehouse, unpaid invoices, and what you still owe Jakarta. After that, press New transaction every time something happens.</p>
     <div class="row"><button class="btn primary" data-act="pick" data-t="opening">Enter starting balances</button><button class="btn" data-act="demo-on">Load example data</button></div></div></section>`;
   const c=now(),[f,t]=monthRange(0),m=compute(f,t),T=today(),wk=addDays(7);
-  const late=c.openAR.filter(o=>o.due<T),soon=c.openAR.filter(o=>o.due>=T&&o.due<=wk);
-  const sum=L=>L.reduce((a,o)=>a+o.open,0);
-  // cheques
+  const late=c.openAR.filter(o=>o.due<T),soon=c.openAR.filter(o=>o.due>=T&&o.due<=wk),later=c.openAR.filter(o=>o.due>wk);
+  const sum=L=>L.reduce((a,o)=>a+o.open,0),pct=(v,mx)=>mx>0?Math.max(0,Math.min(100,v/mx*100)):0;
+  const sLate=sum(late),sSoon=sum(soon),sLater=sum(later),arAll=sLate+sSoon+sLater;
+  /* 1. To collect: one bar split by how urgent */
+  const parts=[['late','Late',sLate,late.length],['soon','Due this week',sSoon,soon.length],['later','Later',sLater,later.length]].filter(p=>p[2]>0.5);
+  const segbar=arAll>0?`<div class="segbar" role="img" aria-label="${parts.map(p=>p[1]+' '+rp(p[2])).join(', ')}">${parts.map(p=>`<i class="s-${p[0]}" style="flex:${p[2]}" data-tip="${esc(p[1])}: ${esc(rp(p[2]))} on ${p[3]} invoice${p[3]===1?'':'s'}"></i>`).join('')}</div>
+    <div class="legend">${parts.map(p=>`<span><i class="key s-${p[0]}"></i>${esc(p[1])}<b>${esc(rp(p[2]))}</b></span>`).join('')}</div>`:'';
+  const top=late.concat(soon).slice(0,4);
+  /* 2. Who holds the money */
+  const firstCash=accts().find(a=>!BANKISH.test(a.name+a.id)),A=accts().map(a=>({a,v:c.bal[a.id]||0})),mxA=Math.max(1,...A.map(x=>x.v));
+  const holders=A.map(({a,v})=>{const flag=v>0.5&&firstCash&&a.id!==firstCash.id&&!BANKISH.test(a.name+a.id);
+    return `<div class="hb" data-tip="${esc(a.name)}: ${esc(rp(v))}"><span class="hn">${esc(a.name)}${flag?'<span class="ex neg">Not handed over yet</span>':''}</span><span class="tr"><i class="fl${flag?' s-late':''}" style="width:${pct(v,mxA)}%"></i></span><span class="hv">${M(v)}</span></div>`;}).join('');
+  /* 3. Cheques */
   const chq=c.pending.slice().sort((a,b)=>a.clear<b.clear?-1:1);
-  const chqHTML=chq.length?chq.map(e=>`<button type="button" class="txn" data-act="view" data-id="${e.id}"><span class="tk">${esc(cname(e.k))}${e.chqBank?' · '+esc(e.chqBank):''}</span><span class="tdsc">${daysBetween(T,e.clear)<=0?'Clears today':`Clears ${esc(short(e.clear))}, in ${daysBetween(T,e.clear)} day${daysBetween(T,e.clear)===1?'':'s'}`}</span><span class="tamt">${rp(e.a)}</span></button>`).join(''):'<p class="small" style="padding-block:12px">No cheques waiting.</p>';
-  // who holds money
-  const firstCash=accts().find(a=>!BANKISH.test(a.name+a.id));
-  const holders=accts().map(a=>{const v=c.bal[a.id]||0,flag=v>0.5&&firstCash&&a.id!==firstCash.id&&!BANKISH.test(a.name+a.id);
-    return `<div class="lrow"><span>${esc(a.name)}${flag?'<span class="ex">Collected, not handed over or deposited yet</span>':''}</span><span class="${flag?'neg':''}" style="white-space:nowrap">${M(v)}</span></div>`;}).join('');
-  // stock
+  const chqHTML=chq.map(e=>{const dl=daysBetween(T,e.clear);return `<button type="button" class="txn" data-act="view" data-id="${e.id}"><span class="tk">${esc(cname(e.k))}${e.chqBank?' · '+esc(e.chqBank):''}</span><span class="tdsc">${dl<=0?'Clears today':`Clears ${esc(short(e.clear))}, in ${dl} day${dl===1?'':'s'}`}</span><span class="tamt">${rp(e.a)}</span></button>`;}).join('');
+  /* 4. Tires sold per week, last 8 weeks (Monday to Sunday) */
+  const dow=(parseD(T).getDay()+6)%7,wks=[];
+  for(let i=7;i>=0;i--){const s=addDaysTo(T,-dow-7*i);wks.push({s,e:addDaysTo(s,6),q:0,v:0});}
+  for(const e of d.entries){if(e.t!=='sale'||e.void)continue;const w=wks.find(x=>e.d>=x.s&&e.d<=x.e);if(!w)continue;
+    for(const l of e.lines||[]){w.q+=n(l.q);w.v+=n(l.q)*n(l.u);}w.v-=n(e.disc);}
+  const mxW=Math.max(1,...wks.map(w=>w.q)),peak=wks.reduce((a,w,i)=>w.q>wks[a].q?i:a,0),avgW=Math.round(wks.slice(0,7).reduce((a,w)=>a+w.q,0)/7);
+  const cols=`<div class="cols" role="img" aria-label="Tires sold per week">${wks.map((w,i)=>{const cur=i===7,lab=cur||i===peak;
+    return `<div class="col${cur?' cur':''}" data-tip="${esc(short(w.s))} to ${esc(short(w.e))}: ${w.q} tire${w.q===1?'':'s'}, ${esc(rp(w.v))}"><i style="height:${pct(w.q,mxW)}%;animation-delay:${i*40}ms">${lab&&w.q?`<span class="cv">${w.q}</span>`:''}</i></div>`;}).join('')}</div>
+    <div class="cx">${wks.map((w,i)=>`<span>${i===7?'Now':esc(dd(w.s))}</span>`).join('')}</div>`;
+  /* 5. Stock per tire type, with incoming DOs and the reorder line */
   const s28=sold28(),incoming={};c.ordered.forEach(e=>(e.lines||[]).forEach(l=>{incoming[l.p]=(incoming[l.p]||0)+n(l.qd);}));
-  const stockHTML=Object.keys(d.products).sort((a,b)=>pname(a).localeCompare(pname(b))).map(id=>{const p=d.products[id],q=(c.st[id]||{q:0}).q,perWk=(s28[id]||0)/4,wks=perWk>0?q/perWk:null,stop=p.restock===false;
-    if(stop&&q<=0)return '';
-    const life=stop?'Not ordered any more. Selling what is left.':q<0?'<span class="neg">Below zero. A DO is probably missing.</span>':wks==null?'No sales in the last 4 weeks':wks<1.5?`<span class="neg">About ${wks<1?'less than a week':Math.round(wks*7)+' days'} left. Time to request from Jakarta.</span>`:`About ${Math.round(wks)} weeks left at ${Math.round(perWk)} a week`;
-    return `<div class="stk"><div><span class="size" style="font-size:15px">${esc(p.pattern||pname(id))}</span>${stop?' <span class="tag">Not restocked</span>':''}<div class="small">${life}${incoming[id]?` · +${incoming[id]} on a DO, waiting for the truck`:''}</div></div><span class="mid">${q}</span></div>`;}).join('');
-  // this month and slow payers
-  const slow=payerStats(c).slice(0,4);
+  const P=Object.keys(d.products).sort((a,b)=>pname(a).localeCompare(pname(b))).map(id=>({id,p:d.products[id],q:(c.st[id]||{q:0}).q,inc:incoming[id]||0})).filter(x=>!(x.p.restock===false&&x.q<=0));
+  const mxS=Math.max(1,...P.map(x=>Math.max(0,x.q)+x.inc),...P.map(x=>n(x.p.low)));
+  const stockHTML=P.map(({id,p,q,inc})=>{const perWk=(s28[id]||0)/4,w=perWk>0?q/perWk:null,stop=p.restock===false,low=!stop&&(q<0||(w!=null&&w<1.5));
+    const life=stop?'Not ordered any more':q<0?'<span class="neg">Below zero. A DO is probably missing.</span>':w==null?'No sales in the last 4 weeks':w<1.5?`<span class="neg">About ${w<1?'less than a week':Math.round(w*7)+' days'} left. Request from Jakarta.</span>`:`About ${Math.round(w)} weeks left`;
+    return `<div class="hb stk2" data-tip="${esc(p.pattern||pname(id))}: ${q} in stock${inc?`, ${inc} on a DO`:''}${n(p.low)?`, reorder at ${n(p.low)}`:''}"><span class="hn">${esc(p.pattern||pname(id))}${stop?' <span class="tag">Not restocked</span>':''}<span class="ex">${life}${inc?` · +${inc} on a DO`:''}</span></span>
+      <span class="tr"><i class="fl${low?' s-late':''}" style="width:${pct(Math.max(0,q),mxS)}%"></i>${inc?`<i class="fl s-later" style="width:${pct(inc,mxS)}%"></i>`:''}${n(p.low)&&!stop?`<b class="tick" style="left:${pct(n(p.low),mxS)}%"></b>`:''}</span><span class="hv big">${q}</span></div>`;}).join('');
+  /* 6. Late payers */
+  const slow=payerStats(c).slice(0,4),mxL=Math.max(1,...slow.map(x=>x.avg));
+  const slowHTML=slow.map(x=>`<div class="hb" data-tip="${esc(cname(x.k))}: ${x.lateCount} of ${x.count} late${x.moves?`, due moved ${x.moves} times`:''}"><span class="hn">${esc(cname(x.k))}<span class="ex">${x.lateCount} of ${x.count} invoice${x.count===1?'':'s'} late${x.moves?`, due moved ${x.moves}×`:''}</span></span><span class="tr"><i class="fl" style="width:${pct(x.avg,mxL)}%"></i></span><span class="hv">${x.avg} day${x.avg===1?'':'s'}</span></div>`).join('');
+  const totT=P.reduce((a,x)=>a+Math.max(0,x.q),0),totInc=P.reduce((a,x)=>a+x.inc,0);
   const recent=d.entries.slice(-5).reverse().map(e=>txnRow(e,c)).join('');
   return `<section class="wrap">
     <div class="hello"><div class="stack" style="gap:6px"><p class="small">${esc(longToday())}</p><h1 class="h1">Overview</h1></div>
       <div class="seg">${['sale','recv','purchase','expense'].map(k=>`<button type="button" data-act="pick" data-t="${k}">${esc(TYPES[k])}</button>`).join('')}</div></div>
+    <div class="card kpis">
+      <a class="kpi" href="#unpaid"><span class="micro">To collect</span><span class="kv">${fmtShort(c.arTot)}</span><span class="small">${sLate>0.5?`<span class="neg">${fmtShort(sLate)} late</span>`:'Nothing late'}</span></a>
+      <div class="kpi"><span class="micro">Money on hand</span><span class="kv">${fmtShort(c.money)}</span><span class="small">${chq.length?`+ ${fmtShort(chq.reduce((a,e)=>a+n(e.a),0))} in cheques`:'All places together'}</span></div>
+      <a class="kpi" href="#stock"><span class="micro">Tires in stock</span><span class="kv">${totT}</span><span class="small">${totInc?`+ ${totInc} on the way`:'Nothing on the way'}</span></a>
+      <a class="kpi" href="#reports"><span class="micro">Profit this month</span><span class="kv${m.P.profit<0?' neg':''}">${fmtShort(m.P.profit)}</span><span class="small">${m.P.tires} tires, ${fmtShort(m.P.net)} sales</span></a>
+    </div>
     <div class="hgrid">
       <div class="card">
         <div class="chead"><h2 class="ch">To collect</h2><a class="link" href="#unpaid">All unpaid</a></div>
         <div class="hero-n" style="font-size:clamp(38px,5.4vw,64px)"><span class="cur">Rp</span>${fmt(c.arTot)}</div>
-        <p class="small" style="margin-top:8px">${c.openAR.length} unpaid invoice${c.openAR.length===1?'':'s'}${late.length?` · <span class="neg">${rp(sum(late))} late on ${late.length}</span>`:''}${soon.length?` · ${rp(sum(soon))} due this week`:''}</p>
-        <div style="margin-top:14px">${late.length?`<p class="micro" style="margin:6px 0 2px">Late</p>${late.slice(0,4).map(o=>collectRow(o,c)).join('')}`:''}
-        ${soon.length&&late.length<4?`<p class="micro" style="margin:14px 0 2px">Due this week</p>${soon.slice(0,4-Math.min(late.length,4)).map(o=>collectRow(o,c)).join('')}`:''}
-        ${late.length+soon.length>4?`<p style="margin-top:12px"><a class="link" href="#unpaid">See all ${late.length+soon.length} late or due this week</a></p>`:''}
-        ${!late.length&&!soon.length?'<p class="small" style="padding-block:10px">Nothing late or due this week.</p>':''}</div>
-        <p class="small" style="margin-top:12px">Shop asked to pay later? Press More time. The first due date is kept, so you can see who often pays late.</p>
+        <div style="margin-top:18px">${segbar}</div>
+        <div style="margin-top:14px">${top.length?`<p class="micro" style="margin:6px 0 2px">Chase first</p>${top.map(o=>collectRow(o,c)).join('')}`:'<p class="small" style="padding-block:10px">Nothing late or due this week.</p>'}
+        ${late.length+soon.length>4?`<p style="margin-top:12px"><a class="link" href="#unpaid">See all ${late.length+soon.length} late or due this week</a></p>`:''}</div>
       </div>
       <div class="stack" style="gap:14px">
-        <div class="card list"><div class="chead" style="padding-top:18px;margin-bottom:0"><h2 class="ch">Cheques waiting to clear</h2><span class="small">${rp(chq.reduce((a,e)=>a+n(e.a),0))}</span></div>${chqHTML}</div>
         <div class="card"><div class="chead"><h2 class="ch">Who is holding the money</h2><span class="small">${rp(c.money)}</span></div>${holders}</div>
+        ${chq.length?`<div class="card list"><div class="chead" style="padding-top:18px;margin-bottom:0"><h2 class="ch">Cheques waiting to clear</h2><span class="small">${rp(chq.reduce((a,e)=>a+n(e.a),0))}</span></div>${chqHTML}</div>`:''}
       </div>
     </div>
     <div class="hgrid2">
+      <div class="card"><div class="chead"><h2 class="ch">Tires sold per week</h2><span class="small">About ${avgW} a week</span></div>${cols}</div>
       <div class="card"><div class="chead"><h2 class="ch">Tires in the warehouse</h2><a class="link" href="#stock">Stock and prices</a></div>${stockHTML||'<p class="small">No tires yet.</p>'}
+        <div class="legend"><span><i class="key s-in"></i>In stock</span><span><i class="key s-later"></i>On a DO</span><span><i class="key s-tick"></i>Reorder line</span></div>
         ${editable()?'<div class="row" style="margin-top:14px"><button class="btn sm" data-act="pick" data-t="purchase" data-stage="ordered">Opened a DO</button></div>':''}</div>
-      <div class="card"><div class="chead"><h2 class="ch">This month</h2><a class="link" href="#reports">Reports</a></div>
-        <div class="lrow"><span>Tires sold</span><span>${m.P.tires}</span></div><div class="lrow"><span>Sales</span><span>${M(m.P.net)}</span></div><div class="lrow"><span>Profit after tire cost and running costs</span><span>${M(m.P.profit)}</span></div>
-        <div class="chead" style="margin-top:18px"><h2 class="ch">Often pays late</h2></div>
-        ${slow.length?slow.map(x=>`<div class="lrow"><span>${esc(cname(x.k))}<span class="ex">${x.lateCount} of ${x.count} invoice${x.count===1?'':'s'} late${x.moves?`, due moved ${x.moves}×`:''}</span></span><span style="white-space:nowrap">${x.avg} day${x.avg===1?'':'s'} late on average</span></div>`).join(''):'<p class="small" style="padding-block:8px">No late payers yet.</p>'}
-      </div>
     </div>
-    <div class="card list" style="margin-top:14px"><div class="chead" style="padding-top:18px;margin-bottom:0"><h2 class="ch">Latest transactions</h2><a class="link" href="#journal">See all</a></div>${recent}</div>
+    <div class="hgrid2">
+      <div class="card"><div class="chead"><h2 class="ch">Often pays late</h2><span class="small">Average days late</span></div>${slowHTML||'<p class="small" style="padding-block:8px">No late payers yet.</p>'}</div>
+      <div class="card list"><div class="chead" style="padding-top:18px;margin-bottom:0"><h2 class="ch">Latest transactions</h2><a class="link" href="#journal">See all</a></div>${recent}</div>
+    </div>
   </section>`;
 }
 
@@ -1522,6 +1586,13 @@ function boot(){
 }
 boot();
 })();
+
+/* hover or tap a bar to see its exact number */
+(()=>{const tip=document.createElement('div');tip.id='tip';document.body.appendChild(tip);
+const show=ev=>{const t=ev.target.closest&&ev.target.closest('[data-tip]');if(!t){tip.classList.remove('on');return;}
+tip.textContent=t.dataset.tip;const r=t.getBoundingClientRect(),w=tip.offsetWidth;
+tip.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2))+'px';tip.style.top=Math.max(8,r.top-38)+'px';tip.classList.add('on');};
+document.addEventListener('pointerover',show);document.addEventListener('scroll',()=>tip.classList.remove('on'),{passive:true});})();
 </script>
 </body>
 </html>
