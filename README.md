@@ -26,3 +26,6 @@ It is a single file (`index.html`), so any static host works:
 
 ## Next step after the client approves
 Connect a real database (for example Supabase) so records are saved and each person signs in with their own account.
+
+## Questions for Ci Via
+`questions.html` (for example `https://windpower-tire-testing.vercel.app/questions.html`) is a tap-to-answer questionnaire in Indonesian and English. Answers stay on her phone until she sends them to Kevin on WhatsApp, copies them, or downloads them. Nothing is stored on a server.

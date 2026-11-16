@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Windpower Books: Pertanyaan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500&display=swap">
+<style>
+/* Same desk as the mockup: white slips on dispatch grey, one blue for actions. One question per slip, answered by tapping. */
+:root{
+  color-scheme:light;
+  --paper:#eceef1;   /* canvas */
+  --sheet:#ffffff;   /* question cards */
+  --field:#f3f4f6;   /* chips and inputs */
+  --ink:#15171b;     /* text */
+  --muted:#656b74;   /* hints */
+  --rule:#e3e6ea;    /* hairlines */
+  --accent:#2457f5;  /* chosen answers, buttons */
+  --accent-soft:#e6ecff;
+  --guess:#7a5b00;   /* "from your sheet" notes */
+  --guess-soft:#fff6db;
+  --sans:"Manrope","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#0e1013;--sheet:#181b20;--field:#21252b;--ink:#eceef1;--muted:#9097a1;--rule:#272b32;--accent:#6b8dff;--accent-soft:#1d2645;--guess:#f0cf73;--guess-soft:#2e2712;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0e1013;--sheet:#181b20;--field:#21252b;--ink:#eceef1;--muted:#9097a1;--rule:#272b32;--accent:#6b8dff;--accent-soft:#1d2645;--guess:#f0cf73;--guess-soft:#2e2712;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:0;z-index:5;background:var(--paper);padding-block:12px 10px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mark{display:flex;align-items:center;gap:10px;font-weight:500;font-size:15px}
+.logo{width:26px;height:26px;border-radius:50%;background:var(--ink);display:grid;place-items:center}
+.logo::after{content:"";width:11px;height:11px;border-radius:50%;border:2px solid var(--sheet)}
+.lang{display:flex;background:var(--sheet);border-radius:999px;padding:3px}
+.lang button{all:unset;cursor:pointer;padding:6px 12px;border-radius:999px;font-size:13px;color:var(--muted);font-weight:500}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+.progress{height:6px;background:var(--sheet);border-radius:999px;margin-top:10px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:999px;width:0;transition:width .45s cubic-bezier(.16,1,.3,1)}
+.ptext{font-size:12px;color:var(--muted);margin-top:6px}
+h1{font-size:clamp(34px,7vw,52px);font-weight:500;line-height:.95;letter-spacing:-0.03em;margin:22px 0 12px}
+.lead{color:var(--muted);max-width:60ch;margin:0}
+.part{margin-top:34px}
+.part h2{font-size:22px;font-weight:500;letter-spacing:-0.015em;margin:0 0 4px}
+.part .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+.q{background:var(--sheet);border-radius:22px;padding:20px 20px 18px;margin-top:12px}
+.send a{color:var(--accent)}
+.q{scroll-margin-top:110px}
+.q .num{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.q h3{font-size:18px;font-weight:500;letter-spacing:-0.01em;line-height:1.3;margin:6px 0 4px}
+.q .why{font-size:13.5px;color:var(--muted);margin:0 0 10px}
+.guess{font-size:13.5px;background:var(--guess-soft);color:var(--guess);border-radius:12px;padding:8px 12px;margin:0 0 12px}
+.sub-q{font-size:15px;font-weight:500;margin:14px 0 8px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{all:unset;cursor:pointer;box-sizing:border-box;border:1px solid var(--rule);background:var(--field);border-radius:999px;padding:10px 15px;font-size:14.5px;line-height:1.25;min-height:44px;display:inline-flex;align-items:center}
+.opt[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt.stack{border-radius:16px;width:100%}
+input[type=text],textarea{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--field);border:1px solid transparent;border-radius:12px;padding:11px 13px;margin-top:10px}
+input[type=text]:focus,textarea:focus{outline:0;border-color:var(--accent)}
+textarea{min-height:70px;resize:vertical}
+.done{font-size:12px;color:var(--accent);font-weight:500;margin-left:8px}
+.checklist .opt{justify-content:space-between}
+.send{background:var(--sheet);border-radius:22px;padding:22px;margin-top:34px}
+.btn{all:unset;cursor:pointer;box-sizing:border-box;border-radius:999px;padding:13px 20px;font-weight:500;font-size:15px;text-align:center;border:1px solid var(--rule);background:var(--sheet);min-height:46px;display:inline-flex;align-items:center;justify-content:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.small{font-size:13px;color:var(--muted)}
+pre{white-space:pre-wrap;font:inherit;font-size:13px;background:var(--field);border-radius:12px;padding:12px;max-height:260px;overflow:auto;margin-top:14px}
+footer{padding-block:28px 40px;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 18px}
+footer a{color:var(--muted)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 18px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:reduce){.progress i{transition:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="bar"><div class="mark"><span class="logo" aria-hidden="true"></span><span id="t-brand"></span></div>
+    <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="id">ID</button><button type="button" data-lang="en">EN</button></div></div>
+  <div class="progress" aria-hidden="true"><i id="bar"></i></div><div class="ptext" id="ptext"></div>
+</div></header>
+<main class="wrap" id="main"></main>
+<div class="wrap"><footer><span id="t-foot"></span><a href="index.html">Mockup</a><a href="index.html#privacy" id="t-priv"></a></footer></div>
+<div id="toast" hidden></div>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let L='id';try{L=localStorage.getItem('wb-q-lang')||'id';}catch(_){}
+let A={};try{A=JSON.parse(localStorage.getItem('wb-q-answers')||'{}')||{};}catch(_){A={};}
+const save=()=>{try{localStorage.setItem('wb-q-answers',JSON.stringify(A));}catch(_){}};
+const t=x=>typeof x==='string'?x:(x[L]||x.id);
+
+const UI={
+  brand:{id:'Windpower Books',en:'Windpower Books'},
+  title:{id:'Pertanyaan untuk Ci Via',en:'Questions for Ci Via'},
+  lead:{id:'Supaya aplikasinya pas dengan cara kerja Ci Via. Tinggal ketuk jawaban. Yang kuning adalah tebakan kami dari sheet Ci, cukup dicek. Kalau tidak ada yang cocok, tulis di kotak. Jawaban tersimpan di HP ini, jadi bisa dilanjut nanti.',
+        en:'So the app fits how Ci Via works. Just tap the answers. The yellow notes are our guesses from your sheet, so mostly just check them. If nothing fits, type in the box. Answers stay saved on this phone, so you can continue later.'},
+  progress:{id:'{a} dari {b} pertanyaan utama terjawab',en:'{a} of {b} main questions answered'},
+  other:{id:'Lainnya / catatan (opsional)',en:'Other / note (optional)'},
+  guess:{id:'Dari sheet Ci: ',en:'From your sheet: '},
+  multi:{id:'Boleh pilih lebih dari satu',en:'You can pick more than one'},
+  agree:{id:'Setuju',en:'Agree'},discuss:{id:'Perlu dibahas',en:'Let us discuss'},
+  ready:{id:'Siap',en:'Ready'},notyet:{id:'Belum',en:'Not yet'},
+  sendT:{id:'Kirim jawaban',en:'Send answers'},
+  sendL:{id:'Jawaban dikirim lewat WhatsApp ke Kevin. Tidak ada yang tersimpan di server.',en:'Answers are sent to Kevin on WhatsApp. Nothing is stored on a server.'},
+  wa:{id:'Kirim lewat WhatsApp',en:'Send on WhatsApp'},copy:{id:'Salin jawaban',en:'Copy answers'},dl:{id:'Unduh sebagai file',en:'Download as a file'},
+  reset:{id:'Hapus semua jawaban',en:'Clear all answers'},resetSure:{id:'Ketuk lagi untuk menghapus',en:'Tap again to clear'},
+  copied:{id:'Jawaban disalin. Tempel di WhatsApp.',en:'Answers copied. Paste them in WhatsApp.'},
+  saved:{id:'File diunduh.',en:'File downloaded.'},cleared:{id:'Semua jawaban dihapus.',en:'All answers cleared.'},
+  preview:{id:'Lihat ringkasan',en:'See summary'},
+  foot:{id:'Disiapkan oleh Studio 1801',en:'Prepared by Studio 1801'},priv:{id:'Privasi',en:'Privacy'},
+  missing:{id:'Belum dijawab: ',en:'Not answered yet: '},
+};
+
+/* Each question: id, title, why, guess (from the Bookkeeping Windpower tab), and one or more pickers.
+   picker: {k, label?, multi?, opts:[...]} ; every question also gets a free-text box. */
+const PARTS=[
+ {id:'A',main:true,title:{id:'A. Fondasi aplikasi',en:'A. The foundation'},sub:{id:'10 pertanyaan ini menentukan bentuk aplikasinya. Paling penting.',en:'These 10 decide how the app is built. Most important.'},qs:[
+  {id:'users',title:{id:'Siapa saja yang akan memakai aplikasi?',en:'Who will use the app?'},why:{id:'Menentukan login dan siapa boleh lihat/ubah apa.',en:'Decides logins and who can see or change what.'},
+   guess:{id:'di sheet, uang diterima oleh Ci Via, Bella, dan JW.',en:'in the sheet, money is received by Ci Via, Bella and JW.'},
+   pick:[{k:'who',label:{id:'Siapa yang akan input data?',en:'Who will enter data?'},multi:true,opts:[{id:'Ci Via',en:'Ci Via'},{id:'Ci Bella',en:'Ci Bella'},{id:'JW',en:'JW'},{id:'Staf gudang',en:'Warehouse staff'},{id:'Penagih / sales',en:'Collector / sales'}]},
+         {k:'see',label:{id:'Siapa yang boleh lihat laba dan bagian pemilik?',en:'Who may see profit and the owners\' share?'},opts:[{id:'Hanya Ci Via',en:'Only Ci Via'},{id:'Ci Via dan para pemilik',en:'Ci Via and the owners'},{id:'Semua yang input',en:'Everyone who enters data'}]}]},
+  {id:'brands',title:{id:'Merek apa saja yang masuk aplikasi?',en:'Which brands go in the app?'},why:{id:'Keputusan paling dasar: setiap catatan punya merek, atau bukunya terpisah.',en:'The most basic decision: every record carries a brand, or the books are separate.'},
+   pick:[{k:'scope',opts:[{id:'Windpower dulu, merek lain nanti di aplikasi yang sama',en:'Windpower first, other brands later in the same app'},{id:'Windpower, Aeolus, Apollo sekaligus',en:'Windpower, Aeolus and Apollo at once'},{id:'Windpower saja',en:'Windpower only'}],stack:true},
+         {k:'shared',label:{id:'Kalau nanti beberapa merek: kas dan daftar toko...',en:'If several brands later: cash and shop list...'},opts:[{id:'Digabung (satu kas, satu daftar toko)',en:'Shared (one cash, one shop list)'},{id:'Terpisah per merek',en:'Separate per brand'},{id:'Kas terpisah, daftar toko gabung',en:'Separate cash, shared shop list'}],stack:true}]},
+  {id:'money',title:{id:'Di mana saja uang Windpower disimpan?',en:'Where is Windpower money kept?'},why:{id:'Ini "dompet" di aplikasi. Semua pembayaran dan laporan bergantung pada ini.',en:'These are the app\'s "wallets". Every payment and report depends on them.'},
+   guess:{id:'setoran ke Bella dan JW, transfer ke BCA dan BRI.',en:'cash handed to Bella and JW, transfers to BCA and BRI.'},
+   pick:[{k:'places',multi:true,opts:[{id:'Kas Ci Via',en:'Ci Via\'s cash'},{id:'Kas Ci Bella',en:'Ci Bella\'s cash'},{id:'Kas JW',en:'JW\'s cash'},{id:'Bank BCA',en:'Bank BCA'},{id:'Bank BRI',en:'Bank BRI'},{id:'Bank lain',en:'Another bank'}]},
+         {k:'handover',label:{id:'Uang tunai yang diterima Bella/JW biasanya...',en:'Cash collected by Bella/JW usually...'},opts:[{id:'Langsung disetor ke bank',en:'Goes straight to the bank'},{id:'Diserahkan ke Ci Via',en:'Is handed to Ci Via'},{id:'Disimpan dulu, disetor sesekali',en:'Is kept, deposited now and then'}],stack:true}]},
+  {id:'stock',title:{id:'Stok dihitung satu total atau per lokasi?',en:'Is stock one total, or per location?'},why:{id:'Kalau per lokasi, setiap DO, penjualan, dan hitung stok perlu lokasi.',en:'Per location means every DO, sale and count needs a location.'},
+   guess:{id:'invoice Jakarta dikirim ke Palembang lalu Lampung, dan ada tab stok Padang.',en:'Jakarta invoices go to Palembang and later Lampung, and there is a Padang stock tab.'},
+   pick:[{k:'loc',opts:[{id:'Satu total saja',en:'One total'},{id:'Per lokasi: Palembang, Lampung, Padang',en:'Per location: Palembang, Lampung, Padang'},{id:'Per lokasi, tapi lokasinya lain',en:'Per location, but different places'}],stack:true}]},
+  {id:'ppn',title:{id:'PPN: apakah usaha ini PKP?',en:'VAT: is the business VAT-registered (PKP)?'},why:{id:'Kalau ya, setiap jual dan beli dipisah antara harga dan pajak.',en:'If yes, every sale and purchase is split into price and tax.'},
+   guess:{id:'total di nota = qty × harga, tanpa baris PPN.',en:'invoice total = qty × price, no VAT line.'},
+   pick:[{k:'pkp',opts:[{id:'Tidak PKP, tidak ada PPN',en:'Not PKP, no VAT'},{id:'PKP, harga sudah termasuk PPN',en:'PKP, prices include VAT'},{id:'PKP, PPN ditambah di atas harga',en:'PKP, VAT added on top'},{id:'Belum tahu, perlu tanya',en:'Not sure, need to ask'}],stack:true}]},
+  {id:'jakarta',title:{id:'Dokumen dari Jakarta: DO dan invoice',en:'Paperwork from Jakarta: DO and invoice'},why:{id:'Menentukan nomor mana yang dicatat dan kapan utang ke Jakarta mulai.',en:'Decides which number we track and when the debt to Jakarta starts.'},
+   guess:{id:'tab INVOICE WP pakai nomor seperti INV/2025/IX/155.',en:'the INVOICE WP tab uses numbers like INV/2025/IX/155.'},
+   pick:[{k:'doc',label:{id:'Nomor yang dipakai',en:'Number to use'},opts:[{id:'DO dan invoice nomornya sama',en:'DO and invoice share one number'},{id:'Pakai nomor DO',en:'Use the DO number'},{id:'Pakai nomor invoice (INV/...)',en:'Use the invoice number (INV/...)'},{id:'Catat keduanya',en:'Record both'}],stack:true},
+         {k:'start',label:{id:'Utang ke Jakarta dihitung mulai...',en:'The debt to Jakarta starts on...'},opts:[{id:'Tanggal DO',en:'The DO date'},{id:'Tanggal invoice',en:'The invoice date'},{id:'Tanggal barang tiba',en:'The day goods arrive'}]},
+         {k:'tempo',label:{id:'Tempo bayar ke Jakarta',en:'Days to pay Jakarta'},opts:[{id:'Bayar di depan',en:'Paid upfront'},{id:'30 hari',en:'30 days'},{id:'45 hari',en:'45 days'},{id:'60 hari',en:'60 days'}]}]},
+  {id:'shops',title:{id:'Aturan per toko: tetap atau tiap order?',en:'Rules per shop: fixed or per order?'},why:{id:'Kalau tetap, aplikasi mengisi otomatis dan memberi peringatan.',en:'If fixed, the app fills them in and warns when a rule is broken.'},
+   guess:{id:'tempo sering sama per toko (7, 10, 15, 30 hari), harga beda per toko.',en:'terms are often the same per shop (7, 10, 15, 30 days), prices differ per shop.'},
+   pick:[{k:'price',label:{id:'Harga',en:'Price'},opts:[{id:'Tetap per toko',en:'Fixed per shop'},{id:'Disepakati tiap order',en:'Agreed per order'},{id:'Satu harga untuk semua',en:'One price for all'}]},
+         {k:'terms',label:{id:'Tempo bayar',en:'Credit days'},opts:[{id:'Tetap per toko',en:'Fixed per shop'},{id:'Beda tiap order',en:'Differs per order'}]},
+         {k:'limit',label:{id:'Perlu batas maksimal hutang per toko?',en:'Need a maximum a shop can owe?'},opts:[{id:'Ya, perlu',en:'Yes'},{id:'Tidak perlu',en:'No'}]}]},
+  {id:'owners',title:{id:'Bagian para pemilik',en:'The owners\' shares'},why:{id:'Menentukan apakah laporan menunjukkan bagian laba per pemilik.',en:'Decides whether reports show each owner\'s share of profit.'},
+   guess:{id:'ada tab Shares/Expenses dengan porsi modal per pemilik.',en:'there is a Shares/Expenses tab with each owner\'s capital share.'},
+   pick:[{k:'split',opts:[{id:'Tampilkan bagian laba per pemilik',en:'Show each owner\'s profit share'},{id:'Tidak perlu ditampilkan',en:'No need to show it'}],stack:true},
+         {k:'for',label:{id:'Porsi itu berlaku untuk...',en:'The split applies to...'},opts:[{id:'Windpower saja',en:'Windpower only'},{id:'Semua merek',en:'All brands'},{id:'Beda per merek',en:'Differs per brand'}]}]},
+  {id:'start',title:{id:'Mulai dari kapan?',en:'Where do we start?'},why:{id:'Memasukkan riwayat berarti merapikan sheet dulu (tanggal, nama toko).',en:'Bringing in history means cleaning the sheet first (dates, shop names).'},
+   pick:[{k:'how',opts:[{id:'Mulai bersih tgl 1 bulan depan + nota yang belum lunas saja (disarankan)',en:'Fresh on the 1st of next month + only unpaid invoices (recommended)'},{id:'Mulai bersih tgl 1 bulan depan dengan saldo awal saja',en:'Fresh on the 1st with opening balances only'},{id:'Masukkan semua riwayat sejak Okt 2025',en:'Bring in all history since Oct 2025'}],stack:true}]},
+  {id:'device',title:{id:'Pakai HP atau laptop? Internet di gudang?',en:'Phone or laptop? Internet at the warehouse?'},why:{id:'Kalau internet sering putus, aplikasi harus bisa simpan dulu lalu kirim nanti.',en:'If the internet drops often, the app must save first and send later.'},
+   pick:[{k:'dev',multi:true,opts:[{id:'HP Android',en:'Android phone'},{id:'iPhone',en:'iPhone'},{id:'Laptop',en:'Laptop'}]},
+         {k:'net',label:{id:'Internet di gudang',en:'Internet at the warehouse'},opts:[{id:'Lancar',en:'Good'},{id:'Kadang putus',en:'Sometimes drops'},{id:'Tidak ada',en:'None'}]}]},
+ ]},
+ {id:'B',title:{id:'B. Detail (boleh dijawab nanti)',en:'B. Details (can be answered later)'},sub:{id:'Ini bisa ditambahkan tanpa mengubah fondasi.',en:'These can be added without changing the foundation.'},qs:[
+  {id:'cheque',title:{id:'Cek dan giro',en:'Cheques and giro'},guess:{id:'banyak catatan "cek permata" dengan tanggal cair.',en:'many notes like "cek permata" with a clearing date.'},
+   pick:[{k:'keep',label:{id:'Siapa yang simpan dan setor cek/giro?',en:'Who keeps and deposits cheques?'},multi:true,opts:[{id:'Ci Via',en:'Ci Via'},{id:'Ci Bella',en:'Ci Bella'},{id:'JW',en:'JW'}]},
+         {k:'bounce',label:{id:'Pernah ada cek/giro tolak?',en:'Has a cheque ever bounced?'},opts:[{id:'Pernah',en:'Yes'},{id:'Belum pernah',en:'Never'}]}]},
+  {id:'truck',title:{id:'Ongkos truk dari Jakarta',en:'Truck cost from Jakarta'},pick:[{k:'who',opts:[{id:'Kita yang bayar',en:'We pay'},{id:'Jakarta yang bayar',en:'Jakarta pays'},{id:'Dibagi',en:'Shared'}]}]},
+  {id:'ndp',title:{id:'Dua harga di tab NDP (mis. 1.865.500 dan 1.827.700)',en:'Two prices in the NDP tab (e.g. 1,865,500 and 1,827,700)'},
+   pick:[{k:'mean',opts:[{id:'Harga tempo dan harga tunai',en:'Credit price and cash price'},{id:'Harga lama dan harga baru',en:'Old and new price'},{id:'Lainnya',en:'Something else'}]},
+         {k:'pay',label:{id:'Biasanya bayar yang mana?',en:'Which do you usually pay?'},opts:[{id:'Yang lebih tinggi (tempo)',en:'The higher one (credit)'},{id:'Yang lebih rendah (tunai)',en:'The lower one (cash)'}]}]},
+  {id:'short',title:{id:'Kalau hitungan gudang beda dengan DO',en:'When the warehouse count differs from the DO'},pick:[{k:'how',opts:[{id:'Klaim, Jakarta kirim ganti',en:'Claim, Jakarta sends a replacement'},{id:'Jakarta potong tagihan',en:'Jakarta reduces the bill'},{id:'Jarang terjadi',en:'Rarely happens'}],stack:true}]},
+  {id:'claim',title:{id:'Ban klaim dari toko',en:'Tires returned under warranty'},guess:{id:'ada ban klaim dijual Rp 500.000 dengan nomor seri.',en:'a claimed tire sold at Rp 500,000 with a serial number.'},
+   pick:[{k:'how',multi:true,opts:[{id:'Dikirim ke Jakarta, diganti baru',en:'Sent to Jakarta, replaced'},{id:'Dijual murah ke toko',en:'Sold cheaply to the shop'},{id:'Toko dapat potongan',en:'Shop gets a discount'}]}]},
+  {id:'ship',title:{id:'Ongkir ke luar kota',en:'Shipping to other towns'},pick:[{k:'who',opts:[{id:'Ditanggung kita',en:'We pay it'},{id:'Ditambah ke nota toko',en:'Added to the shop\'s invoice'},{id:'Toko bayar langsung ke ekspedisi',en:'Shop pays the courier directly'}],stack:true}]},
+  {id:'late',title:{id:'Kapan toko dianggap telat?',en:'When is a shop late?'},pick:[{k:'when',opts:[{id:'Sehari setelah jatuh tempo',en:'The day after the due date'},{id:'Setelah 7 hari',en:'After 7 days'},{id:'Setelah 14 hari',en:'After 14 days'}]}]},
+  {id:'remind',title:{id:'Pengingat WhatsApp ke toko',en:'WhatsApp reminders to shops'},pick:[{k:'ok',opts:[{id:'Boleh, dari HP Ci Via',en:'Yes, from Ci Via\'s phone'},{id:'Boleh, dari nomor usaha',en:'Yes, from a business number'},{id:'Jangan dulu',en:'Not yet'}],stack:true}]},
+  {id:'comm',title:{id:'Ada komisi untuk sales/penagih?',en:'Is there commission for sales/collectors?'},pick:[{k:'yes',opts:[{id:'Ada',en:'Yes'},{id:'Tidak ada',en:'No'}]}]},
+  {id:'costs',title:{id:'Biaya rutin yang mau dicatat',en:'Running costs to track'},guess:{id:'tab Shares/Expenses mencatat BBM per mobil dan token listrik gudang.',en:'the Shares/Expenses tab tracks fuel per vehicle and warehouse electricity.'},
+   pick:[{k:'list',multi:true,opts:[{id:'Gaji',en:'Salaries'},{id:'Sewa gudang',en:'Warehouse rent'},{id:'BBM per mobil',en:'Fuel per vehicle'},{id:'Listrik',en:'Electricity'},{id:'Servis mobil',en:'Vehicle service'},{id:'Bongkar muat',en:'Loading and unloading'}]}]},
+  {id:'reports',title:{id:'Laporan yang ingin dilihat',en:'Reports you want to see'},
+   pick:[{k:'list',multi:true,opts:[{id:'Harian: yang harus ditagih',en:'Daily: what to collect'},{id:'Mingguan: penjualan dan stok',en:'Weekly: sales and stock'},{id:'Bulanan: laba rugi',en:'Monthly: profit and loss'},{id:'Bulanan: bagian per pemilik',en:'Monthly: each owner\'s share'},{id:'Untuk akuntan atau pajak',en:'For the accountant or tax'}]}]},
+ ]},
+ {id:'C',title:{id:'C. Cara input baru',en:'C. The new way of logging'},sub:{id:'Usulan kami supaya catatan rapi dan tidak ada pembayaran yang terlewat. Ci setuju?',en:'Our proposal so records stay tidy and no payment gets lost. Do you agree?'},habits:[
+  {id:'h1',t:{id:'Setiap nota dimasukkan di hari yang sama, dengan nomor faktur yang sama, dan toko dipilih dari daftar.',en:'Every invoice is entered the same day, with the same number, picking the shop from the list.'}},
+  {id:'h2',t:{id:'Siapa pun yang menerima uang (termasuk Bella dan JW) mencatatnya sendiri di HP: tunai, transfer, atau cek, dan nota mana yang dibayar.',en:'Whoever receives money (Bella and JW included) records it on their own phone: cash, transfer or cheque, and which invoices it pays.'}},
+  {id:'h3',t:{id:'Setoran atau serah terima uang dicatat sebagai "Pindah uang", supaya jelas siapa memegang berapa.',en:'Handing over or depositing money is recorded as "Moved money", so it is always clear who holds what.'}},
+  {id:'h4',t:{id:'Cek dan giro dicatat saat diterima: bank, nomor, dan tanggal cair.',en:'Cheques and giro are recorded when received: bank, number and clearing date.'}},
+  {id:'h5',t:{id:'DO dicatat saat dibuka, lalu ditandai "Ban tiba" dengan hitungan gudang saat truk datang.',en:'A DO is recorded when opened, then marked "Tires arrived" with the warehouse count when the truck comes.'}},
+  {id:'h6',t:{id:'Salah catat diperbaiki atau dibatalkan (void), bukan dihapus dan diketik ulang.',en:'Mistakes are fixed or voided, never deleted and retyped.'}},
+  {id:'h7',t:{id:'Gudang dihitung sebulan sekali, selisihnya dicatat.',en:'The warehouse is counted once a month and any difference is recorded.'}},
+  {id:'h8',t:{id:'Excel jadi hasil unduhan, bukan tempat mengetik. Ci tetap bisa unduh format yang sama kapan saja.',en:'The Excel becomes the download, not the place to type. You can still download the same layout any time.'}},
+ ]},
+ {id:'D',title:{id:'D. Data untuk hari pertama',en:'D. Data for day one'},sub:{id:'Disiapkan untuk tanggal mulai. Tandai kalau sudah siap.',en:'To prepare for the start date. Mark when ready.'},prep:[
+  {id:'d1',t:{id:'Uang tunai yang dipegang tiap orang (Ci Via, Bella, JW)',en:'Cash each person holds (Ci Via, Bella, JW)'}},
+  {id:'d2',t:{id:'Saldo tiap rekening bank',en:'Each bank account balance'}},
+  {id:'d3',t:{id:'Hitungan stok per jenis ban (per lokasi kalau perlu)',en:'Stock count per tire type (per location if needed)'}},
+  {id:'d4',t:{id:'Daftar nota yang belum lunas: nomor, toko, sisa, jatuh tempo',en:'Unpaid invoices: number, shop, amount left, due date'}},
+  {id:'d5',t:{id:'Utang ke Jakarta: nomor DO/invoice, jumlah, jatuh tempo',en:'What is owed to Jakarta: DO/invoice number, amount, due date'}},
+  {id:'d6',t:{id:'Daftar toko resmi: satu nama per toko, kota, nomor HP, tempo, harga',en:'Official shop list: one name per shop, town, phone, terms, price'}},
+  {id:'d7',t:{id:'Cek/giro yang belum cair: bank, nomor, jumlah, tanggal cair',en:'Cheques not cleared yet: bank, number, amount, clearing date'}},
+ ]},
+];
+
+const mainQs=PARTS.filter(p=>p.main).flatMap(p=>p.qs);
+const answered=q=>q.pick.every(pk=>{const v=A[q.id+'.'+pk.k];return Array.isArray(v)?v.length:!!v;})||!!(A[q.id+'.note']||'').trim();
+const optKey=o=>o.id;
+
+function render(){
+  document.documentElement.lang=L;
+  document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===L)));
+  $('#t-brand').textContent=t(UI.brand);$('#t-foot').textContent=t(UI.foot);$('#t-priv').textContent=t(UI.priv);
+  document.title=t(UI.brand)+': '+t(UI.title);
+  let h=`<h1>${esc(t(UI.title))}</h1><p class="lead">${esc(t(UI.lead))}</p>`;
+  let n=0;
+  for(const P of PARTS){
+    h+=`<section class="part"><h2>${esc(t(P.title))}</h2><p class="sub">${esc(t(P.sub))}</p>`;
+    if(P.qs)for(const q of P.qs){n++;
+      h+=`<div class="q" id="q-${q.id}"><span class="num">${P.id}${P.qs.indexOf(q)+1}</span>${answered(q)?`<span class="done">✓</span>`:''}<h3>${esc(t(q.title))}</h3>${q.why?`<p class="why">${esc(t(q.why))}</p>`:''}${q.guess?`<p class="guess">${esc(t(UI.guess)+t(q.guess))}</p>`:''}`;
+      for(const pk of q.pick){const key=q.id+'.'+pk.k,v=A[key];
+        if(pk.label)h+=`<p class="sub-q">${esc(t(pk.label))}${pk.multi?` <span class="small">(${esc(t(UI.multi))})</span>`:''}</p>`;else if(pk.multi)h+=`<p class="small" style="margin:0 0 8px">${esc(t(UI.multi))}</p>`;
+        h+=`<div class="opts" role="group">${pk.opts.map(o=>{const on=pk.multi?(v||[]).includes(optKey(o)):v===optKey(o);return `<button type="button" class="opt${pk.stack?' stack':''}" data-q="${key}" data-v="${esc(optKey(o))}" data-multi="${pk.multi?1:0}" aria-pressed="${on}">${esc(t(o))}</button>`;}).join('')}</div>`;}
+      h+=`<input type="text" data-note="${q.id}.note" value="${esc(A[q.id+'.note']||'')}" placeholder="${esc(t(UI.other))}" aria-label="${esc(t(UI.other))}"></div>`;}
+    if(P.habits)h+=P.habits.map((x,i)=>{const v=A['C.'+x.id];return `<div class="q"><span class="num">C${i+1}</span><h3 style="font-size:16px">${esc(t(x.t))}</h3><div class="opts">${[['agree',UI.agree],['discuss',UI.discuss]].map(([k,lab])=>`<button type="button" class="opt" data-q="C.${x.id}" data-v="${k}" data-multi="0" aria-pressed="${v===k}">${esc(t(lab))}</button>`).join('')}</div>${v==='discuss'?`<input type="text" data-note="C.${x.id}.note" value="${esc(A['C.'+x.id+'.note']||'')}" placeholder="${esc(t(UI.other))}">`:''}</div>`;}).join('');
+    if(P.prep)h+=`<div class="q checklist">${P.prep.map(x=>{const v=A['D.'+x.id];return `<div style="padding-block:10px;border-bottom:1px solid var(--rule)"><p style="margin:0 0 8px;font-size:15px">${esc(t(x.t))}</p><div class="opts">${[['ready',UI.ready],['notyet',UI.notyet]].map(([k,lab])=>`<button type="button" class="opt" data-q="D.${x.id}" data-v="${k}" data-multi="0" aria-pressed="${v===k}">${esc(t(lab))}</button>`).join('')}</div></div>`;}).join('')}</div>`;
+    h+=`</section>`;}
+  const miss=mainQs.filter(q=>!answered(q));
+  h+=`<section class="send"><h2 style="font-size:22px;font-weight:500;margin:0 0 6px">${esc(t(UI.sendT))}</h2><p class="small" style="margin:0">${esc(t(UI.sendL))}</p>
+    ${miss.length?`<p class="small" style="margin-top:10px">${esc(t(UI.missing))}${miss.map(q=>`<a href="#q-${q.id}">A${mainQs.indexOf(q)+1}</a>`).join(', ')}</p>`:''}
+    <div class="btns"><button class="btn primary" data-act="wa">${esc(t(UI.wa))}</button><button class="btn" data-act="copy">${esc(t(UI.copy))}</button><button class="btn" data-act="dl">${esc(t(UI.dl))}</button></div>
+    <details style="margin-top:14px"><summary class="small" style="cursor:pointer">${esc(t(UI.preview))}</summary><pre id="sum">${esc(summary())}</pre></details>
+    <div class="btns"><button class="btn" data-act="reset" id="resetBtn">${esc(t(UI.reset))}</button></div></section>`;
+  $('#main').innerHTML=h;progress();
+}
+function progress(){const a=mainQs.filter(answered).length,b=mainQs.length;$('#bar').style.width=(a/b*100)+'%';$('#ptext').textContent=t(UI.progress).replace('{a}',a).replace('{b}',b);}
+
+function label(qid,k,v){const P=PARTS.find(p=>p.qs&&p.qs.some(q=>q.id===qid));const q=P&&P.qs.find(x=>x.id===qid);const pk=q&&q.pick.find(x=>x.k===k);const o=pk&&pk.opts.find(x=>optKey(x)===v);return o?t(o):v;}
+function summary(){
+  const out=[t(UI.brand)+': '+t(UI.title),''];
+  for(const P of PARTS){out.push('== '+t(P.title)+' ==');
+    if(P.qs)P.qs.forEach((q,i)=>{const parts=[];for(const pk of q.pick){const v=A[q.id+'.'+pk.k];const vals=Array.isArray(v)?v.map(x=>label(q.id,pk.k,x)):v?[label(q.id,pk.k,v)]:[];parts.push((pk.label?t(pk.label)+' ':'')+(vals.length?vals.join(', '):'-'));}
+      const note=(A[q.id+'.note']||'').trim();out.push(`${P.id}${i+1}. ${t(q.title)}`);parts.forEach(x=>out.push('   '+x));if(note)out.push('   '+t(UI.other)+': '+note);});
+    if(P.habits)P.habits.forEach((x,i)=>{const v=A['C.'+x.id];const note=(A['C.'+x.id+'.note']||'').trim();out.push(`C${i+1}. ${v==='agree'?t(UI.agree):v==='discuss'?t(UI.discuss):'-'}${note?' ('+note+')':''}`);});
+    if(P.prep)P.prep.forEach((x,i)=>{const v=A['D.'+x.id];out.push(`D${i+1}. ${t(x.t)}: ${v==='ready'?t(UI.ready):v==='notyet'?t(UI.notyet):'-'}`);});
+    out.push('');}
+  return out.join('\n');
+}
+function toast(m){const e=$('#toast');e.textContent=m;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2600);}
+
+document.addEventListener('click',async ev=>{
+  const lb=ev.target.closest('[data-lang]');if(lb){L=lb.dataset.lang;try{localStorage.setItem('wb-q-lang',L);}catch(_){}const y=scrollY;render();scrollTo(0,y);return;}
+  const b=ev.target.closest('[data-q]');
+  if(b){const key=b.dataset.q,v=b.dataset.v;
+    if(b.dataset.multi==='1'){const arr=Array.isArray(A[key])?A[key].slice():[];const i=arr.indexOf(v);if(i>=0)arr.splice(i,1);else arr.push(v);A[key]=arr;}
+    else A[key]=A[key]===v?'':v;
+    save();const y=scrollY;render();scrollTo(0,y);return;}
+  const a=ev.target.closest('[data-act]');if(!a)return;const act=a.dataset.act,txt=summary();
+  if(act==='wa'){location.href='https://wa.me/?text='+encodeURIComponent(txt);}
+  else if(act==='copy'){try{await navigator.clipboard.writeText(txt);toast(t(UI.copied));}catch(_){const s=$('#sum');s.closest('details').open=true;const r=document.createRange();r.selectNodeContents(s);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}}
+  else if(act==='dl'){const u=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));const l=document.createElement('a');l.href=u;l.download='jawaban-windpower-books.txt';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast(t(UI.saved));}
+  else if(act==='reset'){if(a.dataset.sure!=='1'){a.dataset.sure='1';a.textContent=t(UI.resetSure);setTimeout(()=>{if(a.isConnected){a.dataset.sure='';a.textContent=t(UI.reset);}},4000);return;}A={};save();render();scrollTo(0,0);toast(t(UI.cleared));}
+});
+document.addEventListener('input',ev=>{const k=ev.target.dataset&&ev.target.dataset.note;if(!k)return;A[k]=ev.target.value;save();progress();const s=$('#sum');if(s)s.textContent=summary();});
+document.addEventListener('change',ev=>{if(ev.target.dataset&&ev.target.dataset.note){const y=scrollY;render();scrollTo(0,y);}});
+render();
+})();
+</script>
+</body>
+</html>
