@@ -447,6 +447,15 @@ details.extras summary{font-size:14px}
 @media (max-width:640px){.toolbar{padding:14px 18px;gap:14px 18px}.tsel{min-width:0;flex:1 1 40%}.tstep{order:3;flex:1 1 100%;justify-content:space-between;border-top:1px solid var(--rule);padding-top:10px}.tdl{order:4;margin-left:0}}
 @media (max-width:640px){.tabs-scroll{overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}.tabs-scroll::-webkit-scrollbar{display:none}.tabs-scroll .seg{flex-wrap:nowrap;white-space:nowrap;width:max-content}}
 @media (max-width:760px){.hello .seg{display:none}}
+
+/* v11: reports read like a story first, statement second */
+.insum{padding:22px 26px;overflow:hidden}
+.insum .say{font-size:clamp(17px,1.9vw,21px);line-height:1.45;letter-spacing:-0.005em;margin:8px 0 0;max-width:62ch}
+.insum .say b{font-weight:500}
+.kpis.three{grid-template-columns:repeat(3,minmax(0,1fr));margin:20px -26px -22px;border-top:1px solid var(--rule)}
+@media (max-width:760px){.kpis.three{grid-template-columns:1fr 1fr;margin:18px -18px -18px}.insum{padding:18px}.kpis.three .kpi:nth-child(3){border-left:0;border-top:1px solid var(--rule);grid-column:1/-1}}
+.srow{font-variant-numeric:tabular-nums}
+
 </style>
 </head>
 <body>
@@ -1440,8 +1449,10 @@ function comparePeriod(){
   if(r.preset==='custom'){const [f,t]=period();
     if(r.cmp==='yoy'){const sh=x=>{const d=parseD(x);d.setFullYear(d.getFullYear()-1);return iso(d);};return periodOf('custom',0,sh(f),sh(t));}
     const len=daysBetween(f,t),t2=addDaysTo(f,-1);return periodOf('custom',0,addDaysTo(t2,-len),t2);}
-  const step=r.cmp==='yoy'?{month:12,quarter:4,half:2,year:1,ytd:1}[r.preset]:1;
-  return periodOf(r.preset,off-step,'','');
+  const step=r.cmp==='yoy'?{month:12,quarter:4,half:2,year:1,ytd:1}[r.preset]:1,cp=periodOf(r.preset,off-step,'',''),cur=periodOf(r.preset,off,'',''),T=today();
+  /* the current period is not over: compare the same number of days, so it is fair */
+  if(r.preset!=='ytd'&&cur.f<=T&&cur.t>T){const t=addDaysTo(cp.f,daysBetween(cur.f,T));if(t<cp.t)return {...cp,t,short:r.preset==='month'?`1 to ${short(t)}`:`${cp.short} to ${short(t)}`,label:`${cp.label}, up to ${niceL(t)}`,cut:true,base:cp.short};}
+  return cp;
 }
 const niceL=s=>parseD(s).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 const RID={pl:'Profit and Loss Statement',bs:'Balance Sheet',cf:'Cash Flow Statement',ar:'Receivables Aging',st:'Inventory Listing'};
@@ -1505,7 +1516,7 @@ function reportCharts(from,to){
   return `<div class="hgrid2" style="margin-top:22px">
     <div class="card"><div class="chead"><div><h2 class="ch">Profit ${({month:"month by month",quarter:"by quarter",half:"by semester",year:"by year",ytd:"year to date, by year"})[g]}</h2><p class="small" style="margin-top:4px">After tire cost and running costs</p></div></div>${bars}</div>
     <div class="card"><div class="chead"><div><h2 class="ch">Where the sales money went</h2><p class="small" style="margin-top:4px">${esc(niceL(from<st?st:from))} to ${esc(niceL(to>today()?today():to))}</p></div></div>
-      <div class="hero-n" style="font-size:clamp(32px,4vw,48px)"><span class="cur">Rp</span>${fmt(P.net)}</div><p class="small" style="margin:6px 0 16px">Sales, ${P.tires} tires</p>${split}</div></div>`;
+      <div style="margin-top:22px">${split}</div><p class="small" style="margin-top:16px">Out of every Rp 100 of sales: Rp ${Math.round(tire/(P.net||1)*100)} paid for the tires, Rp ${Math.round(run/(P.net||1)*100)} for running costs${prof>0.5?`, Rp ${Math.round(prof/(P.net||1)*100)} profit`:''}.</p></div></div>`;
 }
 /* rows of two statements lined up by line name, keeping the order of both */
 function mergeRows(A,B){
@@ -1517,9 +1528,32 @@ function mergeRows(A,B){
 }
 const chg=(a,b)=>{if(a==null||b==null)return '';if(a<=0&&b<=0){a=-a;b=-b;}const d=Math.round(a)-Math.round(b);if(!d)return '<span class="muted">No change</span>';
   const pc=Math.round(b)?d/Math.abs(b)*100:null;return `${d>0?'+':'-'}${esc(fmtShort(Math.abs(d)).replace('Rp ',''))}${pc==null?'':`<span class="pc">${d>0?'+':''}${pc.toLocaleString('id-ID',{maximumFractionDigits:Math.abs(pc)<10?1:0})}%</span>`}`;};
+/* "In short": the report in plain words, with three key numbers */
+function reportSummary(tab,from,to,CP,cap,running,P0){
+  const c=compute(from,to),c2=CP?compute(CP.f,cap(CP.t)):null,vs=(a,b,cost)=>{if(!c2||b==null)return '';if(cost){a=-a;b=-b;}const d=Math.round(a)-Math.round(b);if(!d)return `<span class="small">Same as ${esc(CP.short)}</span>`;const pc=Math.round(b)?Math.round(d/Math.abs(b)*100):null;return `<span class="small">${pc==null?(d>0?'Up':'Down'):(d>0?'+':'')+pc+'%'} vs ${esc(CP.short)}</span>`;};
+  const tile=(lab,val,sub,neg)=>`<div class="kpi"><span class="micro">${lab}</span><span class="kv${neg?' neg':''}">${val}</span>${sub||'<span class="small">&nbsp;</span>'}</div>`;
+  const when=running?`${esc(P0.short)} so far`:esc(P0.short),asof=esc(niceL(to===FAR?today():to));let say='',tiles='';
+  if(tab==='pl'){const P=c.P,Q=c2&&c2.P,mg=P.net?Math.round(P.profit/P.net*1000)/10:0;
+    say=P.net?`In ${when} you sold <b>${P.tires} tires</b> for <b>${rp(P.net)}</b>. After paying for those tires and the running costs, <b>${P.profit>=0?'the profit is':'the loss is'} ${rp(Math.abs(P.profit))}</b>, about ${String(Math.abs(mg)).replace('.',',')} rupiah on every 100 rupiah sold.`:`No sales in ${when}.`;
+    if(Q&&P.net&&Q.net){const d=P.profit-Q.profit;say+=` That is ${rp(Math.abs(d))} ${d>=0?'more':'less'} profit than ${CP.cut?'the same days of '+esc(CP.base):esc(CP.short)}.`;}
+    tiles=tile('Sales',fmtShort(P.net),vs(P.net,Q&&Q.net))+tile('Tires sold',P.tires,vs(P.tires,Q&&Q.tires))+tile('Profit',fmtShort(P.profit),vs(P.profit,Q&&Q.profit),P.profit<0);}
+  else if(tab==='bs'){const own=c.money+c.arGross+c.apCredit+c.stockVal,owe=c.apGross+c.arCredit,ow2=c2?c2.money+c2.arGross+c2.apCredit+c2.stockVal:null;
+    say=`On ${asof} the business has <b>${rp(own)}</b>: ${rp(c.money)} in cash and banks, ${rp(c.arGross)} still owed by shops, and ${rp(c.stockVal)} in tires. It owes <b>${rp(owe)}</b>, mostly to Jakarta. What is left for the owners is <b>${rp(c.equity)}</b>.`;
+    tiles=tile('The business has',fmtShort(own),vs(own,ow2))+tile('It owes',fmtShort(owe),vs(owe,c2&&c2.apGross+c2.arCredit))+tile("Owners' share",fmtShort(c.equity),vs(c.equity,c2&&c2.equity),c.equity<0);}
+  else if(tab==='cf'){const C=c.C,inn=C.saleCash+C.arIn+C.capIn,out=C.buyCash+C.apOut+C.expOut+C.drawOut,net=inn-out,C2=c2&&c2.C;
+    say=`In ${when}, <b>${rp(inn)}</b> came in and <b>${rp(out)}</b> went out, so cash went ${net>=0?'up':'down'} by <b>${rp(Math.abs(net))}</b>. Cash and banks now hold ${rp(c.money)}.`;
+    tiles=tile('Money in',fmtShort(inn),vs(inn,C2&&C2.saleCash+C2.arIn+C2.capIn))+tile('Money out',fmtShort(out),vs(out,C2&&C2.buyCash+C2.apOut+C2.expOut+C2.drawOut))+tile('Change in cash',(net>=0?'+':'')+fmtShort(net),'',net<0);}
+  else if(tab==='ar'){const L=c.openAR,late=L.filter(o=>o.due<to),l30=L.filter(o=>daysBetween(o.due,to)>30),sm=X=>X.reduce((a,o)=>a+o.open,0);
+    say=L.length?`On ${asof} shops owe <b>${rp(sm(L))}</b> on ${L.length} invoice${L.length===1?'':'s'}. <b>${rp(sm(late))}</b> is past its due date${l30.length?`, and ${rp(sm(l30))} of that is more than 30 days late`:''}.`:`On ${asof} no shop owes anything.`;
+    tiles=tile('Shops owe',fmtShort(sm(L)),`<span class="small">${L.length} invoices</span>`)+tile('Late',fmtShort(sm(late)),`<span class="small">${late.length} invoices</span>`,sm(late)>0.5)+tile('Over 30 days late',fmtShort(sm(l30)),`<span class="small">${l30.length} invoices</span>`,sm(l30)>0.5);}
+  else{const ids=Object.keys(c.st),q=ids.reduce((a,k)=>a+Math.max(0,c.st[k].q),0);
+    say=`On ${asof} there are <b>${q} tires</b> in the warehouse, worth <b>${rp(c.stockVal)}</b> at what they cost.`;
+    tiles=tile('Tires',q,'')+tile('Worth at cost',fmtShort(c.stockVal),'')+tile('Average per tire',fmtShort(q?c.stockVal/q:0),'');}
+  return `<div class="card insum"><p class="micro">In short</p><p class="say">${say}</p><div class="kpis three">${tiles}</div></div>`;
+}
 function pageReports(){
   const r=S.rp,tab=r.tab,asOf=['bs','ar','st'].includes(tab),P0=periodOf(r.preset,r.off||0,r.from,r.to);
-  const cap=t=>asOf&&t>today()?today():t,from=P0.f,to=cap(P0.t),{R,c}=statementRows(tab,from,to);
+  const cap=t=>asOf&&t>today()?today():t,from=P0.f,to=cap(P0.t),{R,c}=statementRows(tab,from,to),running=!asOf&&P0.t>today()&&P0.f<=today();
   const canCmp=['pl','bs','cf'].includes(tab),CP0=canCmp?comparePeriod():null,early=CP0&&CP0.t<START_D(),CP=early?null:CP0,R2=CP?statementRows(tab,CP.f,cap(CP.t)).R:null;
   const when=(x,t)=>asOf?'as of '+niceL(t===FAR?today():t):(r.preset==='all'?'from the start of the book to '+niceL(today()):x.label);
   const seg=(key,opts,cur)=>`<div class="seg" role="group">${opts.map(([v,l])=>`<button type="button" data-act="${key}" data-v="${v}" aria-pressed="${v===cur}">${l}</button>`).join('')}</div>`;
@@ -1530,12 +1564,11 @@ function pageReports(){
   const stepper=!['all','custom'].includes(r.preset)?`<div class="tstep"><button type="button" data-act="rp-step" data-v="-1" aria-label="Earlier period">‹</button><span>${esc(P0.short)}</span><button type="button" data-act="rp-step" data-v="1"${(r.off||0)>=0?' disabled':''} aria-label="Later period">›</button></div>`:'';
   let rows;
   if(R2){const L=mergeRows(R,R2);
-    rows=`<div class="srow cmp headc"><span></span><span>${esc(P0.short)}</span><span>${esc(CP.short)}</span><span>Change</span></div>`+L.map((x,i)=>x.k==='note'?(x.only2?'':`<div class="srow note">${esc(x.l)}</div>`):`<div class="srow cmp ${x.k}" style="animation-delay:${Math.min(i*20,500)}ms"><span${x.x&&!S.explain?` data-tip="${esc(x.x)}" class="hasx"`:''}>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span><span class="was">${x.v2==null?'':esc(rp(x.v2))}</span><span class="dl">${x.v==null?'':chg(x.v,x.v2)}</span></div>`).join('');}
-  else rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*24,600)}ms"><span${x.x&&!S.explain?` data-tip="${esc(x.x)}" class="hasx"`:''}>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':M(x.v)}</span></div>`).join('');
+    rows=`<div class="srow cmp headc"><span></span><span>${esc(P0.short)}</span><span>${esc(CP.short)}</span><span>Change</span></div>`+L.map((x,i)=>x.k==='note'?(x.only2?'':`<div class="srow note">${esc(x.l)}</div>`):`<div class="srow cmp ${x.k}" style="animation-delay:${Math.min(i*20,500)}ms"><span${x.x&&!S.explain?` data-tip="${esc(x.x)}" class="hasx"`:''}>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':(['total','grand'].includes(x.k)?M(x.v):esc(rp(x.v)))}</span><span class="was">${x.v2==null?'':esc(rp(x.v2))}</span><span class="dl">${x.v==null?'':chg(x.v,x.v2)}</span></div>`).join('');}
+  else rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*24,600)}ms"><span${x.x&&!S.explain?` data-tip="${esc(x.x)}" class="hasx"`:''}>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':(['total','grand'].includes(x.k)?M(x.v):esc(rp(x.v)))}</span></div>`).join('');
   const stamp=tab==='bs'?(Math.abs(c.diff)<1?'<span class="stamp">Balanced</span>':`<span class="stamp off">Off by ${rp(c.diff)}</span>`):'';
-  const running=!asOf&&P0.t>today()&&P0.f<=today();
   const sub=R2?`${esc(P0.short)} vs ${esc(CP.short)} · in Rupiah`:`${esc(when(P0,to)).replace(/^./,ch=>ch.toUpperCase())} · in Rupiah`;
-  const fine=[running?`${esc(P0.short)} is still running, so it counts up to today.`:'',R2?'For costs, a plus means the cost went up.':'',early?`Nothing to compare yet: the book starts ${esc(short(START_D()))}.`:'',canCmp||r.preset==='all'?'':'Comparison is for Profit and loss, Balance sheet and Cash flow.'].filter(Boolean).join(' ');
+  const fine=[running?(R2&&CP.cut?`${esc(P0.short)} is not over yet, so both columns count the same number of days.`:`${esc(P0.short)} is not over yet, so it counts up to today.`):'',R2&&tab!=='bs'?'For costs, a plus means the cost went up.':'',early?`Nothing to compare yet: the book starts ${esc(short(START_D()))}.`:'',canCmp||r.preset==='all'?'':'Comparison is for Profit and loss, Balance sheet and Cash flow.'].filter(Boolean).join(' ');
   return `<section class="wrap"><h1 class="h1">Financial reports</h1>
     <p class="small" style="margin-top:10px">For the accountant. Day to day, Home already shows what matters.</p>
     <div class="tabs-scroll" style="margin-top:22px">${seg('rp-tab',Object.keys(RID).map(k=>[k,REN[k]]),tab)}</div>
@@ -1546,9 +1579,10 @@ function pageReports(){
       ${cmpOpts.length&&canCmp?sel('rp-cmp-sel',cmpOpts,cmpVal,'Compare with'):''}
       <button class="btn sm tdl" data-act="export-report">Download</button>
     </div>
-    ${reportCharts(asOf?(r.preset==='all'?START:P0.f):from,to)}
+    <div style="margin-top:22px">${reportSummary(tab,from,to,CP,cap,running,P0)}</div>
+    ${tab==='pl'?reportCharts(from,to):''}
     <article class="statement${R2?' wide':''}"><div class="head"><p class="micro">${esc(D().setup.name||'Windpower Books')}</p><h2 class="h1" style="font-size:clamp(30px,5vw,44px)">${RID[tab]}</h2><p class="small">${sub}</p>${stamp}</div>${fine?`<p class="cmpkey">${fine}</p>`:''}
-    <div class="row" style="justify-content:center"><button class="link" data-act="explain">${S.explain?'Hide explanations':'Show explanations'}</button></div>
+    <div class="row" style="justify-content:center"><button class="btn sm" data-act="explain">${S.explain?'Hide the meaning of each line':'Show the meaning of each line'}</button></div>
     <div>${rows}</div>
     </article></section>`;
 }
