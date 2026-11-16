@@ -1449,9 +1449,7 @@ function comparePeriod(){
   if(r.preset==='custom'){const [f,t]=period();
     if(r.cmp==='yoy'){const sh=x=>{const d=parseD(x);d.setFullYear(d.getFullYear()-1);return iso(d);};return periodOf('custom',0,sh(f),sh(t));}
     const len=daysBetween(f,t),t2=addDaysTo(f,-1);return periodOf('custom',0,addDaysTo(t2,-len),t2);}
-  const step=r.cmp==='yoy'?{month:12,quarter:4,half:2,year:1,ytd:1}[r.preset]:1,cp=periodOf(r.preset,off-step,'',''),cur=periodOf(r.preset,off,'',''),T=today();
-  /* the current period is not over: compare the same number of days, so it is fair */
-  if(r.preset!=='ytd'&&cur.f<=T&&cur.t>T){const t=addDaysTo(cp.f,daysBetween(cur.f,T));if(t<cp.t)return {...cp,t,short:r.preset==='month'?`1 to ${short(t)}`:`${cp.short} to ${short(t)}`,label:`${cp.label}, up to ${niceL(t)}`,cut:true,base:cp.short};}
+  const step=r.cmp==='yoy'?{month:12,quarter:4,half:2,year:1,ytd:1}[r.preset]:1,cp=periodOf(r.preset,off-step,'','');
   return cp;
 }
 const niceL=s=>parseD(s).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
@@ -1535,7 +1533,7 @@ function reportSummary(tab,from,to,CP,cap,running,P0){
   const when=running?`${esc(P0.short)} so far`:esc(P0.short),asof=esc(niceL(to===FAR?today():to));let say='',tiles='';
   if(tab==='pl'){const P=c.P,Q=c2&&c2.P,mg=P.net?Math.round(P.profit/P.net*1000)/10:0;
     say=P.net?`In ${when} you sold <b>${P.tires} tires</b> for <b>${rp(P.net)}</b>. After paying for those tires and the running costs, <b>${P.profit>=0?'the profit is':'the loss is'} ${rp(Math.abs(P.profit))}</b>, about ${String(Math.abs(mg)).replace('.',',')} rupiah on every 100 rupiah sold.`:`No sales in ${when}.`;
-    if(Q&&P.net&&Q.net){const d=P.profit-Q.profit;say+=` That is ${rp(Math.abs(d))} ${d>=0?'more':'less'} profit than ${CP.cut?'the same days of '+esc(CP.base):esc(CP.short)}.`;}
+    if(Q&&P.net&&Q.net){const d=P.profit-Q.profit;say+=` That is ${rp(Math.abs(d))} ${d>=0?'more':'less'} profit than ${esc(CP.short)}${running?`, and ${esc(P0.short)} is not over yet`:''}.`;}
     tiles=tile('Sales',fmtShort(P.net),vs(P.net,Q&&Q.net))+tile('Tires sold',P.tires,vs(P.tires,Q&&Q.tires))+tile('Profit',fmtShort(P.profit),vs(P.profit,Q&&Q.profit),P.profit<0);}
   else if(tab==='bs'){const own=c.money+c.arGross+c.apCredit+c.stockVal,owe=c.apGross+c.arCredit,ow2=c2?c2.money+c2.arGross+c2.apCredit+c2.stockVal:null;
     say=`On ${asof} the business has <b>${rp(own)}</b>: ${rp(c.money)} in cash and banks, ${rp(c.arGross)} still owed by shops, and ${rp(c.stockVal)} in tires. It owes <b>${rp(owe)}</b>, mostly to Jakarta. What is left for the owners is <b>${rp(c.equity)}</b>.`;
@@ -1568,7 +1566,7 @@ function pageReports(){
   else rows=R.map((x,i)=>`<div class="srow ${x.k}" style="animation-delay:${Math.min(i*24,600)}ms"><span${x.x&&!S.explain?` data-tip="${esc(x.x)}" class="hasx"`:''}>${esc(x.l)}${x.x&&S.explain?`<span class="ex">${esc(x.x)}</span>`:''}</span><span>${x.v==null?'':(['total','grand'].includes(x.k)?M(x.v):esc(rp(x.v)))}</span></div>`).join('');
   const stamp=tab==='bs'?(Math.abs(c.diff)<1?'<span class="stamp">Balanced</span>':`<span class="stamp off">Off by ${rp(c.diff)}</span>`):'';
   const sub=R2?`${esc(P0.short)} vs ${esc(CP.short)} · in Rupiah`:`${esc(when(P0,to)).replace(/^./,ch=>ch.toUpperCase())} · in Rupiah`;
-  const fine=[running?(R2&&CP.cut?`${esc(P0.short)} is not over yet, so both columns count the same number of days.`:`${esc(P0.short)} is not over yet, so it counts up to today.`):'',R2&&tab!=='bs'?'For costs, a plus means the cost went up.':'',early?`Nothing to compare yet: the book starts ${esc(short(START_D()))}.`:'',canCmp||r.preset==='all'?'':'Comparison is for Profit and loss, Balance sheet and Cash flow.'].filter(Boolean).join(' ');
+  const fine=[running?`${esc(P0.short)} is not over yet, so it counts up to today.`:'',R2&&tab!=='bs'?'For costs, a plus means the cost went up.':'',early?`Nothing to compare yet: the book starts ${esc(short(START_D()))}.`:'',canCmp||r.preset==='all'?'':'Comparison is for Profit and loss, Balance sheet and Cash flow.'].filter(Boolean).join(' ');
   return `<section class="wrap"><h1 class="h1">Financial reports</h1>
     <p class="small" style="margin-top:10px">For the accountant. Day to day, Home already shows what matters.</p>
     <div class="tabs-scroll" style="margin-top:22px">${seg('rp-tab',Object.keys(RID).map(k=>[k,REN[k]]),tab)}</div>
