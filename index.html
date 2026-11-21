@@ -534,7 +534,7 @@ tr.newerr .err:empty{display:none}
 tr.flash td{animation:flash 1.6s var(--ease)}
 @keyframes flash{0%,30%{background:var(--accent-soft)}100%{background:transparent}}
 tr.paypanel td{background:var(--field);white-space:normal;padding:0}
-.pp{padding:16px 18px}
+.pp{padding:16px 18px;position:sticky;left:0;box-sizing:border-box;width:min(1440px,calc(100vw - 32px))}
 .pp-h{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;margin-bottom:10px}
 .pp-f{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:end}
 .pp-f .tsel{min-width:140px}
@@ -2266,7 +2266,7 @@ const chg=(a,b)=>{if(a==null||b==null)return '';if(a<=0&&b<=0){a=-a;b=-b;}const 
 function reportSummary(tab,from,to,CP,cap,running,P0){
   const c=compute(from,to),c2=CP?compute(CP.f,cap(CP.t)):null,vs=(a,b,cost)=>{if(!c2||b==null)return '';if(cost){a=-a;b=-b;}const d=Math.round(a)-Math.round(b);if(!d)return `<span class="small">Same as ${esc(CP.short)}</span>`;const pc=Math.round(b)?Math.round(d/Math.abs(b)*100):null;return `<span class="small">${pc==null?(d>0?'Up':'Down'):(d>0?'+':'')+pc+'%'} vs ${esc(CP.short)}</span>`;};
   const tile=(lab,val,sub,neg)=>`<div class="kpi"><span class="micro">${lab}</span><span class="kv${neg?' neg':''}">${val}</span>${sub||'<span class="small">&nbsp;</span>'}</div>`;
-  const when=running?`${esc(P0.short)} so far`:esc(P0.short),asof=esc(niceL(to===FAR?today():to));let say='',tiles='';
+  const when=running?`${esc(P0.short)} ${L("so far","sejauh ini")}`:esc(P0.short),asof=esc(niceL(to===FAR?today():to));let say='',tiles='';
   if(tab==='pl'){const P=c.P,Q=c2&&c2.P,mg=P.net?Math.round(P.profit/P.net*1000)/10:0;
     say=P.net?L(`In ${when} you sold <b>${P.tires} tires</b> for <b>${rp(P.net)}</b>. After paying for those tires and the running costs, <b>${P.profit>=0?'the profit is':'the loss is'} ${rp(Math.abs(P.profit))}</b>, about ${String(Math.abs(mg)).replace('.',',')} rupiah on every 100 rupiah sold.`,`Di ${when} terjual <b>${P.tires} ban</b> senilai <b>${rp(P.net)}</b>. Setelah dikurangi modal ban dan biaya operasional, <b>${P.profit>=0?'untungnya':'ruginya'} ${rp(Math.abs(P.profit))}</b>, sekitar ${String(Math.abs(mg)).replace('.',',')} rupiah dari setiap 100 rupiah penjualan.`):L(`No sales in ${when}.`,`Tidak ada penjualan di ${when}.`);
     if(Q&&P.net&&Q.net){const d=P.profit-Q.profit;say+=L(` That is ${rp(Math.abs(d))} ${d>=0?'more':'less'} profit than ${esc(CP.short)}${running?`, and ${esc(P0.short)} is not over yet`:''}.`,` Itu ${rp(Math.abs(d))} ${d>=0?'lebih banyak':'lebih sedikit'} dari ${esc(CP.short)}${running?`, dan ${esc(P0.short)} belum selesai`:''}.`);}
