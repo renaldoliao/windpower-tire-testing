@@ -669,6 +669,30 @@ body[data-route="catat"] .chatbtn{display:none}
 .todo-h{display:inline-flex;align-items:center;gap:10px;justify-self:start;background:var(--sheet);border:0;border-radius:999px;padding:8px 16px;font:inherit;font-size:13.5px;color:var(--ink);cursor:pointer}
 .todo-h i{width:9px;height:9px;border-radius:999px;background:var(--ink)}.todo-h.bad i{background:var(--loss)}
 .todo-h b{font-weight:500}.todo-h .todo-c{color:var(--accent)}
+
+/* home dashboard */
+.dtop{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:4px}
+.dtop .todo{margin-top:8px}
+.qacts{display:flex;gap:6px;flex-wrap:wrap}
+.qacts button{border:0;background:var(--sheet);color:var(--ink);font:inherit;font-size:14px;padding:10px 16px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.qacts button:hover{background:var(--accent);color:#fff}
+.kpis.dash{margin-top:14px}
+.gcols{display:flex;align-items:flex-end;gap:10px;height:170px;border-bottom:1px solid var(--rule);margin-top:34px}
+.gcol{flex:1;display:flex;justify-content:center;align-items:flex-end;gap:2px;height:100%;min-width:0}
+.gcol i{position:relative;display:block;flex:1;max-width:22px;min-height:1px;border-radius:4px 4px 0 0;transform-origin:bottom;animation:rise .65s var(--ease) both}
+.gcol .cv{position:absolute;left:50%;bottom:100%;transform:translate(-50%,-6px);font-size:12px;font-style:normal;font-weight:500;white-space:nowrap;color:var(--ink)}
+.gcol i:first-child:not(:last-child) .cv{transform:translate(-80%,-22px)}
+.hb .tr .fl.s-run,.hb .tr .fl.s-tire{background:var(--chart-mid)}.hb .tr .fl.s-tire{background:var(--chart-soft)}
+.hb .tr .fl+.fl{border-radius:0 999px 999px 0}.hb .tr .fl:first-child:not(:last-child){border-radius:999px 0 0 999px}
+.hbtn{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) auto;gap:6px 16px;align-items:center;padding-block:12px;border-bottom:1px solid var(--rule)}
+.hgrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}@media (max-width:960px){.hgrid3{grid-template-columns:1fr}}
+.gcols .gcol .s-run,.legend .key.s-run{background:var(--chart-mid)}
+@media (max-width:520px){.hbtn{grid-template-columns:minmax(0,1fr) auto}.hbtn .tr{grid-column:1/-1;grid-row:2}.qacts{width:100%;display:grid;grid-template-columns:1fr 1fr}.qacts button{padding:10px 8px}}
+.hbtn:hover .hn{color:var(--accent)}
+.n7row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);font-size:14px}
+.n7row span{color:var(--muted);flex:1}.n7row b{font-weight:500}
+.card .ch{margin:0}
+@media (prefers-reduced-motion:reduce){.gcol i{animation:none}}
 </style>
 </head>
 <body>
@@ -1675,35 +1699,46 @@ function todoCard(){const act=todoList().filter(x=>x.tone!=='info');if(!act.leng
 function pageOverview(){
   const d=D();
   if(!d.entries.length)return `<section class="wrap"><div class="card hero" style="padding:clamp(24px,5vw,56px)"><h1 class="display">${L('Start with what the business has today.','Mulai dari yang dimiliki usaha hari ini.')}</h1><div class="row" style="margin-top:20px"><button class="btn primary" data-act="pick" data-t="opening">${L('Enter starting balances','Isi saldo awal')}</button><button class="btn" data-act="demo-on">${L('Load example data','Muat data contoh')}</button></div></div></section>`;
-  const c=now(),T=today(),mm=monthMoney(),U=upcoming(),ws=whStock(),P=d.products,ids=Object.keys(P).filter(id=>P[id].restock!==false||(c.st[id]||{q:0}).q>0);
-  const acts=`<div class="acts">
-    <button class="act in" data-act="f-open" data-v="in-money"><span class="sym">+</span><b>${L('Money in','Uang masuk')}</b><span>${L('A shop paid, or the owner added money','Toko bayar, atau modal masuk')}</span></button>
-    <button class="act" data-act="f-open" data-v="out-money"><span class="sym">−</span><b>${L('Money out','Uang keluar')}</b><span>${L('Costs, paying Jakarta, handing money over','Biaya, bayar Jakarta, setor uang')}</span></button>
-    <button class="act in" data-act="f-open" data-v="in-stock"><span class="sym">+</span><b>${L('Stock in','Barang masuk')}</b><span>${L('Tires from Jakarta, now or coming','Ban dari Jakarta, sekarang atau akan datang')}</span></button>
-    <button class="act" data-act="f-open" data-v="out-stock"><span class="sym">−</span><b>${L('Stock out','Barang keluar')}</b><span>${L('Sold to a shop, sent to Padang','Dijual ke toko, kirim ke Padang')}</span></button></div>`;
-  const A=accts().map(a=>({a,v:c.bal[a.id]||0})),mx=Math.max(1,...A.map(x=>x.v));
-  const money=`<div class="card"><p class="micro">${L('Money now','Uang sekarang')}</p><div class="big">${esc(rp(c.money))}</div>
-    <div class="inout"><span>${L('In this month','Masuk bulan ini')} <b class="pos">+${esc(fmtShort(mm.i))}</b></span><span>${L('Out this month','Keluar bulan ini')} <b>-${esc(fmtShort(mm.o))}</b></span></div>
-    ${A.map(({a,v})=>{const hold=v>0.5&&isCollector(a.id);return `<div class="hb"><span class="hn">${esc(a.name)}${hold?`<span class="ex neg">${L('not handed to','belum disetor ke')} ${esc(aname(handTo()))}</span>`:''}</span><span class="tr"><i class="fl${hold?' s-late':''}" style="width:${Math.max(0,v/mx*100)}%"></i></span><span class="hv">${esc(fmtShort(v))}</span></div>`;}).join('')}
-</div>`;
-  const W=whs(),stock=`<div class="card"><p class="micro">${L('Stock now','Stok sekarang')}</p>
-    <table class="simple"><thead><tr><th></th>${W.map(w=>`<th class="num">${esc(w.name)}</th>`).join('')}<th class="num">${L('Total','Total')}</th></tr></thead><tbody>
-    ${ids.map(id=>`<tr><td><b>${esc(pShort(id))}</b></td>${W.map(w=>`<td class="num">${n(ws[id+'|'+w.id])}</td>`).join('')}<td class="num"><b>${(c.st[id]||{q:0}).q}</b></td></tr>`).join('')}</tbody></table>
-    <div class="next7"><div><p class="micro">${L('Coming in, next 7 days','Akan masuk, 7 hari ke depan')}</p><div class="n7">${U.qi?'+'+U.qi:'0'} <span>${L('tires','ban')}</span></div>${U.inn.map(x=>`<div class="up"><span>${esc(fd(x.d))}${x.late?` <span class="neg">${L('late','telat')}</span>`:''} · ${esc((x.e.lines||[]).map(l=>`${n(l.qd)} ${pShort(l.p)}`).join(', '))}</span><button class="mini" data-act="came" data-id="${x.e.id}">${L('Arrived','Sudah datang')}</button></div>`).join('')}</div>
-      <div><p class="micro">${L('Going out, next 7 days','Akan keluar, 7 hari ke depan')}</p><div class="n7">${U.qo?'-'+U.qo:'0'} <span>${L('tires','ban')}</span></div>${U.out.map(x=>`<div class="up"><span>${esc(fd(x.d))}${x.late?` <span class="neg">${L('late','telat')}</span>`:''} · ${esc(cname(x.e.k))} · ${esc((x.e.lines||[]).map(l=>`${n(l.q)} ${pShort(l.p)}`).join(', '))}</span><button class="mini" data-act="went" data-id="${x.e.id}">${L('Sent','Sudah keluar')}</button></div>`).join('')}</div></div></div>`;
-  const by={};c.openAR.forEach(o=>{const x=by[o.k]||(by[o.k]={k:o.k,a:0,late:0,old:o.due});x.a+=o.open;if(o.due<T)x.late=Math.max(x.late,daysBetween(o.due,T));if(o.due<x.old)x.old=o.due;});
-  const unpaid=Object.values(by).sort((a,b)=>b.late-a.late||b.a-a.a);
-  const owe=`<div class="card" id="owe"><div class="chead"><p class="micro">${L('Shops that still owe us','Toko yang belum bayar')}</p><b>${esc(rp(c.arTot))}</b></div>
-    ${unpaid.slice(0,5).map(x=>`<div class="lrow"><div><b>${esc(cname(x.k))}</b><span class="small"> ${x.late?`<span class="neg">${L(`${x.late} days late`,`telat ${x.late} hari`)}</span>`:L(`due ${fd(x.old)}`,`jatuh tempo ${fd(x.old)}`)}</span></div><div class="row"><span>${esc(fmtShort(x.a))}</span><button class="mini" data-act="f-open" data-v="in-money" data-k="${x.k}">${L('Record payment','Catat bayar')}</button></div></div>`).join('')||`<p class="small">${L('Nobody owes anything.','Tidak ada yang utang.')}</p>`}
-    ${unpaid.length>5?`<p style="margin-top:10px"><a class="link" href="#unpaid">${L(`See all ${unpaid.length}`,`Lihat semua ${unpaid.length}`)}</a></p>`:''}
-    ${c.apTot>0.5?`<div class="lrow" style="margin-top:6px"><div><b>${L('We still owe Jakarta','Kita masih utang ke Jakarta')}</b></div><div class="row"><span>${esc(fmtShort(c.apTot))}</span><button class="mini" data-act="f-open" data-v="out-money" data-sub="jakarta">${L('Pay','Bayar')}</button></div></div>`:''}</div>`;
-  const recent=d.entries.filter(e=>e.d<=T).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.ts||0)-(a.ts||0)).slice(0,8).map(e=>`<button type="button" class="txn" data-act="view" data-id="${e.id}"><span class="tk">${esc(fd(e.d))}</span><span class="tdsc">${esc(plainLine(e))}</span><span class="tamt">${plainAmt(e)}</span></button>`).join('');
+  const c=now(),T=today(),U=upcoming(),ws=whStock(),P=d.products,ids=Object.keys(P).filter(id=>P[id].restock!==false||(c.st[id]||{q:0}).q>0),st=START_D();
+  const sh=v=>fmtShort(v).replace('Rp ','');
+  /* six months of sales, profit, money in and out */
+  const M=[];for(let k=-5;k<=0;k++){const [f,t]=monthRange(k);if(t<st)continue;const r=compute(f,t).P;M.push({f,t,k,lab:MS(parseD(f)),sales:r.net,profit:r.profit,tires:r.tires,i:0,o:0});}
+  for(const e of d.entries){if(e.t==='transfer')continue;for(const m of moneyMoves(e)){const x=M.find(y=>m.d>=y.f&&m.d<=y.t);if(!x)continue;if(m.a>0)x.i+=m.a;else x.o-=m.a;}}
+  const cur=M[M.length-1]||{sales:0,profit:0,i:0,o:0,tires:0},prev=M[M.length-2];
+  const grp=(keys,names,cls,tipf)=>{const mx=Math.max(1,...M.flatMap(x=>keys.map(k=>Math.abs(x[k]))));
+    return `<div class="legend" style="margin-top:6px">${names.map((nm,j)=>`<span><i class="key ${cls[j]}"></i>${nm}</span>`).join('')}</div>
+    <div class="gcols">${M.map((x,i)=>`<div class="gcol${x.k===0?' now':''}" data-tip="${esc(tipf(x))}">${keys.map((k,j)=>`<i class="${cls[j]}${x[k]<0?' s-late':''}" style="height:${Math.max(1,Math.abs(x[k])/mx*100)}%;animation-delay:${i*50+j*25}ms">${x.k===0?`<span class="cv">${esc(sh(x[k]))}</span>`:''}</i>`).join('')}</div>`).join('')}</div>
+    <div class="cx">${M.map(x=>`<span>${esc(x.lab)}${x.k===0?L(' (so far)',' (berjalan)'):''}</span>`).join('')}</div>`;};
+  const vsPrev=(a,b)=>{if(!prev||!b)return `<span class="small">&nbsp;</span>`;return `<span class="small">${L('Last month','Bulan lalu')} ${esc(sh(b))}</span>`;};
+  const late=c.openAR.filter(o=>o.due<T).reduce((a,o)=>a+o.open,0);
+  const kpis=`<div class="card kpis dash">
+    <div class="kpi"><span class="micro">${L('Money now','Uang sekarang')}</span><span class="kv">${esc(sh(c.money))}</span><span class="small">${L('This month','Bulan ini')} <b class="pos">+${esc(sh(cur.i))}</b> <b>-${esc(sh(cur.o))}</b></span></div>
+    <div class="kpi"><span class="micro">${L('Sales this month','Penjualan bulan ini')}</span><span class="kv">${esc(sh(cur.sales))}</span>${vsPrev(cur.sales,prev&&prev.sales)}</div>
+    <div class="kpi"><span class="micro">${L('Profit this month','Untung bulan ini')}</span><span class="kv${cur.profit<0?' neg':''}">${esc(sh(cur.profit))}</span>${vsPrev(cur.profit,prev&&prev.profit)}</div>
+    <a class="kpi" href="#unpaid"><span class="micro">${L('Shops owe us','Piutang toko')}</span><span class="kv">${esc(sh(c.arTot))}</span><span class="small">${late>0.5?`<span class="neg">${esc(sh(late))} ${L('late','telat')}</span>`:L('Nothing late','Tidak ada yang telat')}</span></a></div>`;
+  const one=(key,tipf)=>{const mx=Math.max(1,...M.map(x=>Math.abs(x[key])));
+    return `<div class="legend" style="margin-top:6px"><span><i class="key s-prof"></i>${L('Full month','Bulan penuh')}</span><span><i class="key s-run"></i>${L('This month so far','Bulan ini sejauh ini')}</span></div><div class="gcols">${M.map((x,i)=>`<div class="gcol${x.k===0?' now':''}" data-tip="${esc(tipf(x))}"><i class="${x[key]<0?'s-late':x.k===0?'s-run':'s-prof'}" style="height:${Math.max(1,Math.abs(x[key])/mx*100)}%;max-width:44px;animation-delay:${i*50}ms"><span class="cv">${esc(sh(x[key]))}</span></i></div>`).join('')}</div>
+    <div class="cx">${M.map(x=>`<span>${esc(x.lab)}${x.k===0?L(' (so far)',' (berjalan)'):''}</span>`).join('')}</div>`;};
+  const chartSales=`<div class="card"><h2 class="ch">${L('Sales','Penjualan')}</h2><p class="small">${L('Per month','Per bulan')}</p>${one('sales',x=>`${x.lab}: ${rp(x.sales)}, ${x.tires} ${L('tires','ban')}`)}</div>`;
+  const chartProfit=`<div class="card"><h2 class="ch">${L('Profit','Untung')}</h2><p class="small">${L('After tire cost and running costs','Setelah modal ban dan biaya')}</p>${one('profit',x=>`${x.lab}: ${rp(x.profit)}`)}</div>`;
+  const chartMoney=`<div class="card"><h2 class="ch">${L('Money in and out','Uang masuk dan keluar')}</h2><p class="small">${L('Real money, per month','Uang sungguhan, per bulan')}</p>
+    ${grp(['i','o'],[L('In','Masuk'),L('Out','Keluar')],['s-prof','s-tire'],x=>`${x.lab}: ${L('in','masuk')} ${rp(x.i)}, ${L('out','keluar')} ${rp(x.o)}`)}</div>`;
+  const W=whs(),smx=Math.max(1,...ids.map(id=>(c.st[id]||{q:0}).q)),wcls=['s-prof','s-run','s-tire'];
+  const stock=`<div class="card"><div class="chead"><div><h2 class="ch">${L('Stock now','Stok sekarang')}</h2><p class="small">${ids.reduce((a,id)=>a+Math.max(0,(c.st[id]||{q:0}).q),0)} ${L('tires','ban')}</p></div><a class="link" href="#stock">${L('Details','Detail')}</a></div>
+    <div class="legend" style="margin-top:6px">${W.map((w,j)=>`<span><i class="key ${wcls[j%3]}"></i>${esc(w.name)}</span>`).join('')}</div>
+    ${ids.map(id=>{const q=(c.st[id]||{q:0}).q;return `<div class="hb" data-tip="${esc(W.map(w=>w.name+' '+n(ws[id+'|'+w.id])).join(', '))}"><span class="hn"><b>${esc(pShort(id))}</b></span><span class="tr">${W.map((w,j)=>{const v=Math.max(0,n(ws[id+'|'+w.id]));return v?`<i class="fl ${wcls[j%3]}" style="width:${v/smx*100}%"></i>`:'';}).join('')}</span><span class="hv">${q}</span></div>`;}).join('')}
+    <div class="n7row"><span>${L('Next 7 days','7 hari ke depan')}</span><b class="pos">+${U.qi} ${L('coming in','masuk')}</b><b>-${U.qo} ${L('going out','keluar')}</b></div></div>`;
+  const by={};c.openAR.forEach(o=>{const x=by[o.k]||(by[o.k]={k:o.k,a:0,late:0});x.a+=o.open;if(o.due<T)x.late=Math.max(x.late,daysBetween(o.due,T));});
+  const top=Object.values(by).sort((a,b)=>b.a-a.a).slice(0,5),omx=Math.max(1,...top.map(x=>x.a));
+  const owe=`<div class="card" id="owe"><div class="chead"><div><h2 class="ch">${L('Who owes us most','Toko utang terbesar')}</h2><p class="small">${L('Red is late. Tap a shop to record a payment.','Merah berarti telat. Ketuk toko untuk catat bayar.')}</p></div><a class="link" href="#unpaid">${L('All','Semua')}</a></div>
+    ${top.map(x=>`<button type="button" class="hb hbtn" data-act="f-open" data-v="in-money" data-k="${x.k}" data-tip="${esc(x.late?L(`${x.late} days late`,`telat ${x.late} hari`):L('Not due yet','Belum jatuh tempo'))}"><span class="hn">${esc(cname(x.k).replace(/\s*\(example\)/,''))}</span><span class="tr"><i class="fl${x.late?' s-late':''}" style="width:${x.a/omx*100}%"></i></span><span class="hv">${esc(sh(x.a))}</span></button>`).join('')||`<p class="small">${L('Nobody owes anything.','Tidak ada yang utang.')}</p>`}
+    ${c.apTot>0.5?`<div class="n7row"><span>${L('We owe Jakarta','Kita utang ke Jakarta')}</span><b>${esc(sh(c.apTot))}</b><button class="mini" data-act="f-open" data-v="out-money" data-sub="jakarta">${L('Pay','Bayar')}</button></div>`:''}</div>`;
+  const acts=editable()?`<div class="qacts"><button data-act="f-open" data-v="in-money">+ ${L('Money in','Uang masuk')}</button><button data-act="f-open" data-v="out-money">− ${L('Money out','Uang keluar')}</button><button data-act="f-open" data-v="in-stock">+ ${L('Stock in','Barang masuk')}</button><button data-act="f-open" data-v="out-stock">− ${L('Stock out','Barang keluar')}</button></div>`:'';
   return `<section class="wrap">
-    <p class="small" style="margin-top:4px">${esc(longToday())}</p>
-    ${todoCard()}
-    ${editable()?acts:''}
-    <div class="hgrid2" style="margin-top:14px;align-items:stretch">${stock}${money}</div>
-    <div style="margin-top:14px">${owe}</div>
+    <div class="dtop"><div><p class="small">${esc(longToday())}</p>${todoCard()}</div>${acts}</div>
+    ${kpis}
+    <div class="hgrid3">${chartSales}${chartProfit}${chartMoney}</div>
+    <div class="hgrid2">${stock}${owe}</div>
     ${billsCard(true)?`<div style="margin-top:14px">${billsCard(true)}</div>`:''}
   </section>`;
 }
