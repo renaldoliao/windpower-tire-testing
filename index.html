@@ -1443,15 +1443,31 @@ document.addEventListener('keydown',ev=>{
 
 /* -------- Assistant (demo): understands short Indonesian or English sentences, no AI key needed -------- */
 const L=(en,id)=>S.lang==='id'?id:en;
-function parseAmt(t){
-  const m=String(t).toLowerCase().match(/(\d[\d.,]*)\s*(jt|juta|rb|ribu|k|m|miliar)?\b/);if(!m)return 0;
-  let s=m[1],u=m[2]||'';
-  if(u){s=s.replace(/\./g,'').replace(',','.');const v=parseFloat(s)||0;return Math.round(v*({jt:1e6,juta:1e6,rb:1e3,ribu:1e3,k:1e3,m:1e9,miliar:1e9}[u]||1));}
-  return n(s);
-}
+function amtOf(num,unit){unit=(unit||'').toLowerCase();const mult={jt:1e6,juta:1e6,mn:1e6,mio:1e6,million:1e6,m:1e6,rb:1e3,ribu:1e3,k:1e3,thousand:1e3,miliar:1e9,bn:1e9,billion:1e9}[unit]||1;
+  let s=num;if(mult>1){s=(s.match(/\./g)||[]).length>1?s.replace(/\./g,''):s.replace(',','.');return Math.round((parseFloat(s)||0)*mult);}
+  return n(s.replace(/[.,](?=\d{3}(\D|$))/g,''));}
+function parseAmt(t){const re=/(idr|rp\.?)?\s*(\d[\d.,]*)\s*(jt|juta|mn|mio|million|miliar|bn|billion|rb|ribu|thousand|k|m)?\b/gi;let m,best=null;
+  while((m=re.exec(String(t)))){const v=amtOf(m[2].replace(/[.,]$/,''),m[3]);const strong=!!(m[1]||m[3]);if(!v)continue;if(!best||strong&&!best.strong||strong===best.strong&&v>best.v)best={v,strong};}
+  return best?best.v:0;}
+/* dates in plain words: today, yesterday, 2 days ago, tomorrow, 25 Nov, Nov 25th, 25/11, tgl 25 */
+const MON={jan:1,feb:2,mar:3,apr:4,may:5,mei:5,jun:6,jul:7,aug:8,agu:8,agt:8,ags:8,sep:9,oct:10,okt:10,nov:11,dec:12,des:12};
+function ymd(y,m,d){const dt=new Date(y,m-1,d);return dt.getMonth()===m-1?iso(dt):'';}
+function findDate(s){const T=today(),Y=+T.slice(0,4),M=+T.slice(5,7);let m;const cut=(m,d)=>({d,s:(s.slice(0,m.index)+' '+s.slice(m.index+m[0].length)).replace(/\s+/g,' ')});
+  const mon='(jan|feb|mar|apr|may|mei|jun|jul|aug|agu|agt|ags|sep|oct|okt|nov|dec|des)[a-z]*\\.?';
+  if((m=s.match(new RegExp(`\\b(?:on|tgl|tanggal|date)?\\s*(\\d{1,2})(?:st|nd|rd|th)?\\s+${mon}(?:\\s+(\\d{4}))?`,'i')))){const r=cut(m,ymd(m[3]?+m[3]:Y,MON[m[2].toLowerCase().slice(0,3)]||MON[m[2].toLowerCase()],+m[1]));if(r.d)return r;}
+  if((m=s.match(new RegExp(`\\b(?:on\\s+)?${mon}\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?`,'i')))){const r=cut(m,ymd(m[3]?+m[3]:Y,MON[m[1].toLowerCase().slice(0,3)],+m[2]));if(r.d)return r;}
+  if((m=s.match(/\b(?:on\s+|tgl\s*|tanggal\s+)?(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?\b/i))){const r=cut(m,ymd(m[3]?(m[3].length===2?2000+ +m[3]:+m[3]):Y,+m[2],+m[1]));if(r.d)return r;}
+  if((m=s.match(/\b(?:tgl|tanggal|date|on the|on)\s*(\d{1,2})(?:st|nd|rd|th)?\b(?!\s*(?:jt|juta|mn|rb|k|m|ribu|pcs|ban|x|days|hari))/i))){const r=cut(m,ymd(Y,M,+m[1]));if(r.d)return r;}
+  if((m=s.match(/\b(\d{1,2})\s*(?:days?\s+ago|hari\s+(?:lalu|yang lalu))\b/i))){const r=cut(m,addDays(-m[1]));if(r.d)return r;}
+  if((m=s.match(/\b(kemarin lusa|day before yesterday)\b/i))){const r=cut(m,addDays(-2));if(r.d)return r;}
+  if((m=s.match(/\b(yesterday|kemarin|kmrn)\b/i))){const r=cut(m,addDays(-1));if(r.d)return r;}
+  if((m=s.match(/\b(tomorrow|besok)\b/i))){const r=cut(m,addDays(1));if(r.d)return r;}
+  if((m=s.match(/\b(lusa)\b/i))){const r=cut(m,addDays(2));if(r.d)return r;}
+  if((m=s.match(/\b(today|hari ini|tadi)\b/i))){const r=cut(m,T);if(r.d)return r;}
+  return {d:'',s};}
 function findAcct(t){const x=t.toLowerCase();
-  const rules=[[/\b(bella|bca|transfer)\b/,'bank'],[/\b(papi|papa|ayah|pak)\b/,'papi'],[/\b(ci\s*via|via|kas|tunai|cash)\b/,mainCash().id]];
-  for(const a of accts()){const nm=a.name.toLowerCase().replace(/[()]/g,'');const key=nm.replace(/^cash\s*|^bank\s*/,'').trim();if(key&&key.length>1&&x.includes(key))return a.id;}
+  const rules=[[/\b(bella|bca|transfer|tf|trf)\b/,'bank'],[/\b(papi|papa|ayah|dad)\b/,'papi'],[/\b(via|kas|tunai|cash)\b/,mainCash().id]];
+  for(const a of accts()){const nm=a.name.toLowerCase().replace(/[()]/g,'');const key=nm.replace(/^cash\s*|^bank\s*/,'').trim();if(key&&key.length>1&&new RegExp('\\b'+key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b').test(x))return a.id;}
   for(const [re,id] of rules)if(re.test(x)&&accts().some(a=>a.id===id))return id;return '';}
 function findProducts(t){const P=D().products,x=t.toLowerCase(),out=[];
   for(const id in P){const pat=(P[id].pattern||'').toLowerCase();if(!pat)continue;
@@ -1465,62 +1481,83 @@ function findCustomer(t){const C=D().contacts,x=t.toLowerCase().replace(/[.,]/g,
   return best;}
 function botSay(html){S.chat.push({who:'bot',html});}
 function chatHandle(text){
-  const t=text.trim(),x=t.toLowerCase();S.chat.push({who:'me',html:esc(t)});S.chatPending=null;
+  const t=text.trim(),x0=t.toLowerCase();S.chat.push({who:'me',html:esc(t)});S.chatPending=null;
   if(!t)return;
-  if(/^(bantu|help|tolong|contoh|bisa apa|\?)/.test(x)){botSay(chatHelp());return;}
-  const c=now();
+  if(/^(bantu|help|tolong|contoh|bisa apa|what can you do|\?)/.test(x0)){botSay(chatHelp());return;}
+  const c=now(),T=today();
   /* questions */
-  if(/\b(stok|stock)\b/.test(x)&&!/jual/.test(x)){const P=D().products;botSay(L('Tires in the warehouse:','Ban di gudang:')+'<ul>'+Object.keys(P).map(id=>`<li>${esc(P[id].pattern||pname(id))}: <b>${(c.st[id]||{q:0}).q}</b></li>`).join('')+'</ul>');return;}
-  if(/(piutang|belum bayar|belum lunas|unpaid|owe|utang toko)/.test(x)){const L2=c.openAR.slice(0,6);botSay(L2.length?L(`Shops owe ${rp(c.arTot)}. Oldest first:`,`Toko masih utang ${rp(c.arTot)}. Yang paling lama:`)+'<ul>'+L2.map(o=>`<li>${esc(cname(o.k))} · ${esc(o.nota)} · <b>${esc(rp(o.open))}</b>${o.due<today()?' <span class="neg">'+L('late','telat')+'</span>':''}</li>`).join('')+'</ul>':L('Nobody owes anything.','Tidak ada yang utang.'));return;}
-  if(/(untung|laba|profit|rugi)/.test(x)){const [f,tt]=monthRange(0),m=compute(f,tt).P;botSay(L(`This month so far: sales ${rp(m.net)} (${m.tires} tires), profit <b>${rp(m.profit)}</b>.`,`Bulan ini sejauh ini: penjualan ${rp(m.net)} (${m.tires} ban), untung <b>${rp(m.profit)}</b>.`));return;}
-  if(/(saldo|uang|kas|money|cash)\b/.test(x)&&!/(bayar|terima|biaya|jual)/.test(x)){botSay(L('Money now:','Uang sekarang:')+'<ul>'+accts().map(a=>`<li>${esc(a.name)}: <b>${esc(rp(c.bal[a.id]||0))}</b></li>`).join('')+'</ul>');return;}
+  if(/\b(stok|stock)\b/.test(x0)&&!/(jual|sold|sell)/.test(x0)){const P=D().products,ws=whStock();botSay(L('Tires in the warehouse:','Ban di gudang:')+'<ul>'+Object.keys(P).map(id=>`<li>${esc(P[id].pattern||pname(id))}: <b>${(c.st[id]||{q:0}).q}</b> <span class="small">(${whs().map(w=>esc(w.name)+' '+n(ws[id+'|'+w.id])).join(', ')})</span></li>`).join('')+'</ul>');return;}
+  if(/(piutang|belum bayar|belum lunas|unpaid|who owes|owes us|utang toko)/.test(x0)){const L2=c.openAR.slice(0,6);botSay(L2.length?L(`Shops owe ${rp(c.arTot)}. Oldest first:`,`Toko masih utang ${rp(c.arTot)}. Yang paling lama:`)+'<ul>'+L2.map(o=>`<li>${esc(cname(o.k))} · ${esc(o.nota)} · <b>${esc(rp(o.open))}</b>${o.due<T?' <span class="neg">'+L('late','telat')+'</span>':''}</li>`).join('')+'</ul>':L('Nobody owes anything.','Tidak ada yang utang.'));return;}
+  if(/(untung|laba|profit|rugi)/.test(x0)){const [f,tt]=monthRange(0),m=compute(f,tt).P;botSay(L(`This month so far: sales ${rp(m.net)} (${m.tires} tires), profit <b>${rp(m.profit)}</b>.`,`Bulan ini sejauh ini: penjualan ${rp(m.net)} (${m.tires} ban), untung <b>${rp(m.profit)}</b>.`));return;}
+  if(/^(how much money|saldo|uang sekarang|money now|balance)/.test(x0)){botSay(L('Money now:','Uang sekarang:')+'<ul>'+accts().map(a=>`<li>${esc(a.name)}: <b>${esc(rp(c.bal[a.id]||0))}</b></li>`).join('')+'</ul>');return;}
+  /* pull out a giro clear date first, then the date of the event */
+  let x=x0,clear='';const cm=x.match(/\b(?:clears?|cair|jatuh tempo giro)\s+(?:on\s+|tgl\s*)?/);
+  if(cm){const r=findDate(x.slice(cm.index+cm[0].length));if(r.d){clear=r.d;x=x.slice(0,cm.index)+' '+r.s;}}
+  const fdR=findDate(x);x=fdR.s;const d=fdR.d||T,dateRow=[L('Date','Tanggal'),fd(d)+(d>T?L(' (coming up)',' (nanti)'):'')];
+  const by=/\bbella\b/.test(x0)?'Bella':/\bpapi\b/.test(x0)?'Papi':((S.me&&S.me.name)||'Via');
+  /* handing collected cash over to BCA Bella */
+  if(/(setor|hand(ed|s)? (it )?over|handover|deposit)/.test(x)){const a=parseAmt(x);const from=/\bpapi\b/.test(x)?'papi':accts().find(y=>isCollector(y.id)&&new RegExp('\\b'+y.name.toLowerCase().replace(/^cash\s*\(?|\)$/g,'')+'\\b').test(x))?.id||mainCash().id;
+    if(!a){botSay(L(`How much did ${holder(from)} hand over? For example "Papi handed over 5jt".`,`Berapa yang disetor ${holder(from)}? Contoh "Papi setor 5jt".`));return;}
+    if(d>T){botSay(L('That date is still to come. Record a handover on the day it happens.','Tanggal itu belum lewat. Catat setoran di hari kejadiannya.'));return;}
+    S.chatPending={t:'transfer',d,from,to:handTo(),a,by};botSay(confirmCard(L('Record this handover?','Catat setoran ini?'),[dateRow,[L('From','Dari'),aname(from)],[L('To','Ke'),aname(handTo())],[L('Amount','Jumlah'),rp(a)]]));return;}
+  /* paying Jakarta */
+  if(/(jakarta|supplier|pemasok)/.test(x)&&/(pay|paid|bayar|lunas|transfer)/.test(x)){const open=c.openAP;const a=parseAmt(x)||open.reduce((s,y)=>s+y.open,0);
+    if(!a){botSay(L('We owe Jakarta nothing right now.','Tidak ada utang ke Jakarta sekarang.'));return;}const acct=findAcct(x.replace(/jakarta/g,''))||'bank';
+    S.chatPending={t:'pay',d,k:open[0]?open[0].k:'',a,acct,alloc:open.map(y=>y.id),by};
+    botSay(confirmCard(L('Record this payment to Jakarta?','Catat bayar Jakarta?'),[dateRow,[L('Amount','Jumlah'),rp(a)],[L('Paid from','Dibayar dari'),aname(acct)]]));return;}
   /* costs */
-  const CAT=[[/(bensin|solar|bbm|fuel)/,'Fuel'],[/(listrik|token|pln)/,'Electricity token'],[/(gaji|upah|salary|wage)/,'Salaries and wages'],[/(sewa|rent)/,'Warehouse rent'],[/(servis|service|bengkel)/,'Vehicle service'],[/(bongkar|muat|kuli)/,'Loading and unloading'],[/(ongkir|ongkos kirim|kirim|shipping)/,'Shipping'],[/(admin bank|biaya bank|bank fee)/,'Bank fees']];
+  const CAT=[[/(bensin|solar|bbm|fuel|diesel)/,'Fuel'],[/(listrik|token|pln|electric)/,'Electricity token'],[/(gaji|upah|salary|salaries|wage)/,'Salaries and wages'],[/(sewa|rent)/,'Warehouse rent'],[/(servis|service|bengkel|repair)/,'Vehicle service'],[/(bongkar|muat|kuli|unloading|loading)/,'Loading and unloading'],[/(ongkir|ongkos kirim|shipping|delivery)/,'Shipping'],[/(admin bank|biaya bank|bank fee)/,'Bank fees']];
   const cat=CAT.find(([re])=>re.test(x));
-  if(cat||/^(biaya|cost|beli)\b/.test(x)){const a=parseAmt(x.replace(/\b\d{4}\b(?=\s|$)/,''));const name=cat?cat[1]:'Other',useCat=cats().includes(name)?name:(cats().find(cc=>cc.toLowerCase().includes(name.toLowerCase().split(' ')[0]))||'Other');
-    if(!a){botSay(L(`How much was the ${useCat.toLowerCase()}? For example "bensin 1,5jt".`,`Berapa biaya ${useCat.toLowerCase()}? Contoh "bensin 1,5jt".`));return;}
-    const acct=findAcct(x)||mainCash().id;S.chatPending={t:'expense',d:today(),cat:useCat,a,acct,note:''};
-    botSay(confirmCard(L('Record this cost?','Catat biaya ini?'),[[L('Kind','Jenis'),useCat],[L('Amount','Jumlah'),rp(a)],[L('Paid from','Dibayar dari'),aname(acct)]]));return;}
+  if(cat||/^(biaya|cost|expense|beli|bought)\b/.test(x)){const a=parseAmt(x);const name=cat?cat[1]:'Other',useCat=cats().includes(name)?name:(cats().find(cc=>cc.toLowerCase().includes(name.toLowerCase().split(' ')[0]))||'Other');
+    if(!a){botSay(L(`How much was the ${useCat.toLowerCase()}? For example "fuel 1,5jt yesterday".`,`Berapa biaya ${useCat.toLowerCase()}? Contoh "bensin 1,5jt kemarin".`));return;}
+    const acct=findAcct(x)||(a>=10e6?'bank':mainCash().id);const planned=d>T;S.chatPending={t:'expense',d,cat:useCat,a,acct,note:'',planned,by};
+    botSay(confirmCard(planned?L('Note this bill to pay later?','Catat tagihan untuk nanti?'):L('Record this cost?','Catat biaya ini?'),[dateRow,[L('Kind','Jenis'),useCat],[L('Amount','Jumlah'),rp(a)],[L('Paid from','Dibayar dari'),aname(acct)]].concat(planned?[[L('Note','Catatan'),L('Reminder only. Money goes out when you press Paid.','Hanya pengingat. Uang keluar saat tekan Sudah bayar.')]]:[])));return;}
   /* sales */
-  if(/\b(jual|terjual|sold|sell|nota baru)\b/.test(x)){
-    const lines=findProducts(x);if(!lines.length){botSay(L('Which tire and how many? For example "jual 10 WGC29 ke Sinar Ban tempo 14".','Ban apa dan berapa? Contoh "jual 10 WGC29 ke Sinar Ban tempo 14".'));return;}
-    const k=findCustomer(x);const raw=(t.match(/\b(?:ke|to|untuk)\s+(.+?)(?:\s+(?:tempo|harga|@|cash|tunai|lunas|nota|faktur)\b|$)/i)||[])[1];
-    if(!k&&!raw){botSay(L('Which shop? Add "ke [shop name]".','Ke toko mana? Tambahkan "ke [nama toko]".'));return;}
-    let term=(x.match(/tempo\s*(\d+)/)||x.match(/(\d+)\s*hari/)||[])[1]||'';if(/(cash|tunai|lunas)/.test(x))term='cash';if(!term){const lt=k&&lastTerm(k);term=lt?(lt.term==='date'?'30':lt.term):'cash';}
-    const price=(x.match(/(?:harga|@)\s*([\d.,]+\s*(?:jt|rb|ribu|juta|k)?)/)||[])[1];
+  if(/\b(jual|terjual|sold|sell|nota baru|kirim ke)\b/.test(x)){
+    const lines=findProducts(x);if(!lines.length){botSay(L('Which tire and how many? For example "sold 10 WGC29 to Sinar Ban, 14 days".','Ban apa dan berapa? Contoh "jual 10 WGC29 ke Sinar Ban tempo 14".'));return;}
+    const k=findCustomer(x);const raw=(t.match(/\b(?:ke|to|untuk)\s+(.+?)(?:[,.]|\s+(?:tempo|harga|price|at|@|cash|tunai|lunas|nota|faktur|invoice|on|tgl|from|dari)\b|$)/i)||[])[1];
+    if(!k&&!raw){botSay(L('Which shop? Add "to [shop name]".','Ke toko mana? Tambahkan "ke [nama toko]".'));return;}
+    let term=(x.match(/(?:tempo|terms?)\s*(\d+)/)||x.match(/(\d+)\s*(?:hari|days)/)||[])[1]||'';if(/(cash|tunai|lunas|paid)/.test(x))term='cash';if(!term){const lt=k&&lastTerm(k);term=lt?(lt.term==='date'?'30':lt.term):'cash';}
+    const price=(x.match(/(?:harga|price|at|@)\s*((?:idr|rp\.?)?\s*[\d.,]+\s*(?:jt|rb|ribu|juta|k)?)/)||[])[1];
     const L3=lines.map(l=>({p:l.p,q:l.q,u:price?parseAmt(price):(lastPrice(k,l.p)||n(D().products[l.p].price))}));
-    const nota=(x.match(/(?:nota|faktur|invoice)\s*(\d{3,})/)||[])[1]||nextNota();
-    const acct=term==='cash'?(findAcct(x.replace(/\bke\s+.+$/,''))||mainCash().id):mainCash().id;
+    const nota=(x.match(/(?:nota|faktur|invoice)\s*(?:no\.?\s*)?(\d{3,})/)||[])[1]||nextNota();
+    const acct=term==='cash'?(findAcct(x.replace(/\b(ke|to)\s+.+$/,''))||mainCash().id):mainCash().id;
     const tot=L3.reduce((a,l)=>a+l.q*l.u,0),shop=k?cname(k):raw.trim();
     const lw=k&&D().entries.filter(y=>y.t==='sale'&&y.k===k).pop(),wh=/padang/.test(x)?'pdg':/lampung/.test(x)?'lpg':(lw&&lw.wh)||whs()[0].id;
-    S.chatPending={t:'sale',k,newName:k?'':raw.trim(),nota,d:today(),lines:L3,term,acct,wh};
-    botSay(confirmCard(L('Record this sale?','Catat penjualan ini?'),[[L('Invoice','Nota'),nota],[L('Customer','Toko'),shop+(k?'':' '+L('(new customer)','(toko baru)'))],...L3.map(l=>[esc(D().products[l.p].pattern),`${l.q} × ${fmt(l.u)}`]),[L('Warehouse','Gudang'),whName(S.chatPending.wh)],[L('Total','Total'),rp(tot)],[L('Terms','Tempo'),term==='cash'?L('Cash, received by ','Tunai, diterima ')+aname(acct):term+L(' days',' hari')]]));return;}
-  /* payments */
-  if(/(bayar|lunas|transfer|terima|paid|pays|setor)/.test(x)){
+    if(d<=T){const ws=whStock(),short=L3.find(l=>l.q>n(ws[l.p+'|'+wh]));if(short){botSay(L(`${whName(wh)} only has ${n(ws[short.p+'|'+wh])} ${pShort(short.p)}.`,`${whName(wh)} hanya punya ${n(ws[short.p+'|'+wh])} ${pShort(short.p)}.`));return;}}
+    S.chatPending={t:'sale',k,newName:k?'':raw.trim(),nota,d,lines:L3,term,acct,wh,planned:d>T,by};
+    botSay(confirmCard(d>T?L('Plan this sale?','Rencanakan penjualan ini?'):L('Record this sale?','Catat penjualan ini?'),[dateRow,[L('Invoice','Nota'),nota],[L('Shop','Toko'),shop+(k?'':' '+L('(new shop)','(toko baru)'))],...L3.map(l=>[D().products[l.p].pattern,`${l.q} × ${fmt(l.u)}`]),[L('Warehouse','Gudang'),whName(wh)],[L('Total','Total'),rp(tot)],[L('Payment','Pembayaran'),term==='cash'?L('Paid now, received by ','Lunas, diterima ')+aname(acct):L(`Unpaid invoice, ${term} days`,`Belum dibayar, tempo ${term} hari`)]]));return;}
+  /* a shop paid */
+  if(/(bayar|lunas|transfer|terima|received|paid|pays|pay|giro|tf)/.test(x)){
     const nota=(x.match(/\b(\d{5})\b/)||[])[1];let o=nota&&c.openAR.find(y=>y.nota===nota);const k=o?o.k:findCustomer(x);
-    if(!k){botSay(L('Which shop paid? For example "Sinar Ban bayar 20jt ke Papi".','Toko mana yang bayar? Contoh "Sinar Ban bayar 20jt ke Papi".'));return;}
+    if(!k){botSay(L('Which shop paid? For example "Sinar Ban paid 20jt to Bella by transfer on 18 Nov".','Toko mana yang bayar? Contoh "Sinar Ban bayar 20jt ke Papi tgl 18".'));return;}
+    if(d>T){botSay(L('That date is still to come. If the shop gave a giro, write for example "giro clears 30 Nov".','Tanggal itu belum lewat. Kalau toko kasih giro, tulis misalnya "giro cair 30 Nov".'));return;}
     const open=c.openAR.filter(y=>y.k===k);if(!open.length){botSay(L(`${esc(cname(k))} owes nothing right now.`,`${esc(cname(k))} tidak punya utang sekarang.`));return;}
-    if(!o)o=open[0];let a=parseAmt(x.replace(/\b\d{5}\b/,''));if(!a||/lunas/.test(x))a=open.reduce((s,y)=>s+y.open,0);
-    const acct=findAcct(x)||mainCash().id,method=/(giro|cek|cheque)/.test(x)?'cheque':BANKISH.test(aname(acct)+acct)||/transfer/.test(x)?'transfer':'cash';
-    if(method==='cheque'){botSay(L('For a cheque or giro, use Mark paid on the Sales tab so you can add the clear date.','Untuk cek atau giro, pakai Mark paid di tab Penjualan supaya bisa isi tanggal cair.'));return;}
-    S.chatPending={t:'recv',k,a,acct,method,alloc:[o.id],d:today()};
-    botSay(confirmCard(L('Record this payment?','Catat pembayaran ini?'),[[L('Shop','Toko'),cname(k)],[L('Amount','Jumlah'),rp(a)],[L('For','Untuk'),L('invoice ','nota ')+o.nota+(a>o.open+0.5?L(' and older ones',' dan nota lain'):'')],[L('Received by','Diterima'),aname(acct)],[L('How','Cara'),method==='transfer'?'Transfer':L('Cash','Tunai')]]));return;}
+    if(!o)o=open[0];let a=parseAmt(x.replace(/\b\d{5}\b/,''));if(!a||/(lunas|in full|everything|semua)/.test(x))a=open.reduce((s,y)=>s+y.open,0);
+    const acct=findAcct(x.replace(new RegExp(cname(k).toLowerCase().replace(/\(example\)/,'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&').trim(),'g'),''))||mainCash().id,method=/(giro|cek|cheque)/.test(x)?'cheque':BANKISH.test(aname(acct)+acct)||/(transfer|tf|trf)/.test(x)?'transfer':'cash';
+    if(method==='cheque'&&!clear){botSay(L('When does the giro clear? For example "Sinar Ban gave a giro 20jt, clears 30 Nov".','Giro cair tanggal berapa? Contoh "Sinar Ban kasih giro 20jt cair 30 Nov".'));return;}
+    const alloc=[];let left=a;for(const y of [o,...open.filter(z=>z!==o)]){if(left<=0.5)break;alloc.push(y.id);left-=y.open;}
+    S.chatPending={t:'recv',k,a,acct,method,alloc,d,clear,by};
+    botSay(confirmCard(L('Record this payment?','Catat pembayaran ini?'),[dateRow,[L('Shop','Toko'),cname(k)],[L('Amount','Jumlah'),rp(a)],[L('For','Untuk'),L('invoice ','nota ')+o.nota+(alloc.length>1?L(` and ${alloc.length-1} more`,` dan ${alloc.length-1} lagi`):'')],[L('Received by','Diterima'),aname(acct)],[L('How','Cara'),method==='cheque'?L('Giro, clears ','Giro, cair ')+fd(clear):method==='transfer'?'Transfer':L('Cash','Tunai')]]));return;}
   botSay(L("Sorry, I didn't get that yet. ","Maaf, saya belum paham. ")+chatHelp());
 }
 function confirmCard(title,rows){return `<div class="ccard"><b>${title}</b>${rows.map(([k,v])=>`<div class="cr"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('')}<div class="row"><button class="btn primary sm" data-act="chat-ok">${L('Save','Simpan')}</button><button class="link" data-act="chat-no">${L('Cancel','Batal')}</button></div></div>`;}
-function chatHelp(){return L('Try one of these:','Coba ketik seperti ini:')+`<div class="chips">${['jual 10 WGC29 ke Sinar Ban tempo 14','Sinar Ban bayar 20jt ke Papi','bensin 1,5jt','siapa yang belum bayar?','stok','untung bulan ini'].map(s=>`<button class="mini ghost" data-act="chat-try">${esc(s)}</button>`).join('')}</div>`;}
+function chatHelp(){const ex=S.lang==='id'?['Sinar Ban bayar 20jt transfer ke Bella kemarin','jual 10 WGC29 ke Sinar Ban tgl 20 tempo 14','bensin 1,5jt tgl 21 dibayar Via','gaji 100jt tgl 25 Nov','Papi setor 5jt','siapa yang belum bayar?']:['Sinar Ban paid 20jt by transfer to Bella yesterday','Sold 10 WGC29 to Sinar Ban on 20 Nov, 14 days','Fuel 1.5jt on 21 Nov paid by Via','Salary IDR 100mn on 25 Nov','Papi handed over 5jt','Who still owes us?'];
+  return L('Type what happened, with the date and amount. I put it in the right place. For example:','Ketik apa yang terjadi, dengan tanggal dan jumlahnya. Saya catat di tempat yang benar. Contoh:')+`<div class="chips">${ex.map(s=>`<button class="mini ghost" data-act="chat-try">${esc(s)}</button>`).join('')}</div>`;}
 async function chatConfirm(){
-  const p=S.chatPending;if(!p)return;S.chatPending=null;const by=(S.me&&S.me.name)||'';
+  const p=S.chatPending;if(!p)return;S.chatPending=null;const by=p.by||(S.me&&S.me.name)||'',id='e'+uid(),ts=Date.now();
   if(p.t==='sale'){const k=p.k||await ensureContact(p.newName,'customer');if(D().entries.some(x=>x.t==='sale'&&x.nota===p.nota))p.nota=nextNota();
-    const e={id:'e'+uid(),t:'sale',wh:p.wh,d:p.d,ts:Date.now(),k,nota:p.nota,lines:p.lines,disc:0,ship:0,shipAcct:p.acct,term:p.term,due:p.term==='cash'?'':addDaysTo(p.d,parseInt(p.term,10)||0),acct:p.acct,note:'',claim:'',by};e.paid=p.term==='cash'?entryTotal(e):0;
-    await saveEntry(e);S.sl.flash=e.id;botSay(L(`Saved invoice ${e.nota}. It is on the Sales tab.`,`Nota ${e.nota} tersimpan. Ada di tab Penjualan.`));}
-  if(p.t==='recv'){await saveEntry({id:'e'+uid(),t:'recv',d:p.d,ts:Date.now(),k:p.k,a:p.a,acct:p.acct,alloc:p.alloc,method:p.method,note:'',by});botSay(L('Payment saved.','Pembayaran tersimpan.'));}
-  if(p.t==='expense'){await saveEntry({id:'e'+uid(),t:'expense',d:p.d,ts:Date.now(),cat:p.cat,a:p.a,acct:p.acct,note:'',by});botSay(L('Cost saved.','Biaya tersimpan.'));}
+    const e={id,t:'sale',wh:p.wh,d:p.d,ts,k,nota:p.nota,lines:p.lines,disc:0,ship:0,shipAcct:p.acct,term:p.term,due:p.term==='cash'?'':addDaysTo(p.d,parseInt(p.term,10)||0),acct:p.acct,note:'',claim:'',by};e.paid=p.term==='cash'?entryTotal(e):0;if(p.planned){e.stage='planned';e.paid=0;}
+    await saveEntry(e);S.sl.flash=e.id;botSay(p.planned?L(`Planned for ${fd(p.d)}. It shows under Going out on Home.`,`Direncanakan ${fd(p.d)}. Muncul di Akan keluar di Beranda.`):L(`Saved invoice ${e.nota}.`,`Nota ${e.nota} tersimpan.`));}
+  if(p.t==='recv'){const e={id,t:'recv',d:p.d,ts,k:p.k,a:p.a,acct:p.acct,alloc:p.alloc,method:p.method,note:'',by};if(p.method==='cheque')Object.assign(e,{clear:p.clear,chqBank:'',chqNo:''});await saveEntry(e);botSay(L('Payment saved.','Pembayaran tersimpan.'));}
+  if(p.t==='expense'){const e={id,t:'expense',d:p.d,ts,cat:p.cat,a:p.a,acct:p.acct,note:'',by};if(p.planned)e.stage='planned';await saveEntry(e);botSay(p.planned?L(`Reminder set for ${fd(p.d)}. It shows under Bills to pay on Home.`,`Pengingat untuk ${fd(p.d)}. Muncul di Tagihan di Beranda.`):L('Cost saved.','Biaya tersimpan.'));}
+  if(p.t==='transfer'){await saveEntry({id,t:'transfer',d:p.d,ts,from:p.from,to:p.to,a:p.a,note:'Handed over',by});botSay(L('Handover saved.','Setoran tersimpan.'));}
+  if(p.t==='pay'){await saveEntry({id,t:'pay',d:p.d,ts,k:p.k||await supplierId(),a:p.a,acct:p.acct,alloc:p.alloc,note:'',by});botSay(L('Payment to Jakarta saved.','Bayar Jakarta tersimpan.'));}
   drawChat();
 }
 function drawChat(){
   const box=$('#chat');if(!box)return;box.hidden=!S.chatOpen;$('#chatBtn').setAttribute('aria-expanded',S.chatOpen?'true':'false');if(!S.chatOpen)return;
-  if(!S.chat.length)botSay(L('Hi! Tell me what happened in a short sentence and I will record it. ','Halo! Ketik apa yang terjadi dengan kalimat singkat, nanti saya catat. ')+chatHelp());
+  if(!S.chat.length)botSay(L('Hi! Forgot to record something? Tell me here. ','Halo! Ada yang lupa dicatat? Ketik di sini. ')+chatHelp());
   $('#chatLog').innerHTML=S.chat.map(m=>`<div class="msg ${m.who}">${m.html}</div>`).join('');const lg=$('#chatLog');lg.scrollTop=lg.scrollHeight;
   if(window.__tr)window.__tr(box);
 }
