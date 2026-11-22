@@ -1153,12 +1153,13 @@ function goCell(e,ed){if(e.void)return '';
   return ed?`<button class="mini ghost" data-act="sl-go" data-id="${e.id}" title="${L('Tap to switch','Ketuk untuk ganti')}">${lab}</button>`:esc(lab);}
 function viewSeg(){const v=S.sl.view||'inv';return `<div class="seg vseg" role="group" aria-label="View">${[['inv',L('Simple view','Tampilan simpel')],['tire',L('Excel view, one row per tire','Tampilan Excel, satu baris per ban')]].map(([k,l])=>`<button type="button" data-act="sl-view" data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div>`;}
 function payPill(e,I){if(e.void)return '';
-  if(I.st==='plan')return `<span class="st st-due">${L('Not paid yet','Belum bayar')}</span>`;
-  if(I.st==='paid')return `<span class="st st-paid">${L('Paid','Lunas')}</span>`;
-  const part=I.paid>0.5?L('Partly paid, ','Bayar sebagian, '):'';
+  if(I.st==='plan')return `<span class="st st-due">${L('Not received yet','Belum diterima')}</span>`;
+  if(I.st==='paid')return `<span class="st st-paid">${L('Received','Sudah diterima')}${I.pays&&I.pays.length?' · '+esc(howWord(I.pays[I.pays.length-1])):''}</span>`;
+  const part=I.paid>0.5?L('Part received, ','Diterima sebagian, '):'';
   if(I.st==='chq')return `<span class="st st-chq">${L('Giro, clears ','Giro, cair ')}${esc(fd(I.chq[0].clear))}</span>`;
-  if(I.st==='late')return `<span class="st st-late">${part}${L('Not paid, ','Belum bayar, ')}${esc(I.label.replace('Late','late').replace(/^late/,L('late','telat')))}</span>`;
-  return `<span class="st st-due">${part||L('Not paid yet, ','Belum bayar, ')}${L('due ','jatuh tempo ')}${esc(fd(I.o.due))}</span>`;}
+  if(I.st==='late')return `<span class="st st-late">${part}${L('Not received, ','Belum diterima, ')}${esc(I.label.replace('Late','late').replace(/^late/,L('late','telat')))}</span>`;
+  return `<span class="st st-due">${part||L('Not received yet, ','Belum diterima, ')}${L('due ','jatuh tempo ')}${esc(fd(I.o.due))}</span>`;}
+function howWord(p){return /cheque/.test(p.how)?'Giro':p.how==='transfer'||p.acct===handTo()?L('Transfer','Transfer'):L('Cash','Tunai');}
 function goPill(e,ed){if(e.void)return '';
   if(e.stage==='planned')return `<div class="gocell"><span class="st st-due">${L('Not out yet','Belum keluar')} · ${esc(fd(e.d))}</span>${ed?`<span class="row"><button class="mini" data-act="went" data-how="pickup" data-id="${e.id}">${L('Picked up','Diambil')}</button><button class="mini" data-act="went" data-how="deliver" data-id="${e.id}">${L('Delivered','Dikirim')}</button></span>`:''}</div>`;
   const lab=e.go==='deliver'?L('Delivered','Dikirim'):L('Picked up','Diambil');
@@ -1168,7 +1169,7 @@ function salesByInvoice(list,inf,allMonths){const s=S.sl,ed=editable(),c=now(),T
   const sum=a=>a.reduce((x,o)=>x+o.open,0);
   const tile=(f,lab,big,sub,tone)=>`<button type="button" class="stile${s.f===f?' on':''}" data-act="sl-f" data-v="${f}"><span class="micro">${lab}</span><span class="kv${tone?' '+tone:''}">${big}</span><span class="small">${sub}</span></button>`;
   const strip=`<div class="stiles">
-    ${tile('unpaid',L('Not paid yet','Belum dibayar'),notPaid.length,`${L('invoices','nota')} · ${esc(fmtShort(sum(notPaid)))}`)}
+    ${tile('unpaid',L('Not received yet','Belum diterima'),notPaid.length,`${L('invoices','nota')} · ${esc(fmtShort(sum(notPaid)))}`)}
     ${tile('late',L('Late paying','Telat bayar'),late.length,`${L('invoices','nota')} · ${esc(fmtShort(sum(late)))}`,late.length?'neg':'')}
     ${tile('notout',L('Tires not out yet','Ban belum keluar'),notOut.length,`${L('invoices','nota')} · ${notOut.reduce((a,e)=>a+(e.lines||[]).reduce((x,l)=>x+n(l.q),0),0)} ${L('tires','ban')}`)}
     ${tile('all',L('All sales','Semua penjualan'),all.filter(e=>!e.stage&&e.d.slice(0,7)===s.month).length,esc(monthLabel(s.month+'-01')))}</div>`;
@@ -1177,9 +1178,9 @@ function salesByInvoice(list,inf,allMonths){const s=S.sl,ed=editable(),c=now(),T
       <td class="num">${e.void?'':fmt(I.tot)}${!e.void&&I.open>0.5&&I.paid>0.5?`<div class="small">${L('left','sisa')} ${fmt(I.open)}</div>`:''}</td>
       <td>${payPill(e,I)}${ed&&I.open>0.5&&!e.void?` <button class="mini" data-act="f-open" data-v="in-money" data-k="${e.k}">${L('Record payment','Catat bayar')}</button>`:''}</td>
       <td>${goPill(e,ed)}</td></tr>`;}).join('');
-  const chips=[['all','All'],['unpaid','Not paid'],['late','Late'],['notout','Not out yet'],['paid','Paid']].map(([v,l])=>`<button type="button" data-act="sl-f" data-v="${v}" aria-pressed="${s.f===v}">${l}</button>`).join('');
+  const chips=[['all','All'],['unpaid','Not received'],['late','Late'],['notout','Not out yet'],['paid','Received']].map(([v,l])=>`<button type="button" data-act="sl-f" data-v="${v}" aria-pressed="${s.f===v}">${l}</button>`).join('');
   return `<section class="wrap wide">
-    <div class="pagehead"><div><h1 class="h1">Sales</h1><p class="small">${L('Each invoice shows two things: has the shop paid, and have the tires left the warehouse.','Setiap nota menunjukkan dua hal: sudah dibayar atau belum, dan ban sudah keluar atau belum.')}</p></div>
+    <div class="pagehead"><div><h1 class="h1">Sales</h1><p class="small">${L('Each invoice shows two things: has the money been received, and have the tires left the warehouse.','Setiap nota menunjukkan dua hal: sudah dibayar atau belum, dan ban sudah keluar atau belum.')}</p></div>
       <div class="row">${ed?'<button class="btn primary" data-act="f-open" data-v="out-stock">+ New sale</button>':''}<button class="btn" data-act="sl-export">Download</button></div></div>
     ${strip}
     ${viewSeg()}
@@ -1800,7 +1801,7 @@ function pageOverview(){
 /* -------- the four simple forms -------- */
 const FKIND={'in-money':['Money in','Uang masuk'],'out-money':['Money out','Uang keluar'],'in-stock':['Stock in','Barang masuk'],'out-stock':['Stock out','Barang keluar']};
 function newF(kind,sub,k){const p1=Object.keys(D().products).find(id=>D().products[id].restock!==false)||Object.keys(D().products)[0];
-  const f={kind,sub:sub||{'in-money':'shop','out-money':'cost','in-stock':'jakarta','out-stock':'sell'}[kind],d:today(),when:'now',later:addDays(3),pay:'later',term:'14',acct:lsGet('tsb-acct')||mainCash().id,method:'cash',wh:whs()[0].id,from:whs()[0].id,to:(whs()[1]||whs()[0]).id,k:k?cname(k):'',lines:[{p:p1,q:'',u:''}],a:'',cat:cats()[0],note:'',nota:'',tick:null,clear:''};
+  const f={kind,sub:sub||{'in-money':'shop','out-money':'cost','in-stock':'jakarta','out-stock':'sell'}[kind],d:today(),when:'now',later:addDays(3),pay:'later',term:'14',acct:lsGet('tsb-acct')||mainCash().id,method:'transfer',wh:whs()[0].id,from:whs()[0].id,to:(whs()[1]||whs()[0]).id,k:k?cname(k):'',lines:[{p:p1,q:'',u:''}],a:'',cat:cats()[0],note:'',nota:'',tick:null,clear:''};
   if(kind==='in-stock'){f.pay='later';f.term='30';f.lines=[{p:p1,q:'',u:fmt(lastCost(p1))}];}
   if(kind==='out-stock'){f.lines=[{p:p1,q:'',u:fmt(n((D().products[p1]||{}).price))}];}
   if(kind==='out-money'&&f.sub==='handover'){const col=accts().find(a=>isCollector(a.id)&&(now().bal[a.id]||0)>0.5);if(col){f.acct=col.id;f.a=fmt(now().bal[col.id]);}}
@@ -1832,7 +1833,7 @@ function pageCatat(){
       body+=bigQ(L('Which tires?','Ban apa?'),linesBlock(f,L('Price each','Harga per ban')));
       const go=f.when==='later'?'later':(f.go||'pickup');
       body+=bigQ(L('Has the shop got the tires?','Ban sudah diambil atau dikirim?'),`<div class="chips">${chip('go','pickup',go,L('Picked up','Sudah diambil'))}${chip('go','deliver',go,L('Delivered','Sudah dikirim'))}${chip('go','later',go,L('Not yet','Belum'))}</div>${go==='later'?`<p class="small" style="margin:10px 0 6px">${L('Going out on','Keluar tanggal')}</p><input class="fin" type="date" data-ff="later" min="${today()}" value="${esc(f.later)}"><p class="small" style="margin:8px 0 0">${L('Stock stays in the warehouse until you press Picked up or Delivered.','Stok tetap di gudang sampai ditekan Sudah diambil atau Sudah dikirim.')}</p>`:`<p class="small" style="margin:10px 0 6px">${L('On','Tanggal')}</p><input class="fin" type="date" data-ff="d" max="${today()}" value="${esc(f.d)}"><p class="small" style="margin:8px 0 0">${L('Stock goes down now.','Stok langsung berkurang.')}</p>`}`);
-      body+=bigQ(L('How does the shop pay?','Toko bayar pakai apa?'),`<div class="chips">${chip('pay','cash',f.pay,L('Cash','Tunai'))}${chip('pay','transfer',f.pay,'Transfer')}${chip('pay','cheque',f.pay,'Giro')}${chip('pay','later',f.pay,L('Unpaid invoice','Nota belum dibayar'))}</div>${f.pay==='cash'||f.pay==='transfer'?`<p class="small" style="margin:10px 0 6px">${L('Who received the money?','Siapa yang terima uangnya?')}</p>${acctChips(f)}`:f.pay==='cheque'?`<p class="small" style="margin:10px 0 6px">${L('A giro is a promise to pay on a date. Until that date the shop still counts as owing. On that date it becomes money by itself.','Giro adalah janji bayar di tanggal tertentu. Sampai tanggal itu, toko masih dihitung utang. Di tanggal cair, otomatis jadi uang masuk.')}</p><p class="small" style="margin:10px 0 6px">${L('Clears on','Cair tanggal')}</p><input class="fin" type="date" data-ff="clear" value="${esc(f.clear)}"><p class="small" style="margin:10px 0 6px">${L('Who holds the giro?','Siapa yang pegang giro?')}</p>${acctChips(f)}`:`<p class="small" style="margin:10px 0 6px">${L('The shop takes the tires now and pays within','Toko ambil ban sekarang dan bayar dalam')}</p><div class="chips">${['7','14','30'].map(t=>chip('term',t,f.term,L(t+' days',t+' hari'))).join('')}</div>`}`);
+      body+=bigQ(L('How does the shop pay?','Toko bayar pakai apa?'),`<div class="chips">${chip('pay','cash',f.pay,L('Cash','Tunai'))}${chip('pay','transfer',f.pay,'Transfer')}${chip('pay','cheque',f.pay,'Giro')}${chip('pay','later',f.pay,L('Unpaid invoice','Nota belum dibayar'))}</div>${f.pay==='cash'?`<p class="small" style="margin:10px 0 6px">${L('Who has the cash?','Uangnya dipegang siapa?')}</p><div class="chips">${accts().filter(a=>isCollector(a.id)).map(a=>chip('acct',a.id,isCollector(f.acct)?f.acct:mainCash().id,esc(holder(a.id)))).join('')}</div>`:f.pay==='transfer'?`<p class="small" style="margin:10px 0 0">${L('Goes into','Masuk ke')} ${esc(aname(handTo()))}.</p>`:f.pay==='cheque'?`<p class="small" style="margin:10px 0 6px">${L('A giro is a promise to pay on a date. Until that date the shop still counts as owing. On that date it becomes money by itself.','Giro adalah janji bayar di tanggal tertentu. Sampai tanggal itu, toko masih dihitung utang. Di tanggal cair, otomatis jadi uang masuk.')}</p><p class="small" style="margin:10px 0 6px">${L('Clears on','Cair tanggal')}</p><input class="fin" type="date" data-ff="clear" value="${esc(f.clear)}">`:`<p class="small" style="margin:10px 0 6px">${L('The shop takes the tires now and pays within','Toko ambil ban sekarang dan bayar dalam')}</p><div class="chips">${['7','14','30'].map(t=>chip('term',t,f.term,L(t+' days',t+' hari'))).join('')}</div>`}`);
       body+=`<details class="fmore"><summary>${L('Invoice number and note','Nomor nota dan catatan')}</summary><div class="row"><label><span class="micro">${L('Invoice number','Nomor nota')}</span><input class="fin" data-ff="nota" value="${esc(f.nota)}" placeholder="${esc(nextNota())}"></label><label class="grow"><span class="micro">${L('Note','Catatan')}</span><input class="fin" data-ff="note" value="${esc(f.note)}"></label></div></details>`;
     } else if(f.sub==='move'){
       body+=bigQ(L('From and to','Dari dan ke'),`<div class="chips">${whs().map(w=>chip('from',w.id,f.from,esc(w.name))).join('')}</div><p class="small" style="margin:8px 0">${L('to','ke')}</p><div class="chips">${whs().map(w=>chip('to',w.id,f.to,esc(w.name))).join('')}</div>`);
@@ -1855,16 +1856,20 @@ function pageCatat(){
     } else body+=bigQ(L('Date','Tanggal'),`<input class="fin" type="date" data-ff="d" max="${today()}" value="${esc(f.d)}">`);
   }
   if(f.kind==='in-money'){
-    body+=sub([['shop','A shop paid','Toko bayar'],['owner','Owner added money','Pemilik tambah modal']]);
     if(f.sub==='shop'){
       const k=cidByName(f.k),open=k?c.openAR.filter(o=>o.k===k):[];
-      body+=bigQ(L('Which shop?','Toko mana?'),`<input class="fin" list="dl-cust" data-ff="k" value="${esc(f.k)}" placeholder="${L('Shop name','Nama toko')}">${custList()}`);
+      body+=bigQ(L('Which shop paid?','Toko mana yang bayar?'),`<input class="fin" list="dl-cust" data-ff="k" value="${esc(f.k)}" placeholder="${L('Shop name','Nama toko')}">${custList()}`);
       if(k)body+=bigQ(L('For which invoices?','Untuk nota yang mana?'),open.length?`<div class="ticks">${open.map(o=>`<label class="tick"><input type="checkbox" data-act="f-tick" data-id="${o.id}"${(f.tick||[]).includes(o.id)?' checked':''}><span>${esc(o.nota)} · ${esc(dm(o.d))}${o.due<today()?` <span class="neg">${L('late','telat')}</span>`:''}</span><b>${esc(rp(o.open))}</b></label>`).join('')}</div>`:`<p class="small">${L('This shop owes nothing.','Toko ini tidak punya utang.')}</p>`);
+      const m=f.method||'transfer';
+      body+=bigQ(L('Received how?','Diterima lewat apa?'),`<div class="chips">${chip('method','transfer',m,L('Bank transfer','Transfer bank'))}${chip('method','cash',m,L('Cash','Tunai'))}${chip('method','cheque',m,'Giro')}</div>
+        ${m==='transfer'?`<p class="small" style="margin:10px 0 0">${L('Goes into','Masuk ke')} ${esc(aname(handTo()))}.</p>`:m==='cash'?`<p class="small" style="margin:10px 0 6px">${L('Who has the cash?','Uangnya dipegang siapa?')}</p><div class="chips">${accts().filter(a=>isCollector(a.id)).map(a=>chip('acct',a.id,isCollector(f.acct)?f.acct:mainCash().id,esc(holder(a.id)))).join('')}</div>`:`<p class="small" style="margin:10px 0 6px">${L('Clears on','Cair tanggal')}</p><input class="fin" type="date" data-ff="clear" value="${esc(f.clear)}"><p class="small" style="margin:8px 0 0">${L('Counted as received on that date.','Dihitung masuk di tanggal itu.')}</p>`}`);
+      body+=bigQ(L('Amount','Jumlah'),moneyIn('a'));
+    }else{
+      body+=bigQ(L('How much did the owner add?','Berapa modal yang ditambah?'),moneyIn('a'));
+      body+=bigQ(L('Into','Masuk ke'),acctChips(f));
     }
-    body+=bigQ(L('How much?','Berapa?'),moneyIn('a'));
-    body+=bigQ(L('Who received it?','Siapa yang terima?'),acctChips(f));
-    if(f.sub==='shop')body+=bigQ(L('How?','Caranya?'),`<div class="chips">${chip('method','cash',f.method,L('Cash','Tunai'))}${chip('method','transfer',f.method,'Transfer')}${chip('method','cheque',f.method,'Giro')}</div>${f.method==='cheque'?`<p class="small" style="margin:10px 0 6px">${L('A giro is a promise to pay on a date. Until that date the shop still counts as owing. On that date it becomes money by itself.','Giro adalah janji bayar di tanggal tertentu. Sampai tanggal itu, toko masih dihitung utang. Di tanggal cair, otomatis jadi uang masuk.')}</p><p class="small" style="margin:10px 0 6px">${L('Clears on','Cair tanggal')}</p><input class="fin" type="date" data-ff="clear" value="${esc(f.clear)}">`:''}`);
     body+=bigQ(L('Date','Tanggal'),`<input class="fin" type="date" data-ff="d" max="${today()}" value="${esc(f.d)}">`);
+    body+=`<p class="small" style="margin:4px 4px 0">${f.sub==='shop'?`<button type="button" class="link" data-act="f-set" data-k="sub" data-v="owner">${L('Not from a shop? Owner added money','Bukan dari toko? Pemilik tambah modal')}</button>`:`<button type="button" class="link" data-act="f-set" data-k="sub" data-v="shop">${L('Back to: a shop paid','Kembali: toko bayar')}</button>`}</p>`;
   }
   if(f.kind==='out-money'){
     body+=sub([['cost','A cost','Biaya'],['jakarta','Paid Jakarta','Bayar Jakarta'],['handover','Hand money over','Setor uang'],['owner','Owner took money','Pemilik ambil uang']]);
@@ -1892,6 +1897,7 @@ async function saveF(){
   if(f.kind==='out-stock'&&f.when!=='later'&&f.sub!=='sell'||f.kind==='out-stock'&&f.sub==='sell'&&f.when==='now'){const src=f.sub==='move'?f.from:f.wh;const short=lines.find(l=>n(l.q)>n(ws[l.p+'|'+src]));if(short)return err(L(`${whName(src)} only has ${n(ws[short.p+'|'+src])} ${pShort(short.p)}.`,`${whName(src)} hanya punya ${n(ws[short.p+'|'+src])} ${pShort(short.p)}.`));}
   if(f.kind==='out-stock'&&f.sub==='sell'){const name=(f.k||'').trim();if(!name)return err(L('Type the shop.','Isi nama toko.'));if(lines.some(l=>!(n(l.u)>0)))return err(L('Every tire needs a price.','Setiap ban perlu harga.'));
     if(f.pay==='cheque'&&!f.clear)return err(L('Pick the date the giro clears.','Pilih tanggal giro cair.'));
+    if(f.pay!=='later')f.acct=f.pay==='cash'?(isCollector(f.acct)?f.acct:mainCash().id):handTo();
     const k=cidByName(name)||await ensureContact(name,'customer');const paidNow=f.pay==='cash'||f.pay==='transfer';const term=paidNow?'cash':f.pay==='cheque'?'date':f.term;
     let nota=(f.nota||'').trim()||nextNota();if(D().entries.some(x=>x.t==='sale'&&x.nota===nota))nota=nextNota();
     e={id,t:'sale',d:dt,ts,k,nota,wh:f.wh,lines:lines.map(l=>({p:l.p,q:n(l.q),u:n(l.u)})),disc:0,ship:0,shipAcct:f.acct,term,due:term==='cash'?'':term==='date'?f.clear:addDaysTo(dt,parseInt(term,10)),acct:f.acct,method:paidNow?f.pay:f.pay==='cheque'?'cheque':'',note:(f.note||'').trim(),claim:'',by};
@@ -1904,7 +1910,7 @@ async function saveF(){
     else{e={id,t:'purchase',stage:'arrived',d:dt,ts,k,nota,wh:f.wh,lines:lines.map(l=>({p:l.p,qd:n(l.q),q:n(l.q),c:n(l.u)})),extra:0,acct:f.acct,term:f.pay==='paid'?'cash':f.term,by};e.due=f.pay==='paid'?'':addDaysTo(dt,parseInt(f.term,10));e.paid=f.pay==='paid'?entryTotal(e):0;}
     msg=f.when==='later'?L(`Expected on ${dm(dt)}`,`Akan datang ${dm(dt)}`):L('Stock added','Stok bertambah');}
   if(f.kind==='in-money'||f.kind==='out-money'){const a=n(f.a);if(!(a>0))return err(L('Type the amount.','Isi jumlahnya.'));
-    if(f.kind==='in-money'&&f.sub==='shop'){const k=cidByName(f.k);if(!k)return err(L('Pick a shop from the list.','Pilih toko dari daftar.'));if(f.method==='cheque'&&!f.clear)return err(L('Pick the date the giro clears.','Pilih tanggal giro cair.'));
+    if(f.kind==='in-money'&&f.sub==='shop'){f.method=f.method||'transfer';f.acct=f.method==='cash'?(isCollector(f.acct)?f.acct:mainCash().id):handTo();const k=cidByName(f.k);if(!k)return err(L('Pick a shop from the list.','Pilih toko dari daftar.'));if(f.method==='cheque'&&!f.clear)return err(L('Pick the date the giro clears.','Pilih tanggal giro cair.'));
       e={id,t:'recv',d:dt,ts,k,a,acct:f.acct,alloc:(f.tick||[]).slice(),method:f.method,note:'',by};if(f.method==='cheque')Object.assign(e,{clear:f.clear,chqBank:'',chqNo:''});}
     if(f.kind==='in-money'&&f.sub==='owner')e={id,t:'capital',d:dt,ts,a,acct:f.acct,note:'',by};
     if(f.kind==='out-money'&&f.sub==='cost'){e={id,t:'expense',d:dt,ts,cat:f.cat,a,acct:f.acct,note:(f.note||'').trim(),by};if(f.when==='later'){e.stage='planned';msg=L(`Reminder set for ${dm(dt)}`,`Pengingat untuk ${dm(dt)}`);}}
