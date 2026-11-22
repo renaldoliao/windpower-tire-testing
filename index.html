@@ -718,6 +718,7 @@ tr.inl td{background:var(--paper);padding:0 12px 14px!important}tr.irow.open td{
 .txopt:hover{border-color:var(--accent)}.txopt b{font-size:18px;font-weight:500;letter-spacing:-0.01em}.txopt span{font-size:14px;color:var(--muted)}
 .btn.big{padding:14px 26px;font-size:16px;white-space:nowrap}@media (max-width:520px){.qacts .btn.big{width:100%;text-align:center}}.rowend{white-space:nowrap}.rowend .mini{margin-left:4px}
 .tabbar a{font-size:11px!important}
+.vrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center}
 </style>
 </head>
 <body>
@@ -1129,7 +1130,7 @@ function pageSales(){
   if(s.f==='late')list=list.filter(e=>inf[e.id].st==='late');
   if(s.f==='paid')list=list.filter(e=>!e.void&&inf[e.id].open<0.5);
   if(q)list=list.filter(e=>(e.nota||'').toLowerCase().includes(q)||cname(e.k).toLowerCase().includes(q));
-  list.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:String(a.nota).localeCompare(String(b.nota)));
+  list.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:String(a.nota).localeCompare(String(b.nota)));if((s.sort||'new')==='new')list.reverse();
   if(s.view==='inv')return salesByInvoice(list,inf,allMonths);
   let r=0,tq=0,tt=0,tp=0,to=0;
   const cell=(e,f,i,html)=>html;
@@ -1175,7 +1176,7 @@ function goCell(e,ed){if(e.void)return '';
   if(e.stage==='planned')return `<div class="gocell"><span class="small">${L('Going out','Keluar')} ${esc(fd(e.d))}</span>${ed?`<span class="row"><button class="mini" data-act="went" data-how="pickup" data-id="${e.id}">${L('Picked up','Diambil')}</button><button class="mini" data-act="went" data-how="deliver" data-id="${e.id}">${L('Delivered','Dikirim')}</button></span>`:''}</div>`;
   const lab=e.go==='deliver'?L('Delivered','Dikirim'):L('Picked up','Diambil');
   return ed?`<button class="mini ghost" data-act="sl-go" data-id="${e.id}" title="${L('Tap to switch','Ketuk untuk ganti')}">${lab}</button>`:esc(lab);}
-function viewSeg(){const v=S.sl.view||'inv';return `<div class="seg vseg" role="group" aria-label="View">${[['inv',L('Simple view','Tampilan simpel')],['tire',L('Excel view, one row per tire','Tampilan Excel, satu baris per ban')]].map(([k,l])=>`<button type="button" data-act="sl-view" data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div>`;}
+function viewSeg(){const v=S.sl.view||'inv',so=S.sl.sort||'new';return `<div class="vrow"><div class="seg vseg" role="group" aria-label="Sort">${[['new',L('Newest first','Terbaru dulu')],['old',L('Oldest first','Terlama dulu')]].map(([k,l])=>`<button type="button" data-act="sl-sort" data-v="${k}" aria-pressed="${so===k}">${l}</button>`).join('')}</div><div class="seg vseg" role="group" aria-label="View">${[['inv',L('Simple view','Tampilan simpel')],['tire',L('Excel view, one row per tire','Tampilan Excel, satu baris per ban')]].map(([k,l])=>`<button type="button" data-act="sl-view" data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div></div>`;}
 function payPill(e,I){if(e.void)return '';
   const ed=editable(),btn=(cls,txt)=>`<button type="button" class="st ${cls} stbtn"${ed?` data-act="sl-pq" data-id="${e.id}"`:' disabled'}>${txt}${ed?' <span class="caret">▾</span>':''}</button>`;
   if(I.st==='plan'){if(I.open<0.5)return btn('st-paid',L('Fully paid','Lunas')+' · '+esc([...new Set(I.pays.map(howWord))].join(' + ')));if(I.chq&&I.chq.length)return btn('st-chq',`${L('Giro, clears','Giro, cair')} ${esc(fd(I.chq[0].clear))}`);return btn('st-due',I.paid>0.5?L(`DP ${sh2(I.paid)} · ${sh2(I.open)} left`,`DP ${sh2(I.paid)} · sisa ${sh2(I.open)}`):L('Not paid yet','Belum dibayar'));}
@@ -1874,7 +1875,7 @@ function linesBlock(f,price){
   return `<div class="flines">${f.lines.map((l,i)=>`<div class="fline"><div class="tpick">${pids.map(id=>`<button type="button" class="tp${l.p===id?' on':''}" data-act="f-pick" data-i="${i}" data-v="${id}"><b>${esc(pShort(id))}</b><span>${src?`${n(ws[id+'|'+src])} ${L('in stock','stok')}`:''}${price?`${src?' · ':''}${esc(sh2(f.kind==='in-stock'?lastCost(id):(lastPrice(cidByName(f.k),id)||n(P[id].price))))}`:''}</span></button>`).join('')}</div>
     <label><span class="micro">${L('How many','Jumlah')}</span><input class="fin" data-fl="q" data-i="${i}" inputmode="numeric" value="${esc(l.q)}" placeholder="0"></label>
     ${price?`<label><span class="micro">${price}</span><input class="fin money" data-fl="u" data-i="${i}" inputmode="numeric" value="${esc(l.u)}"></label>`:''}
-    ${price?`<span class="ltot">= <b id="flt-${i}">${esc(rp(n(l.q)*n(l.u)))}</b></span>`:''}
+    ${price?`<span class="ltot">= <b id="flt-${i}">${esc(rp(n(l.q)*n(l.u)))}</b></span>`:''}${src?`<span class="ltot neg" id="flw-${i}">${n(l.q)>n(ws[l.p+'|'+src])?L(`Only ${n(ws[l.p+'|'+src])} in stock`,`Stok hanya ${n(ws[l.p+'|'+src])}`):''}</span>`:''}
     ${f.lines.length>1?`<button class="mini ghost" data-act="f-delline" data-i="${i}">×</button>`:''}</div>`).join('')}
     <button class="mini" data-act="f-addline">+ ${L('another tire','ban lain')}</button></div>`;}
 function whenBlock(f,nowL,laterL){return bigQ(L('When?','Kapan?'),`<div class="chips">${chip('when','now',f.when,nowL)}${chip('when','later',f.when,laterL)}</div>${f.when==='later'?`<input class="fin" type="date" data-ff="later" min="${addDays(1)}" value="${esc(f.later)}">`:`<input class="fin" type="date" data-ff="d" max="${today()}" value="${esc(f.d)}">`}`);}
@@ -2040,13 +2041,14 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-ac
   if(act==='f-go'){S.sl.f='notout';if(route()==='sales')render();else location.hash='#sales';return;}
   if(act==='sl-go'){const e=D().entries.find(x=>x.id===b.dataset.id);if(e){const c=clone(e);c.go=c.go==='deliver'?'pickup':'deliver';await saveEntry(c);}return;}
   if(act==='bill-paid'){await markBillPaid(b.dataset.id);return;}
+  if(act==='sl-sort'){S.sl.sort=b.dataset.v;render();return;}
   if(act==='sl-view'){S.sl.view=b.dataset.v;lsSet('wb-slview',b.dataset.v);render();return;}
   if(act==='todo-toggle'){S.todoOpen=!S.todoOpen;render();return;}
 });
 document.addEventListener('input',ev=>{const el=ev.target;if(el.dataset&&el.dataset.pq&&S.sl.pq){S.sl.pq[el.dataset.pq]=el.value;}});
 document.addEventListener('change',ev=>{const el=ev.target;if(el.dataset&&el.dataset.pq&&S.sl.pq){S.sl.pq[el.dataset.pq]=el.value;}});
 document.addEventListener('input',ev=>{const el=ev.target,f=S.f;if(!f||!el.dataset)return;
-  const upd=()=>{const t=$('#f-sum');if(t)t.innerHTML=fsum(f);f.lines.forEach((l,i)=>{const x=$(`#flt-${i}`);if(x)x.textContent=rp(n(l.q)*n(l.u));});};
+  const upd=()=>{const t=$('#f-sum');if(t)t.innerHTML=fsum(f);const ws3=whStock(),src3=f.kind==='out-stock'?(f.sub==='move'?f.from:f.wh):null;f.lines.forEach((l,i)=>{const x=$(`#flt-${i}`);if(x)x.textContent=rp(n(l.q)*n(l.u));const w=$(`#flw-${i}`);if(w&&src3){const have=n(ws3[l.p+'|'+src3]);w.textContent=n(l.q)>have?L(`Only ${have} in stock`,`Stok hanya ${have}`):'';}});};
   if(el.dataset.ff){f[el.dataset.ff]=el.value;upd();return;}
   if(el.dataset.fl){f.lines[+el.dataset.i][el.dataset.fl]=el.value;upd();}});
 document.addEventListener('change',ev=>{const el=ev.target,f=S.f;if(!f||!el.dataset)return;
