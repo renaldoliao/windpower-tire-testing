@@ -531,8 +531,9 @@ tr.newrow td{background:var(--accent-soft)}
 tr.newrow .cell{background:var(--sheet)}
 tr.newerr td{border-bottom:0;padding:0 18px}
 tr.newerr .err:empty{display:none}
-tr.flash td{animation:flash 1.6s var(--ease)}
-@keyframes flash{0%,30%{background:var(--accent-soft)}100%{background:transparent}}
+tr.flash td{animation:flash 2.4s var(--ease) both}
+@keyframes flash{0%,45%{background:color-mix(in srgb,var(--accent) 28%,var(--sheet))}}
+@media (max-width:760px){table.xl.inv tr.irow.flash{animation:flash 2.4s var(--ease) both}}
 tr.paypanel td{background:var(--field);white-space:normal;padding:0}
 .pp{padding:16px 18px;position:sticky;left:0;box-sizing:border-box;width:min(1440px,calc(100vw - 32px))}
 .pp-h{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;margin-bottom:10px}
@@ -2010,7 +2011,7 @@ async function saveF(){
       const c2=clone(o),oldTot=entryTotal(o);c2.k=k;c2.nota=(f.nota||'').trim()||o.nota;c2.wh=f.wh;c2.lines=lines.map(l=>({p:l.p,q:n(l.q),u:n(l.u)}));if(f.d)c2.d=o.stage==='planned'?o.d:f.d;if(o.term!=='cash'&&f.due)c2.due=f.due;
       if(!o.stage){const ws2=whStock();(o.lines||[]).forEach(l=>{const key=l.p+'|'+(o.wh||'lpg');ws2[key]=n(ws2[key])+n(l.q);});const short=c2.lines.find(l=>l.q>n(ws2[l.p+'|'+c2.wh]));if(short)return err(L(`${whName(c2.wh)} only has ${n(ws2[short.p+'|'+c2.wh])} ${pShort(short.p)}.`,`${whName(c2.wh)} hanya punya ${n(ws2[short.p+'|'+c2.wh])} ${pShort(short.p)}.`));}
       if(o.term==='cash'&&Math.abs(n(o.paid)-oldTot)<0.5)c2.paid=entryTotal(c2);
-      S.f=null;await saveEntry(c2);toast(L(`Invoice ${c2.nota} updated`,`Nota ${c2.nota} diperbarui`));location.hash='#sales';return;}
+      S.f=null;Object.assign(S.sl,{flash:c2.id,f:'all',q:'',month:c2.d.slice(0,7)});await saveEntry(c2);toast(L(`Invoice ${c2.nota} updated`,`Nota ${c2.nota} diperbarui`));location.hash='#sales';return;}
     if(f.kind==='out-stock'&&f.sub==='sell'){const name=(f.k||'').trim();if(!name)return err(L('Type the shop.','Isi nama toko.'));if(lines.some(l=>!(n(l.u)>0)))return err(L('Every tire needs a price.','Setiap ban perlu harga.'));
     if(f.pay==='cheque'&&!f.clear)return err(L('Pick the date the giro clears.','Pilih tanggal giro cair.'));
     if(f.pay!=='later')f.acct=f.pay==='cash'?(isCollector(f.acct)?f.acct:mainCash().id):handTo();
@@ -2067,7 +2068,7 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-ac
   if(act==='scroll-owe'){const o=$('#owe');if(o)o.scrollIntoView({behavior:'smooth',block:'start'});return;}
   if(act==='came'){await markCame(b.dataset.id);return;}
   if(act==='went'){const id=b.dataset.id,how=b.dataset.how||'pickup',e=D().entries.find(x=>x.id===id);if(!e)return;const q=(e.lines||[]).reduce((a,l)=>a+n(l.q),0);
-    ask(how==='deliver'?L(`Mark invoice ${esc(e.nota)} for <b>${esc(cname(e.k))}</b> as <b>delivered today</b>? ${q} tires leave ${esc(whName(e.wh||'lpg'))}.`,`Tandai nota ${esc(e.nota)} untuk <b>${esc(cname(e.k))}</b> <b>sudah dikirim hari ini</b>? ${q} ban keluar dari ${esc(whName(e.wh||'lpg'))}.`):L(`Mark invoice ${esc(e.nota)} for <b>${esc(cname(e.k))}</b> as <b>picked up today</b>? ${q} tires leave ${esc(whName(e.wh||'lpg'))}.`,`Tandai nota ${esc(e.nota)} untuk <b>${esc(cname(e.k))}</b> <b>sudah diambil hari ini</b>? ${q} ban keluar dari ${esc(whName(e.wh||'lpg'))}.`),how==='deliver'?L('Yes, delivered','Ya, sudah dikirim'):L('Yes, picked up','Ya, sudah diambil'),()=>markWent(id,how));return;}
+    ask(how==='deliver'?L(`Mark invoice ${esc(e.nota)} for <b>${esc(cname(e.k))}</b> as <b>delivered today</b>? ${q} tires leave ${esc(whName(e.wh||'lpg'))}.`,`Tandai nota ${esc(e.nota)} untuk <b>${esc(cname(e.k))}</b> <b>sudah dikirim hari ini</b>? ${q} ban keluar dari ${esc(whName(e.wh||'lpg'))}.`):L(`Mark invoice ${esc(e.nota)} for <b>${esc(cname(e.k))}</b> as <b>picked up today</b>? ${q} tires leave ${esc(whName(e.wh||'lpg'))}.`,`Tandai nota ${esc(e.nota)} untuk <b>${esc(cname(e.k))}</b> <b>sudah diambil hari ini</b>? ${q} ban keluar dari ${esc(whName(e.wh||'lpg'))}.`),how==='deliver'?L('Yes, delivered','Ya, sudah dikirim'):L('Yes, picked up','Ya, sudah diambil'),()=>{S.sl.flash=id;return markWent(id,how);});return;}
   if(act==='ask-yes'){const f=S.ask&&S.ask.fn;S.ask=null;drawAsk();if(f)await f();return;}
   if(act==='ask-no'){S.ask=null;drawAsk();return;}
   if(act==='sl-pq'){const id=b.dataset.id;if(S.sl.pqId===id){S.sl.pqId=null;}else{S.sl.pqId=id;S.sl.pq={how:'transfer',full:'full',d:today()};}render();return;}
@@ -2078,9 +2079,9 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-ac
     const r={id:'e'+uid(),t:'recv',d:q.d||today(),ts:Date.now(),k:e.k,a,acct:q.how==='cash'?(q.acct||mainCash().id):handTo(),alloc:[e.id],method:q.how,note:'',by:(S.me&&S.me.name)||''};if(q.how==='cheque')Object.assign(r,{clear:q.clear,chqBank:'',chqNo:''});
     const howT=q.how==='cheque'?`${L('giro, clears','giro, cair')} ${fd(q.clear)}`:q.how==='cash'?`${L('cash, with','tunai, dipegang')} ${holder(r.acct)}`:`${L('transfer into','transfer ke')} ${aname(handTo())}`;
     ask(L(`Save <b>${rp(a)}</b> from <b>${esc(cname(e.k))}</b> for invoice ${esc(e.nota)}, by ${esc(howT)}, on ${esc(fd(r.d))}? ${a>=I.open-0.5?'The invoice becomes <b>fully paid</b>.':`<b>${rp(I.open-a)}</b> will still be owed.`}`,`Simpan <b>${rp(a)}</b> dari <b>${esc(cname(e.k))}</b> untuk nota ${esc(e.nota)}, lewat ${esc(howT)}, tanggal ${esc(fd(r.d))}? ${a>=I.open-0.5?'Nota jadi <b>lunas</b>.':`Sisa <b>${rp(I.open-a)}</b>.`}`),L('Yes, save payment','Ya, simpan'),async()=>{
-    S.sl.pqId=null;await saveEntry(r);toast(a>=I.open-0.5?L(`Invoice ${e.nota} fully paid`,`Nota ${e.nota} lunas`):L(`DP saved. ${rp(I.open-a)} left.`,`DP tersimpan. Sisa ${rp(I.open-a)}.`));});return;}
+    S.sl.pqId=null;S.sl.flash=e.id;await saveEntry(r);toast(a>=I.open-0.5?L(`Invoice ${e.nota} fully paid`,`Nota ${e.nota} lunas`):L(`DP saved. ${rp(I.open-a)} left.`,`DP tersimpan. Sisa ${rp(I.open-a)}.`));});return;}
   if(act==='f-go'){S.sl.f='notout';if(route()==='sales')render();else location.hash='#sales';return;}
-  if(act==='sl-go'){const e=D().entries.find(x=>x.id===b.dataset.id);if(e){const to=e.go==='deliver'?'pickup':'deliver';ask(L(`Change invoice ${esc(e.nota)} from ${e.go==='deliver'?'delivered':'picked up'} to <b>${to==='deliver'?'delivered':'picked up'}</b>? Stock does not change.`,`Ubah nota ${esc(e.nota)} dari ${e.go==='deliver'?'dikirim':'diambil'} jadi <b>${to==='deliver'?'dikirim':'diambil'}</b>? Stok tidak berubah.`),L('Yes, change','Ya, ubah'),async()=>{const c=clone(e);c.go=to;await saveEntry(c);});}return;}
+  if(act==='sl-go'){const e=D().entries.find(x=>x.id===b.dataset.id);if(e){const to=e.go==='deliver'?'pickup':'deliver';ask(L(`Change invoice ${esc(e.nota)} from ${e.go==='deliver'?'delivered':'picked up'} to <b>${to==='deliver'?'delivered':'picked up'}</b>? Stock does not change.`,`Ubah nota ${esc(e.nota)} dari ${e.go==='deliver'?'dikirim':'diambil'} jadi <b>${to==='deliver'?'dikirim':'diambil'}</b>? Stok tidak berubah.`),L('Yes, change','Ya, ubah'),async()=>{const c=clone(e);c.go=to;S.sl.flash=e.id;await saveEntry(c);});}return;}
   if(act==='bill-paid'){await markBillPaid(b.dataset.id);return;}
   if(act==='sl-sort'){S.sl.sort=b.dataset.v;render();return;}
   if(act==='sl-view'){S.sl.view=b.dataset.v;lsSet('wb-slview',b.dataset.v);render();return;}
@@ -2949,7 +2950,8 @@ function render(){if(S.ask){S.ask=null;drawAsk();}
   if(!same&&m.classList){m.classList.remove('enter');void m.offsetWidth;m.classList.add('enter');}
   else{const w=$('#sheetwrap');if(w)w.scrollLeft=sx;if(fk){const x=document.querySelector(`[data-key="${CSS.escape(fk)}"]`);if(x&&x!==document.activeElement){x.focus({preventScroll:true});}}}
   if(r==='record'&&S.draft)mountForm();
-  if(S.sl.flash||S.cs.flash){clearTimeout(render._f);render._f=setTimeout(()=>{S.sl.flash=null;S.cs.flash=null;document.querySelectorAll('.flash').forEach(x=>x.classList.remove('flash'));},1800);}
+  if(S.sl.flash){const fr=document.querySelector('tr.flash');if(fr)requestAnimationFrame(()=>fr.scrollIntoView({block:'center',behavior:'smooth'}));}
+  if(S.sl.flash||S.cs.flash){clearTimeout(render._f);render._f=setTimeout(()=>{S.sl.flash=null;S.cs.flash=null;document.querySelectorAll('.flash').forEach(x=>x.classList.remove('flash'));},2600);}
   if(S.chatOpen)drawChat();
   if(S.lang==='id'||render._wasId){translateTree(document.body);}render._wasId=S.lang==='id';movePill();
 }
