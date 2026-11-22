@@ -182,7 +182,7 @@ nav a.newbtn{color:var(--sheet);padding:8px 16px;font-size:14px;text-decoration:
 @media (max-width:760px){
   nav#nav{display:none}.moreLink{display:inline}
   header.top{flex-wrap:nowrap}
-  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--sheet);border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;gap:4px;padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-right,0px))}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--sheet);border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(6,1fr);align-items:center;gap:2px;padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-right,0px))}
   .tabbar a{text-align:center;font-size:12px;letter-spacing:.01em;color:var(--muted);text-decoration:none;padding:10px 0}
   .tabbar a[aria-current]{color:var(--carbon)}
   .tabbar a.plus{background:var(--carbon);color:var(--sheet);border-radius:999px;font-size:13px;font-weight:500}
@@ -693,6 +693,8 @@ body[data-route="catat"] .chatbtn{display:none}
 .n7row span{color:var(--muted);flex:1}.n7row b{font-weight:500}
 .card .ch{margin:0}
 @media (prefers-reduced-motion:reduce){.gcol i{animation:none}}
+.vseg{margin:14px 0 12px}
+table.xl.inv td{padding:14px 12px;white-space:nowrap}table.xl.inv tbody tr{cursor:pointer}table.xl.inv tbody tr:hover td{background:var(--paper)}
 </style>
 </head>
 <body>
@@ -701,7 +703,7 @@ body[data-route="catat"] .chatbtn{display:none}
   <header class="top">
     <a class="mark" href="#overview"><span class="logo" aria-hidden="true"></span><span id="bizName">Windpower Books</span><span class="micro">Books</span></a>
     <nav id="nav">
-      <span class="navpill" aria-hidden="true"></span><a href="#overview">Home</a><a href="#cash">Money</a><a href="#stock">Stock</a><a href="#more">More</a><a class="btn primary newbtn" href="#catat" data-act="f-reset">+ Record</a><button class="lang" data-act="lang" type="button" aria-label="Change language"></button>
+      <span class="navpill" aria-hidden="true"></span><a href="#overview">Home</a><a href="#sales">Sales</a><a href="#cash">Money</a><a href="#stock">Stock</a><a href="#more">More</a><a class="btn primary newbtn" href="#catat" data-act="f-reset">+ Record</a><button class="lang" data-act="lang" type="button" aria-label="Change language"></button>
     </nav>
     <button class="chatHead" data-act="chat-toggle" type="button">Assistant</button><button class="lang moreLink" data-act="lang" type="button" aria-label="Change language"></button>
   </header>
@@ -709,7 +711,7 @@ body[data-route="catat"] .chatbtn{display:none}
 </div>
 <main id="main"></main>
 <div class="wrap"><footer><span>All amounts in Rupiah.</span><a href="#terms">Terms of use</a><a href="#privacy">Privacy</a><span id="who"></span></footer></div>
-<nav class="tabbar" id="tabbar" aria-label="Main"><a href="#overview">Home</a><a href="#cash">Money</a><a class="plus" href="#catat" data-act="f-reset">+ Record</a><a href="#stock">Stock</a><a href="#more">More</a></nav>
+<nav class="tabbar" id="tabbar" aria-label="Main"><a href="#overview">Home</a><a href="#sales">Sales</a><a class="plus" href="#catat" data-act="f-reset">+ Record</a><a href="#cash">Money</a><a href="#stock">Stock</a><a href="#more">More</a></nav>
 <button class="chatbtn" id="chatBtn" data-act="chat-toggle" type="button" aria-expanded="false" aria-controls="chat">Assistant</button>
 <section class="chat" id="chat" hidden aria-label="Assistant"><div class="chat-h"><b>Assistant</b><span class="small">Demo: understands short sentences</span><button class="mini ghost" data-act="chat-toggle" aria-label="Close">×</button></div><div class="chat-log" id="chatLog" aria-live="polite"></div><form id="chatForm" class="chat-f"><input id="chatIn" autocomplete="off" placeholder="e.g. jual 10 WGC29 ke Sinar Ban tempo 14"><button class="btn primary sm" type="submit">Send</button></form></section>
 <div id="toast" hidden></div>
@@ -768,7 +770,7 @@ const TERMS=[['cash','Paid in full now'],['7','7 days'],['14','14 days'],['30','
 
 const S={mode:'loading',db:null,user:null,uid:null,canWrite:true,demo:false,slow:false,err:'',ready:{p:0,c:0,d:0,m:0},
   live:{products:{},contacts:{},days:{},setup:{}},ver:0,cache:{},draft:null,editing:null,formMounted:false,lastRoute:'',allocKey:null,
-  rp:{preset:'month',off:0,cmp:'prev',from:'',to:'',tab:'pl'},sl:{month:today().slice(0,7),f:'all',q:'',open:null,pay:null,add:null,cust:null,flash:null},stk:{month:today().slice(0,7),p:'',wh:'',move:null},cs:{month:today().slice(0,7),add:null,flash:null},cx:{month:today().slice(0,7),acct:'',move:null},na:null,chat:[],chatOpen:false,chatPending:null,lang:'en',jr:{month:today().slice(0,7),type:'',g:'all',q:''},viewId:null,saved:null,prodEdit:null,contEdit:null,delArm:null,
+  rp:{preset:'month',off:0,cmp:'prev',from:'',to:'',tab:'pl'},sl:{view:lsGet('wb-slview')||'tire',month:today().slice(0,7),f:'all',q:'',open:null,pay:null,add:null,cust:null,flash:null},stk:{month:today().slice(0,7),p:'',wh:'',move:null},cs:{month:today().slice(0,7),add:null,flash:null},cx:{month:today().slice(0,7),acct:'',move:null},na:null,chat:[],chatOpen:false,chatPending:null,lang:'en',jr:{month:today().slice(0,7),type:'',g:'all',q:''},viewId:null,saved:null,prodEdit:null,contEdit:null,delArm:null,
   priceEdits:{},explain:false,assets:null,photoFor:null,sb:null,me:null,authView:'signin',authMsg:''};
 S.live.entries=[];S.live.members=[];
 
@@ -1096,6 +1098,7 @@ function pageSales(){
   if(s.f==='paid')list=list.filter(e=>!e.void&&inf[e.id].open<0.5);
   if(q)list=list.filter(e=>(e.nota||'').toLowerCase().includes(q)||cname(e.k).toLowerCase().includes(q));
   list.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:String(a.nota).localeCompare(String(b.nota)));
+  if(s.view==='inv')return salesByInvoice(list,inf,allMonths);
   let r=0,tq=0,tt=0,tp=0,to=0;
   const cell=(e,f,i,html)=>html;
   const rows=list.map((e,ix)=>{const I=inf[e.id],L=e.void?[{p:'',q:'',u:''}]:(e.lines||[]),span=L.length,dis=!ed||e.void?' disabled':'';
@@ -1128,6 +1131,7 @@ function pageSales(){
   return `<section class="wrap wide">${custList()}<datalist id="dl-x"></datalist>
     <div class="pagehead"><div><h1 class="h1">Sales</h1><p class="small">One row per tire, like the Excel. Type straight into any cell. Changes save by themselves.</p></div>
       <div class="row">${ed?'<button class="btn primary" data-act="sl-new">+ New sale</button>':''}<button class="btn" data-act="sl-export">Download</button></div></div>
+    ${viewSeg()}
     <div class="toolbar sl-tools"><div class="seg" role="group">${chips}</div>
       ${allMonths?`<p class="small" style="align-self:center">${s.f==='late'?'All late invoices, every month.':'All unpaid invoices, every month.'}</p>`:`<label class="tsel"><span class="micro">Month</span><input type="month" id="sl-month" value="${esc(s.month)}"></label>`}
       <label class="tsel grow"><span class="micro">Search</span><input id="sl-q" value="${esc(s.q||'')}" placeholder="Invoice number or customer"></label></div>
@@ -1135,6 +1139,24 @@ function pageSales(){
       <tfoot><tr><td colspan="6">${list.length} invoice${list.length===1?'':'s'}</td><td class="num">${tq}</td><td></td><td class="num">${fmt(tt)}</td><td colspan="2"></td><td class="num">${fmt(tp)}</td><td class="num">${fmt(to)}</td><td colspan="6"></td></tr></tfoot></table></div>
     <p class="small" style="margin-top:12px">Tip: Enter moves down, Tab moves right. Another tire on the same invoice, discount, shipping or a claim tire: open the row's ⋯ menu.</p></section>`;
 }
+function viewSeg(){const v=S.sl.view||'tire';return `<div class="seg vseg" role="group" aria-label="View">${[['inv',L('One row per invoice','Satu baris per nota')],['tire',L('One row per tire (Excel)','Satu baris per ban (Excel)')]].map(([k,l])=>`<button type="button" data-act="sl-view" data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div>`;}
+function salesByInvoice(list,inf,allMonths){const s=S.sl,ed=editable();let tq=0,tt=0,tp=0,to=0;
+  const rows=list.map((e,ix)=>{const I=inf[e.id];const Ls=e.lines||[],q=Ls.reduce((a,l)=>a+n(l.q),0);if(!e.void){tq+=q;tt+=I.tot;tp+=I.paid;to+=I.open;}
+    return `<tr class="irow${e.void?' void':''}" data-act="view" data-id="${e.id}"><td class="c-no">${ix+1}</td><td>${esc(e.nota||'')}</td><td>${esc(fd(e.d))}</td><td><b>${esc(e.void?'VOID':cname(e.k))}</b></td><td>${esc(whName(e.wh||'lpg'))}</td>
+      <td class="small">${esc(Ls.map(l=>`${n(l.q)} ${pShort(l.p)}`).join(', '))}</td><td class="num">${e.void?'':fmt(I.tot)}</td><td class="num">${e.void?'':fmt(I.paid)}</td><td class="num">${e.void?'':I.open>0.5?`<b>${fmt(I.open)}</b>`:'0'}</td>
+      <td>${e.term==='cash'||e.void?'<span class="muted">-</span>':esc(fd(e.due))}</td><td><span class="st st-${I.st}">${esc(I.label)}</span></td>
+      <td>${ed&&I.open>0.5&&!e.void?`<button class="mini" data-act="f-open" data-v="in-money" data-k="${e.k}">${L('Record payment','Catat bayar')}</button>`:''}</td></tr>`;}).join('');
+  const chips=[['all','All'],['unpaid','Unpaid'],['late','Late'],['paid','Paid']].map(([v,l])=>`<button type="button" data-act="sl-f" data-v="${v}" aria-pressed="${s.f===v}">${l}</button>`).join('');
+  return `<section class="wrap wide">
+    <div class="pagehead"><div><h1 class="h1">Sales</h1><p class="small">${L('Every invoice on one line. Tap a line to see or change it.','Setiap nota satu baris. Ketuk untuk lihat atau ubah.')}</p></div>
+      <div class="row">${ed?'<button class="btn primary" data-act="f-open" data-v="out-stock">+ New sale</button>':''}<button class="btn" data-act="sl-export">Download</button></div></div>
+    ${viewSeg()}
+    <div class="toolbar sl-tools"><div class="seg" role="group">${chips}</div>
+      ${allMonths?`<p class="small" style="align-self:center">${s.f==='late'?'All late invoices, every month.':'All unpaid invoices, every month.'}</p>`:`<label class="tsel"><span class="micro">Month</span><input type="month" id="sl-month" value="${esc(s.month)}"></label>`}
+      <label class="tsel grow"><span class="micro">Search</span><input id="sl-q" value="${esc(s.q||'')}" placeholder="Invoice number or customer"></label></div>
+    <div class="sheetwrap"><table class="xl inv"><thead><tr><th class="c-no">No</th><th>Invoice</th><th>Date</th><th>Shop</th><th>Warehouse</th><th>Tires</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Still owed</th><th>Due</th><th>Status</th><th></th></tr></thead>
+      <tbody>${rows||`<tr><td colspan="12" class="muted" style="padding:22px">Nothing here${allMonths?'':' in '+esc(monthLabel(s.month+'-01'))}.</td></tr>`}</tbody>
+      <tfoot><tr><td colspan="5">${list.length} invoice${list.length===1?'':'s'}</td><td>${tq} ${L('tires','ban')}</td><td class="num">${fmt(tt)}</td><td class="num">${fmt(tp)}</td><td class="num">${fmt(to)}</td><td colspan="3"></td></tr></tfoot></table></div></section>`;}
 function custHint(id){const p=S.sl.cust;if(!p||p.id!==id)return '';
   return `<div class="cellpop"><span>New name. Did you mean</span>${p.sim.map(k=>`<button class="mini" data-act="sl-cust-use" data-c="${k}">${esc(cname(k))}</button>`).join('')}<button class="mini ghost" data-act="sl-cust-new">Add "${esc(p.name)}" as new</button></div>`;}
 function byCell(e,I,ed){
@@ -1888,6 +1910,7 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-ac
   if(act==='came'){await markCame(b.dataset.id);return;}
   if(act==='went'){await markWent(b.dataset.id);return;}
   if(act==='bill-paid'){await markBillPaid(b.dataset.id);return;}
+  if(act==='sl-view'){S.sl.view=b.dataset.v;lsSet('wb-slview',b.dataset.v);render();return;}
   if(act==='todo-toggle'){S.todoOpen=!S.todoOpen;render();return;}
 });
 document.addEventListener('input',ev=>{const el=ev.target,f=S.f;if(!f||!el.dataset)return;
@@ -2537,7 +2560,6 @@ function pricesSection(){
 function pageMore(){
   const it=(h,t,d,act)=>act?`<button type="button" class="tile" data-act="pick" data-t="${act}"><span class="tt">${t}</span><span class="td">${d}</span></button>`:`<a class="tile" href="#${h}"><span class="tt">${t}</span><span class="td">${d}</span></a>`;
   return `<section class="wrap"><h1 class="h1">${L('More','Lainnya')}</h1><div class="tiles" style="margin-top:26px">
-    ${it('sales',L('Sales list','Daftar penjualan'),L('Every invoice in one sheet, like the Excel. Edit right in the cells.','Semua nota dalam satu lembar seperti Excel. Bisa diubah langsung.'))}
     ${it('costs',L('Costs by kind','Biaya per jenis'),L('Fuel, wages, rent, electricity, month by month.','Bensin, gaji, sewa, listrik, per bulan.'))}
     ${it('reports',L('Full financial reports','Laporan keuangan lengkap'),L('For the accountant: profit and loss, balance sheet, cash flow. PDF or CSV.','Untuk akuntan: laba rugi, neraca, arus kas. PDF atau CSV.'))}
     ${it('people',L('Shops and suppliers','Toko dan pemasok'),L('Everyone you sell to or buy from.','Semua toko dan pemasok.'))}
@@ -2733,7 +2755,7 @@ function pagePrivacy(){return `<section class="wrap prose"><h1 class="h1">Privac
 function render(){
   const r=route();
   const T0={sale:'stock',recv:'cash',purchase:'stock',adjust:'stock',whmove:'stock',pay:'cash',expense:'cash',transfer:'cash',capital:'cash',draw:'cash',opening:'more'};
-  let tab={reports:'more',people:'more',setup:'more',terms:'more',privacy:'more',new:'more',sales:'more',costs:'more'}[r]||r;
+  let tab={reports:'more',people:'more',setup:'more',terms:'more',privacy:'more',new:'more',costs:'more'}[r]||r;
   if(r==='record'||r==='saved'||r==='view'){const f=id=>(D().entries.find(x=>x.id===id)||{}).t;const t=r==='record'?(S.draft&&S.draft.t):r==='view'?f(S.viewId):f((S.saved||{}).id);tab=T0[t]||'more';}
   document.querySelectorAll('#nav a,#tabbar a').forEach(a=>{if(a.getAttribute('href')==='#'+tab)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   document.querySelectorAll('.lang').forEach(x=>x.textContent=S.lang==='id'?'EN':'ID');
