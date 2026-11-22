@@ -846,7 +846,8 @@ function DEMO(){
     E(-1,{t:'purchase',stage:'arrived',k:'c1',nota:'INV/2026/XI/078',lines:[{p:'p1',qd:100,q:100,c:1865500}],extra:0,paid:0,acct:'bank',term:'30',due:addDays(29)}),
     E(0,{t:'purchase',stage:'ordered',k:'c1',nota:'INV/2026/XI/131',eta:addDays(3),wh:'lpg',lines:[{p:'p2',qd:60,q:0,c:1845200}],extra:0,paid:0,acct:'bank',term:'30'}),
     E(0,{t:'purchase',stage:'ordered',k:'c1',nota:'INV/2026/XI/140',eta:addDays(6),wh:'lpg',lines:[{p:'p1',qd:120,q:0,c:1865500}],extra:0,paid:0,acct:'bank',term:'30'}),
-    E(2,{t:'sale',stage:'planned',k:'c7',nota:'',wh:'lpg',lines:[{p:'p1',q:15,u:2050000}],term:'14',due:'',paid:0,acct:'cash',disc:0,ship:0}),
+    E(-1,{t:'recv',k:'c7',a:10000000,acct:'bank',alloc:['po1'],method:'transfer'}),
+    E(2,{t:'sale',id:'po1',stage:'planned',k:'c7',nota:'',wh:'lpg',lines:[{p:'p1',q:15,u:2050000}],term:'14',due:'',paid:0,acct:'cash',disc:0,ship:0}),
     E(4,{t:'sale',stage:'planned',k:'c11',nota:'',wh:'pdg',lines:[{p:'p1',q:6,u:2100000},{p:'p2',q:2,u:2100000}],term:'14',due:'',paid:0,acct:'cash',disc:0,ship:0})
   ];
 
@@ -936,7 +937,11 @@ function compute(from,to,ex){
   /* units arriving at a known cost; if the book was below zero, the shortfall was costed at the old price, so the difference goes to COGS now */
   const putIn=(s,q,v)=>{let varc=0;if(s.q<0&&q>0){const cover=Math.min(-s.q,q),oldUnit=s.v/s.q,newUnit=v/q;varc=Math.round(cover*(newUnit-oldUnit));}s.q+=q;s.v+=v-varc;settle(s);return varc;};
   const addInv=(side,k,o)=>{o.pays=o.pays||[];const c=credit[side][k]||0;if(c>0){const t=Math.min(c,o.open);o.open-=t;credit[side][k]=c-t;if(t>0.5)o.pays.push({d:curD,a:t,credit:true});}o.k=k;o.side=side;(inv[side][k]||(inv[side][k]=[])).push(o);byId[o.id]=o;};
+  /* money paid for an order whose tires have not gone out yet waits on that order */
+  const saleTot={},dep={};D().entries.forEach(x=>{if(x.t==='sale'&&!x.void)saleTot[x.id]={k:x.k,t:entryTotal(x)};});
+  const depSum=id=>(dep[id]||[]).reduce((a,x)=>a+x.a,0);
   const payInv=(side,k,amt,alloc,src)=>{const L=inv[side][k]||[];let left=amt;
+    if(side==='ar')for(const id of alloc||[]){const st=saleTot[id];if(!st||byId[id]||st.k!==k||left<=0)continue;const t=Math.min(left,st.t-depSum(id));if(t>0.5){(dep[id]||(dep[id]=[])).push({d:curD,a:t,src});left-=t;}}
     for(const id of alloc||[]){const o=L.find(x=>x.id===id);if(o&&left>0&&o.open>0){const t=Math.min(o.open,left);o.open-=t;left-=t;o.pays.push({d:curD,a:t,src});if(o.open<0.5)o.paidOn=curD;}}
     for(const o of L.filter(x=>x.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0)){if(left<=0)break;const t=Math.min(o.open,left);o.open-=t;left-=t;o.pays.push({d:curD,a:t,src});if(o.open<0.5)o.paidOn=curD;}
     if(left>0.5)credit[side][k]=(credit[side][k]||0)+left;};
@@ -965,6 +970,7 @@ function compute(from,to,ex){
         const tot=sub+extra,paid=n(e.paid);mv(e.acct,-paid);owe('ap',e,tot,paid);if(inP)C.buyCash+=paid;break;}
       case 'sale':{let goods=0,cogs=0,q=0;(e.lines||[]).forEach(l=>{const s=sk(l.p),lq=n(l.q),c=takeOut(s,lq);goods+=Math.round(lq*n(l.u));q+=lq;cogs+=c;if(s.q<0)warn.push({d:e.d,p:l.p,q:s.q});});
         const tot=goods-n(e.disc),paid=n(e.paid),ship=n(e.ship);mv(e.acct,paid);owe('ar',e,tot,paid);
+        if(dep[e.id]){const o=byId[e.id];for(const x of dep[e.id]){let a=x.a;if(o&&o.open>0.5){const t=Math.min(o.open,a);o.open-=t;a-=t;o.pays.push({d:x.d,a:t,src:x.src});if(o.open<0.5)o.paidOn=curD;}if(a>0.5)credit.ar[e.k]=(credit.ar[e.k]||0)+a;}delete dep[e.id];}
         if(ship){mv(e.shipAcct||e.acct,-ship);}
         profit+=tot-cogs-ship;
         if(inP){P.goods+=goods;P.disc+=n(e.disc);P.cogs+=cogs;P.sales++;P.tires+=q;C.saleCash+=paid;if(paid)recvBy[e.acct||'cash']=(recvBy[e.acct||'cash']||0)+paid;if(ship){P.exp[SHIP]=(P.exp[SHIP]||0)+ship;C.expOut+=ship;}}break;}
@@ -981,13 +987,14 @@ function compute(from,to,ex){
   if(!open)open={tot:money};
   const expTot=Object.values(P.exp).reduce((a,b)=>a+b,0);
   P.net=P.goods-P.disc;P.gross=P.net-P.cogs;P.expTot=expTot;P.profit=P.gross-expTot+P.adj;
-  const side=sd=>{const m={};let t=0;const ks=new Set([...Object.keys(inv[sd]),...Object.keys(credit[sd])]);for(const k of ks){const v=(inv[sd][k]||[]).reduce((a,o)=>a+o.open,0)-(credit[sd][k]||0);m[k]=v;t+=v;}return [m,t];};
+  const depK={};if(true)for(const id in dep){const k=saleTot[id].k;depK[k]=(depK[k]||0)+depSum(id);}
+  const side=sd=>{const m={};let t=0;const ks=new Set([...Object.keys(inv[sd]),...Object.keys(credit[sd]),...(sd==='ar'?Object.keys(depK):[])]);for(const k of ks){const v=(inv[sd][k]||[]).reduce((a,o)=>a+o.open,0)-(credit[sd][k]||0)-(sd==='ar'?depK[k]||0:0);m[k]=v;t+=v;}return [m,t];};
   const [ar,arTot]=side('ar'),[ap,apTot]=side('ap');
   const gross=sd=>Object.values(inv[sd]).flat().reduce((a,o)=>a+o.open,0),cred=sd=>Object.values(credit[sd]).reduce((a,v)=>a+v,0);
   const openInv=sd=>Object.values(inv[sd]).flat().filter(o=>o.open>0.5).sort((a,b)=>a.due<b.due?-1:a.due>b.due?1:0);
   const stockVal=Object.values(st).reduce((a,s)=>a+s.v,0);
   const assets=money+arTot+stockVal,equity=eqOpen+cap-draw+profit;
-  return S.cache[key]={pending,ordered:waitingDO,plannedOut,bills,st,bal,money,ar,ap,arTot,apTot,arGross:gross('ar'),arCredit:cred('ar'),apGross:gross('ap'),apCredit:cred('ap'),inv,byId,openAR:openInv('ar'),openAP:openInv('ap'),credit,open,P,C,recvBy,warn,stockVal,assets,equity,eqOpen,cap,draw,profit,diff:assets-apTot-equity};
+  return S.cache[key]={dep,depTot:Object.values(depK).reduce((a,v)=>a+v,0),pending,ordered:waitingDO,plannedOut,bills,st,bal,money,ar,ap,arTot,apTot,arGross:gross('ar'),arCredit:cred('ar')+Object.values(depK).reduce((a,v)=>a+v,0),apGross:gross('ap'),apCredit:cred('ap'),inv,byId,openAR:openInv('ar'),openAP:openInv('ap'),credit,open,P,C,recvBy,warn,stockVal,assets,equity,eqOpen,cap,draw,profit,diff:assets-apTot-equity};
 }
 const now=()=>compute(START,FAR);
 const START_D=()=>D().entries.reduce((a,e)=>e.d<a?e.d:a,'9999-12-31');
@@ -1092,7 +1099,8 @@ function handedMap(){
 function saleInfo(e,c){
   const T=today(),tot=entryTotal(e),o=c.byId[e.id];
   if(e.void)return {tot:0,paid:0,open:0,st:'void',label:'VOID',pays:[],by:[],coll:[]};
-  if(e.stage==='planned')return {tot,paid:0,open:0,st:'plan',label:'Not out yet',pays:[],by:[],coll:[],chq:[]};
+  if(e.stage==='planned'){const D2=(c.dep&&c.dep[e.id])||[],paid=D2.reduce((a,x)=>a+x.a,0),pays=D2.map(x=>({id:x.src.id,d:x.d,a:x.a,acct:x.src.acct,how:x.src.method==='cheque'?'cheque':x.src.method==='transfer'?'transfer':'cash',rid:x.src.id}));
+    const chq=c.pending.filter(x=>x.k===e.k&&(x.alloc||[]).includes(e.id));return {tot,paid,open:Math.max(0,tot-paid),st:'plan',label:'Not out yet',pays,by:[...new Set(pays.map(p=>p.acct))],coll:[],chq,plan:true};}
   const open=o?o.open:0,pays=[];
   if(n(e.paid)>0.5)pays.push({id:e.id,d:e.d,a:n(e.paid),acct:e.acct,how:e.term==='cash'?'cash sale':'paid at sale',sale:true});
   if(o)(o.pays||[]).forEach(p=>{if(p.now||p.credit)return;const x=p.src;if(x&&x.t==='recv')pays.push({id:x.id,d:p.d,a:p.a,acct:x.acct,how:x.method==='cheque'?`cheque ${x.chqBank||''} ${x.chqNo||''}`.trim():x.method==='transfer'?'transfer':'cash',rid:x.id});});
@@ -1165,16 +1173,16 @@ function goCell(e,ed){if(e.void)return '';
 function viewSeg(){const v=S.sl.view||'inv';return `<div class="seg vseg" role="group" aria-label="View">${[['inv',L('Simple view','Tampilan simpel')],['tire',L('Excel view, one row per tire','Tampilan Excel, satu baris per ban')]].map(([k,l])=>`<button type="button" data-act="sl-view" data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div>`;}
 function payPill(e,I){if(e.void)return '';
   const ed=editable(),btn=(cls,txt)=>`<button type="button" class="st ${cls} stbtn"${ed?` data-act="sl-pq" data-id="${e.id}"`:' disabled'}>${txt}${ed?' <span class="caret">▾</span>':''}</button>`;
-  if(I.st==='plan')return btn('st-due',e.dpAmt?L(`DP ${sh2(e.dpAmt)}`,`DP ${sh2(e.dpAmt)}`):L('Not paid yet','Belum dibayar'));
+  if(I.st==='plan'){if(I.open<0.5)return btn('st-paid',L('Fully paid','Lunas')+' · '+esc([...new Set(I.pays.map(howWord))].join(' + ')));if(I.chq&&I.chq.length)return btn('st-chq',`${L('Giro, clears','Giro, cair')} ${esc(fd(I.chq[0].clear))}`);return btn('st-due',I.paid>0.5?L(`DP ${sh2(I.paid)} · ${sh2(I.open)} left`,`DP ${sh2(I.paid)} · sisa ${sh2(I.open)}`):L('Not paid yet','Belum dibayar'));}
   if(I.st==='paid'){const ways=[...new Set(I.pays.map(howWord))].join(' + ');return btn('st-paid',L('Fully paid','Lunas')+(ways?' · '+esc(ways):''));}
   if(I.st==='chq')return btn('st-chq',`${L('Giro, clears','Giro, cair')} ${esc(fd(I.chq[0].clear))}`);
   const late=I.st==='late',dpTxt=I.paid>0.5?L(`DP ${sh2(I.paid)} · ${sh2(I.open)} left`,`DP ${sh2(I.paid)} · sisa ${sh2(I.open)}`):L('Not paid yet','Belum dibayar');
   return btn(late?'st-late':'st-due',`${dpTxt} · ${late?esc(I.label.replace(/^Late/,L('late','telat'))):L('due ','jatuh tempo ')+esc(fd(I.o.due))}`);}
+function owedBy(k){const c=now();return c.openAR.filter(o=>o.k===k).concat(c.plannedOut.filter(e=>e.k===k).map(e=>{const I=saleInfo(e,c);return {id:e.id,nota:e.nota,d:e.d,due:e.d,open:I.open,order:true};}).filter(o=>o.open>0.5));}
 function sh2(v){return fmtShort(v).replace('Rp ','');}
 function payInline(e,I){const q=S.sl.pq||{},c=e.stage==='planned';
   const hist=I.pays.length?`<div class="phist">${I.pays.map(p=>`<span>${esc(fd(p.d))} · ${esc(howWord(p))} · <b>${esc(rp(p.a))}</b>${p.acct&&isCollector(p.acct)?` · ${L('with','dipegang')} ${esc(holder(p.acct))}`:''}</span>`).join('')}</div>`:'';
-  if(I.open<0.5&&!c)return `<tr class="inl"><td></td><td colspan="7"><div class="inbox"><b>${L('Payments received','Pembayaran diterima')}</b>${hist||`<span class="small">${L('Paid at the time of sale.','Dibayar saat penjualan.')}</span>`}<div><button class="link" data-act="sl-pq" data-id="${e.id}">${L('Close','Tutup')}</button></div></div></td></tr>`;
-  if(c)return `<tr class="inl"><td></td><td colspan="7"><div class="inbox"><span class="small">${L('Payment can be recorded once the tires are picked up or delivered.','Pembayaran bisa dicatat setelah ban diambil atau dikirim.')}</span><div><button class="link" data-act="sl-pq" data-id="${e.id}">${L('Close','Tutup')}</button></div></div></td></tr>`;
+  if(I.open<0.5)return `<tr class="inl"><td></td><td colspan="7"><div class="inbox"><b>${L('Payments received','Pembayaran diterima')}</b>${hist||`<span class="small">${L('Paid at the time of sale.','Dibayar saat penjualan.')}</span>`}<div><button class="link" data-act="sl-pq" data-id="${e.id}">${L('Close','Tutup')}</button></div></div></td></tr>`;
   const how=q.how||'transfer',full=q.full||'full',ch=(k,v,cur,l)=>`<button type="button" class="chip${cur===v?' on':''}" data-act="sl-pqset" data-k="${k}" data-v="${v}">${l}</button>`;
   return `<tr class="inl"><td></td><td colspan="7"><div class="inbox">${hist}
     <div class="inrow"><span class="micro">${L('Paid how?','Bayar lewat?')}</span><div class="chips">${ch('how','transfer',how,L('Bank transfer','Transfer bank'))}${ch('how','cash',how,L('Cash','Tunai'))}${ch('how','cheque',how,'Giro')}</div>
@@ -1189,7 +1197,7 @@ function fsum(f){const tot=f.lines.reduce((a,l)=>a+n(l.q)*n(l.u),0),b=v=>`<b>${e
     if(f.pay==='later'||f.pay==='cheque')return `${L('Total','Total')} ${b(tot)}<span class="sep"></span>${L('Still owed','Sisa piutang')} ${b(tot)}`;
     return `${L('Total','Total')} ${b(tot)}<span class="sep"></span>${L('Fully paid','Lunas')}`;}
   if(f.kind==='in-stock'&&f.sub==='jakarta')return `${L('Total','Total')} ${b(tot)}`;
-  if(f.kind==='in-money'&&f.sub==='shop'){const k=cidByName(f.k);if(!k)return '';const owed=now().openAR.filter(o=>o.k===k&&(f.tick||[]).includes(o.id)).reduce((a,o)=>a+o.open,0);
+  if(f.kind==='in-money'&&f.sub==='shop'){const k=cidByName(f.k);if(!k)return '';const owed=owedBy(k).filter(o=>(f.tick||[]).includes(o.id)).reduce((a,o)=>a+o.open,0);
     const pay=(f.full||'full')==='full'?owed:n(f.a),left=owed-pay;return `${L('Owed','Utang')} ${b(owed)}<span class="sep"></span>${L('Paying','Bayar')} ${b(pay)}<span class="sep"></span>${L('Still owed','Sisa')} <b class="${left<-0.5?'neg':''}">${esc(rp(Math.max(0,left)))}</b>`;}
   return '';}
 function dpBlock(f,tot){const v=f.dp||'full';return `<p class="small" style="margin:12px 0 6px">${L('Fully paid or only DP?','Lunas atau baru DP?')}</p><div class="chips">${chip('dp','full',v,L('Fully paid','Lunas'))}${chip('dp','dp',v,L('Only DP','Baru DP'))}</div>${v==='dp'?`<p class="small" style="margin:10px 0 6px">${L('DP amount','Jumlah DP')}</p><input class="fin money" data-ff="dpa" inputmode="numeric" value="${esc(f.dpa||'')}" placeholder="0"><p class="small" style="margin:10px 0 6px">${L('The rest is due in','Sisanya dibayar dalam')}</p><div class="chips">${['7','14','30'].map(t=>chip('term',t,f.term,L(t+' days',t+' hari'))).join('')}</div>`:''}`;}
@@ -1203,9 +1211,9 @@ function salesByInvoice(list,inf,allMonths){const s=S.sl,ed=editable(),c=now(),T
   const sum=a=>a.reduce((x,o)=>x+o.open,0);
   const tile=(f,lab,big,sub,tone)=>`<button type="button" class="stile${s.f===f?' on':''}" data-act="sl-f" data-v="${f}"><span class="micro">${lab}</span><span class="kv${tone?' '+tone:''}">${big}</span><span class="small">${sub}</span></button>`;
   const strip=`<div class="stiles">
-    ${tile('unpaid',L('Not fully paid','Belum lunas'),notPaid.length,`${L('invoices','nota')} · ${esc(fmtShort(sum(notPaid)))}`)}
-    ${tile('late',L('Late paying','Telat bayar'),late.length,`${L('invoices','nota')} · ${esc(fmtShort(sum(late)))}`,late.length?'neg':'')}
-    ${tile('notout',L('Tires not out yet','Ban belum keluar'),notOut.length,`${L('invoices','nota')} · ${notOut.reduce((a,e)=>a+(e.lines||[]).reduce((x,l)=>x+n(l.q),0),0)} ${L('tires','ban')}`)}
+    ${tile('unpaid',L('Cash: not fully paid','Uang: belum lunas'),notPaid.length+notOut.filter(e=>saleInfo(e,c).open>0.5).length,`${L('sales','penjualan')} · ${esc(fmtShort(sum(notPaid)+notOut.reduce((a,e)=>a+saleInfo(e,c).open,0)))}`)}
+    ${tile('late',L('Cash: late','Uang: telat'),late.length,`${L('invoices','nota')} · ${esc(fmtShort(sum(late)))}`,late.length?'neg':'')}
+    ${tile('notout',L('Stock: not out yet','Barang: belum keluar'),notOut.length,`${L('invoices','nota')} · ${notOut.reduce((a,e)=>a+(e.lines||[]).reduce((x,l)=>x+n(l.q),0),0)} ${L('tires','ban')}`)}
     ${tile('all',L('All sales','Semua penjualan'),all.filter(e=>!e.stage&&e.d.slice(0,7)===s.month).length,esc(monthLabel(s.month+'-01')))}</div>`;
   const rows=list.map((e,ix)=>{const I=inf[e.id];const Ls=e.lines||[];if(!e.void){tt+=I.tot;to+=I.open;}
     return `<tr class="irow${e.void?' void':''}${S.sl.pqId===e.id?' open':''}"><td class="c-no">${ix+1}</td><td>${esc(e.nota||'')}</td><td>${esc(fd(e.d))}</td><td><b>${esc(e.void?'VOID':cname(e.k))}</b><div class="small">${esc(Ls.map(l=>`${n(l.q)} ${pShort(l.p)}`).join(', '))} · ${esc(whName(e.wh||'lpg'))}</div></td>
@@ -1214,14 +1222,14 @@ function salesByInvoice(list,inf,allMonths){const s=S.sl,ed=editable(),c=now(),T
       <td>${goPill(e,ed)}</td><td><button class="mini ghost" data-act="view" data-id="${e.id}" title="${L('Open the full invoice','Buka nota lengkap')}">⋯</button></td></tr>${S.sl.pqId===e.id?payInline(e,I):''}`;}).join('');
   const chips=[['all','All'],['unpaid','Not fully paid'],['late','Late'],['notout','Not out yet'],['paid','Fully paid']].map(([v,l])=>`<button type="button" data-act="sl-f" data-v="${v}" aria-pressed="${s.f===v}">${l}</button>`).join('');
   return `<section class="wrap wide">
-    <div class="pagehead"><div><h1 class="h1">Sales</h1><p class="small">${L('Each invoice shows two things: is it paid, and have the tires left the warehouse. Tap a status to change it.','Setiap nota menunjukkan dua hal: sudah dibayar atau belum, dan ban sudah keluar atau belum.')}</p></div>
+    <div class="pagehead"><div><h1 class="h1">Sales</h1><p class="small">${L('Every sale has two stages that can happen in any order. Cash: has the shop paid? Stock: have the tires gone out? Tap a stage to update it.','Setiap nota menunjukkan dua hal: sudah dibayar atau belum, dan ban sudah keluar atau belum.')}</p></div>
       <div class="row">${ed?'<button class="btn primary" data-act="f-open" data-v="out-stock">+ New sale</button>':''}<button class="btn" data-act="sl-export">Download</button></div></div>
     ${strip}
     ${viewSeg()}
     <div class="toolbar sl-tools"><div class="seg" role="group">${chips}</div>
       ${allMonths?`<p class="small" style="align-self:center">${s.f==='late'?'All late invoices, every month.':s.f==='notout'?'Sold, but the tires are still in the warehouse.':'All unpaid invoices, every month.'}</p>`:`<label class="tsel"><span class="micro">Month</span><input type="month" id="sl-month" value="${esc(s.month)}"></label>`}
       <label class="tsel grow"><span class="micro">Search</span><input id="sl-q" value="${esc(s.q||'')}" placeholder="Invoice number or customer"></label></div>
-    <div class="sheetwrap"><table class="xl inv"><thead><tr><th class="c-no">No</th><th>Invoice</th><th>Date</th><th>Shop and tires</th><th class="num">Total</th><th>${L('1. Payment','1. Pembayaran')}</th><th>${L('2. Tires','2. Ban')}</th><th></th></tr></thead>
+    <div class="sheetwrap"><table class="xl inv"><thead><tr><th class="c-no">No</th><th>Invoice</th><th>Date</th><th>Shop and tires</th><th class="num">Total</th><th>${L('Cash stage','Tahap uang')}</th><th>${L('Stock stage','Tahap barang')}</th><th></th></tr></thead>
       <tbody>${rows||`<tr><td colspan="8" class="muted" style="padding:22px">Nothing here${allMonths?'':' in '+esc(monthLabel(s.month+'-01'))}.</td></tr>`}</tbody>
       <tfoot><tr><td colspan="4">${list.length} invoice${list.length===1?'':'s'}</td><td class="num">${fmt(tt)}</td><td>${to>0.5?`${L('Still owed','Sisa utang')} <b>${fmt(to)}</b>`:''}</td><td colspan="2"></td></tr></tfoot></table></div></section>`;}
 function custHint(id){const p=S.sl.cust;if(!p||p.id!==id)return '';
@@ -1842,7 +1850,7 @@ function newF(kind,sub,k){const p1=Object.keys(D().products).find(id=>D().produc
   if(k)applyShop(f);return f;}
 function applyShop(f){const k=cidByName(f.k);if(!k)return;
   if(f.kind==='out-stock'){const lt=lastTerm(k);if(lt){f.pay=lt.term==='cash'?'cash':'later';if(lt.term!=='cash')f.term=lt.term==='date'?'14':lt.term;}const lw=D().entries.filter(x=>x.t==='sale'&&x.k===k).pop();if(lw&&lw.wh)f.wh=lw.wh;f.lines.forEach(l=>{const lp=lastPrice(k,l.p);if(lp)l.u=fmt(lp);});}
-  if(f.kind==='in-money'){const open=now().openAR.filter(o=>o.k===k);f.tick=open.map(o=>o.id);f.a=fmt(open.reduce((s,o)=>s+o.open,0));}}
+  if(f.kind==='in-money'){const open=owedBy(k);f.tick=open.filter(o=>!o.order).map(o=>o.id);if(!f.tick.length)f.tick=open.map(o=>o.id);f.a=fmt(open.reduce((s,o)=>s+o.open,0));}}
 function linesBlock(f,price){
   const ws=whStock(),src=f.kind==='out-stock'?(f.sub==='move'?f.from:f.wh):null;
   const P=D().products,pids=Object.keys(P).filter(id=>P[id].restock!==false||n(ws[id+'|'+(src||'lpg')])>0);
@@ -1892,9 +1900,9 @@ function pageCatat(){
   }
   if(f.kind==='in-money'){
     if(f.sub==='shop'){
-      const k=cidByName(f.k),open=k?c.openAR.filter(o=>o.k===k):[];
+      const k=cidByName(f.k),open=k?owedBy(k):[];
       body+=bigQ(L('Which shop paid?','Toko mana yang bayar?'),`<input class="fin" list="dl-cust" data-ff="k" value="${esc(f.k)}" placeholder="${L('Shop name','Nama toko')}">${custList()}`);
-      if(k)body+=bigQ(L('For which invoices?','Untuk nota yang mana?'),open.length?`<div class="ticks">${open.map(o=>`<label class="tick"><input type="checkbox" data-act="f-tick" data-id="${o.id}"${(f.tick||[]).includes(o.id)?' checked':''}><span>${esc(o.nota)} · ${esc(dm(o.d))}${o.due<today()?` <span class="neg">${L('late','telat')}</span>`:''}</span><b>${esc(rp(o.open))}</b></label>`).join('')}</div>`:`<p class="small">${L('This shop owes nothing.','Toko ini tidak punya utang.')}</p>`);
+      if(k)body+=bigQ(L('For which invoices?','Untuk nota yang mana?'),open.length?`<div class="ticks">${open.map(o=>`<label class="tick"><input type="checkbox" data-act="f-tick" data-id="${o.id}"${(f.tick||[]).includes(o.id)?' checked':''}><span>${esc(o.nota)} · ${esc(dm(o.d))}${o.order?` <span class="small">${L('tires not out yet','ban belum keluar')}</span>`:o.due<today()?` <span class="neg">${L('late','telat')}</span>`:''}</span><b>${esc(rp(o.open))}</b></label>`).join('')}</div>`:`<p class="small">${L('This shop owes nothing and has no orders waiting.','Toko ini tidak punya utang.')}</p>`);
       const m=f.method||'transfer';
       body+=bigQ(L('Received how?','Diterima lewat apa?'),`<div class="chips">${chip('method','transfer',m,L('Bank transfer','Transfer bank'))}${chip('method','cash',m,L('Cash','Tunai'))}${chip('method','cheque',m,'Giro')}</div>
         ${m==='transfer'?`<p class="small" style="margin:10px 0 0">${L('Goes into','Masuk ke')} ${esc(aname(handTo()))}.</p>`:m==='cash'?`<p class="small" style="margin:10px 0 6px">${L('Who has the cash?','Uangnya dipegang siapa?')}</p><div class="chips">${accts().filter(a=>isCollector(a.id)).map(a=>chip('acct',a.id,isCollector(f.acct)?f.acct:mainCash().id,esc(holder(a.id)))).join('')}</div>`:`<p class="small" style="margin:10px 0 6px">${L('Clears on','Cair tanggal')}</p><input class="fin" type="date" data-ff="clear" value="${esc(f.clear)}"><p class="small" style="margin:8px 0 0">${L('Counted as received on that date.','Dihitung masuk di tanggal itu.')}</p>`}`);
@@ -1936,7 +1944,7 @@ async function saveF(){
     const k=cidByName(name)||await ensureContact(name,'customer');const paidNow=f.pay==='cash'||f.pay==='transfer',dp=paidNow&&f.dp==='dp',dpa=n(f.dpa),tot=lines.reduce((a,l)=>a+n(l.q)*n(l.u),0);if(dp&&!(dpa>0&&dpa<tot))return err(L('Type the DP amount, less than the total.','Isi jumlah DP, lebih kecil dari total.'));const term=paidNow&&!dp?'cash':f.pay==='cheque'?'date':f.term;
     let nota=(f.nota||'').trim()||nextNota();if(D().entries.some(x=>x.t==='sale'&&x.nota===nota))nota=nextNota();
     e={id,t:'sale',d:dt,ts,k,nota,wh:f.wh,lines:lines.map(l=>({p:l.p,q:n(l.q),u:n(l.u)})),disc:0,ship:0,shipAcct:f.acct,term,due:term==='cash'?'':term==='date'?f.clear:addDaysTo(dt,parseInt(term,10)),acct:f.acct,method:paidNow?f.pay:f.pay==='cheque'?'cheque':'',note:(f.note||'').trim(),claim:'',by};
-    e.paid=term==='cash'?entryTotal(e):dp?dpa:0;if(f.pay==='cheque')e.giro={clear:f.clear,acct:f.acct};if(f.when==='later'){e.stage='planned';if(dp)e.dpAmt=dpa;e.paid=0;}else e.go=f.go||'pickup';msg=f.when==='later'?L(`Saved. Tires stay in the warehouse until picked up or delivered.`,`Tersimpan. Ban tetap di gudang sampai diambil atau dikirim.`):L(`Saved invoice ${nota}`,`Nota ${nota} tersimpan`);}
+    e.paid=term==='cash'?entryTotal(e):dp?dpa:0;if(f.pay==='cheque')e.giro={clear:f.clear,acct:f.acct};if(f.when==='later'){e.stage='planned';e.paid=0;if(paidNow||f.pay==='cheque'){e.term=dp?f.term:'0';e.due='';delete e.giro;S.f2pay={k,a:dp?dpa:f.pay==='cheque'?0:tot,acct:f.acct,method:f.pay==='cheque'?'cheque':f.pay,clear:f.clear,id,d:f.d||today()};if(f.pay==='cheque')S.f2pay.a=tot;}}else e.go=f.go||'pickup';msg=f.when==='later'?L(`Saved. Tires stay in the warehouse until picked up or delivered.`,`Tersimpan. Ban tetap di gudang sampai diambil atau dikirim.`):L(`Saved invoice ${nota}`,`Nota ${nota} tersimpan`);}
   if(f.kind==='out-stock'&&f.sub==='move'){if(f.from===f.to)return err(L('Pick two different warehouses.','Pilih dua gudang yang berbeda.'));e={id,t:'whmove',d:dt,ts,from:f.from,to:f.to,lines:lines.map(l=>({p:l.p,q:n(l.q)})),note:'',by};}
   if(f.kind==='out-stock'&&f.sub==='broken')e={id,t:'adjust',d:dt,ts,wh:f.wh,lines:lines.map(l=>({p:l.p,q:-n(l.q)})),note:(f.note||'').trim()||L('Damaged or lost','Rusak atau hilang'),by};
   if(f.kind==='in-stock'&&f.sub==='found')e={id,t:'adjust',d:dt,ts,wh:f.wh,lines:lines.map(l=>({p:l.p,q:n(l.q)})),note:L('Extra found when counting','Lebih saat hitung gudang'),by};
@@ -1945,7 +1953,7 @@ async function saveF(){
     else{e={id,t:'purchase',stage:'arrived',d:dt,ts,k,nota,wh:f.wh,lines:lines.map(l=>({p:l.p,qd:n(l.q),q:n(l.q),c:n(l.u)})),extra:0,acct:f.acct,term:f.pay==='paid'?'cash':f.term,by};e.due=f.pay==='paid'?'':addDaysTo(dt,parseInt(f.term,10));e.paid=f.pay==='paid'?entryTotal(e):0;}
     msg=f.when==='later'?L(`Expected on ${dm(dt)}`,`Akan datang ${dm(dt)}`):L('Stock added','Stok bertambah');}
   if(f.kind==='in-money'||f.kind==='out-money'){const a=n(f.a);if(!(a>0))return err(L('Type the amount.','Isi jumlahnya.'));
-    if(f.kind==='in-money'&&f.sub==='shop'&&(f.full||'full')==='full'){const k0=cidByName(f.k);const ow=now().openAR.filter(o=>o.k===k0&&(f.tick||[]).includes(o.id)).reduce((a,o)=>a+o.open,0);if(ow)f.a=fmt(ow);}
+    if(f.kind==='in-money'&&f.sub==='shop'&&(f.full||'full')==='full'){const k0=cidByName(f.k);const ow=owedBy(k0).filter(o=>(f.tick||[]).includes(o.id)).reduce((a,o)=>a+o.open,0);if(ow)f.a=fmt(ow);}
     if(f.kind==='in-money'&&f.sub==='shop'){f.method=f.method||'transfer';f.acct=f.method==='cash'?(isCollector(f.acct)?f.acct:mainCash().id):handTo();const k=cidByName(f.k);if(!k)return err(L('Pick a shop from the list.','Pilih toko dari daftar.'));if(f.method==='cheque'&&!f.clear)return err(L('Pick the date the giro clears.','Pilih tanggal giro cair.'));
       e={id,t:'recv',d:dt,ts,k,a,acct:f.acct,alloc:(f.tick||[]).slice(),method:f.method,note:'',by};if(f.method==='cheque')Object.assign(e,{clear:f.clear,chqBank:'',chqNo:''});}
     if(f.kind==='in-money'&&f.sub==='owner')e={id,t:'capital',d:dt,ts,a,acct:f.acct,note:'',by};
@@ -1953,7 +1961,7 @@ async function saveF(){
     if(f.kind==='out-money'&&f.sub==='jakarta'){const open=now().openAP;e={id,t:'pay',d:dt,ts,k:open[0]?open[0].k:await supplierId(),a,acct:f.acct,alloc:(f.tick||open.map(x=>x.id)).slice(),note:'',by};}
     if(f.kind==='out-money'&&f.sub==='handover'){if(!isCollector(f.acct))return err(L('Pick who is handing the money over.','Pilih siapa yang setor.'));e={id,t:'transfer',d:dt,ts,from:f.acct,to:handTo(),a,note:'Handed over',by};}
     if(f.kind==='out-money'&&f.sub==='owner')e={id,t:'draw',d:dt,ts,a,acct:f.acct,note:'',by};}
-  if(!e)return;if(f.acct)lsSet('tsb-acct',f.acct);S.f=null;await saveEntry(e);if(e.t==='sale'&&e.giro&&!e.stage)await saveGiro(e);toast(msg);location.hash='#overview';
+  if(!e)return;if(f.acct)lsSet('tsb-acct',f.acct);S.f=null;await saveEntry(e);if(S.f2pay&&e.stage==='planned'){const q=S.f2pay;S.f2pay=null;const r={id:'e'+uid(),t:'recv',d:today(),ts:Date.now(),k:q.k,a:q.a,acct:q.method==='cash'?q.acct:handTo(),alloc:[q.id],method:q.method,note:'',by:e.by||''};if(q.method==='cheque')Object.assign(r,{clear:q.clear,chqBank:'',chqNo:''});await saveEntry(r);}S.f2pay=null;if(e.t==='sale'&&e.giro&&!e.stage)await saveGiro(e);toast(msg);location.hash='#overview';
 }
 /* a bill noted ahead: pay it now */
 async function markBillPaid(id){const e=D().entries.find(x=>x.id===id);if(!e)return;const c=clone(e);delete c.stage;c.due0=c.d;c.d=today();await saveEntry(c);toast(L(`${c.cat} paid`,`${c.cat} sudah dibayar`));}
@@ -1966,7 +1974,7 @@ async function saveGiro(e){await saveEntry({id:'e'+uid(),t:'recv',d:e.d,ts:Date.
 /* planned stock: it happened */
 async function markCame(id){const e=D().entries.find(x=>x.id===id);if(!e)return;const c=clone(e);c.stage='arrived';c.d=today();c.lines=c.lines.map(l=>({...l,q:n(l.qd)}));c.term=c.term&&c.term!=='cash'?c.term:'30';c.due=addDaysTo(c.d,parseInt(c.term,10)||30);c.paid=0;delete c.eta;await saveEntry(c);toast(L('Stock added. Change the count in the entry if some are missing.','Stok bertambah. Kalau ada yang kurang, ubah jumlahnya di catatannya.'));}
 async function markWent(id,how){const e=D().entries.find(x=>x.id===id);if(!e)return;const ws=whStock();const short=(e.lines||[]).find(l=>n(l.q)>n(ws[l.p+'|'+(e.wh||'lpg')]));if(short){toast(L(`${whName(e.wh||'lpg')} only has ${n(ws[short.p+'|'+(e.wh||'lpg')])} ${pShort(short.p)}.`,`${whName(e.wh||'lpg')} hanya punya ${n(ws[short.p+'|'+(e.wh||'lpg')])} ${pShort(short.p)}.`));return;}
-  const c=clone(e);delete c.stage;c.d=today();c.go=how||'pickup';if(c.dpAmt){c.paid=c.dpAmt;delete c.dpAmt;}if(c.term==='cash'){c.paid=entryTotal(c);c.due='';}else if(c.term==='date'&&c.giro)c.due=c.giro.clear;else c.due=addDaysTo(c.d,parseInt(c.term,10)||14);await saveEntry(c);if(c.giro)await saveGiro(c);toast(c.go==='deliver'?L(`Invoice ${c.nota} delivered. Stock updated.`,`Nota ${c.nota} sudah dikirim. Stok diperbarui.`):L(`Invoice ${c.nota} picked up. Stock updated.`,`Nota ${c.nota} sudah diambil. Stok diperbarui.`));}
+  const c=clone(e);delete c.stage;c.d=today();c.go=how||'pickup';if(c.dpAmt){c.paid=c.dpAmt;delete c.dpAmt;}if(c.term==='cash'&&!(now().dep||{})[c.id]){c.paid=entryTotal(c);c.due='';}else if(c.term==='cash'){c.term='0';c.due=c.d;}else if(c.term==='date'&&c.giro)c.due=c.giro.clear;else c.due=addDaysTo(c.d,parseInt(c.term,10)||14);await saveEntry(c);if(c.giro)await saveGiro(c);toast(c.go==='deliver'?L(`Invoice ${c.nota} delivered. Stock updated.`,`Nota ${c.nota} sudah dikirim. Stok diperbarui.`):L(`Invoice ${c.nota} picked up. Stock updated.`,`Nota ${c.nota} sudah diambil. Stok diperbarui.`));}
 document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-act]');if(!b)return;const act=b.dataset.act;
   if(act==='f-reset'){S.f=null;if(route()==='catat')render();return;}
   if(act==='f-open'){S.f=newF(b.dataset.v,b.dataset.sub,b.dataset.k);location.hash='#catat';if(route()==='catat')render();return;}
@@ -2703,7 +2711,7 @@ function statementRows(tab,from,to){
     note('Income tax is not calculated. Owner drawings are not an expense.');
   }else if(tab==='bs'){
     h('Assets');kasRows();it('Accounts receivable',c.arGross,1,'Unpaid invoices.');if(c.apCredit>0.5)it('Advances to suppliers',c.apCredit,1,'Paid to suppliers beyond what was owed.');it('Inventory',c.stockVal,1,'Tires in the warehouse at moving average cost.');tot('Total assets',c.money+c.arGross+c.apCredit+c.stockVal);
-    h('Liabilities');it('Accounts payable',c.apGross,1,'Unpaid DOs to Jakarta and other suppliers.');if(c.arCredit>0.5)it('Customer deposits',c.arCredit,1,'Paid by shops beyond what they owed; used on their next invoice.');tot('Total liabilities',c.apGross+c.arCredit);
+    h('Liabilities');it('Accounts payable',c.apGross,1,'Unpaid DOs to Jakarta and other suppliers.');if(c.arCredit>0.5)it('Customer deposits',c.arCredit,1,'Paid by shops before the tires went out, or beyond what they owed.');tot('Total liabilities',c.apGross+c.arCredit);
     h('Equity');it('Opening equity',c.eqOpen,1,'From the starting balances.');if(c.cap)it('Additional owner capital',c.cap,1);if(c.draw)it('Owner drawings',-c.draw,1);it('Retained earnings',c.profit,1,'All profit since the book started.');tot('Total equity',c.equity);
     grand('Total liabilities and equity',c.apGross+c.arCredit+c.equity,'Must equal total assets.');
   }else if(tab==='cf'){
