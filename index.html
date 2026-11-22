@@ -666,6 +666,9 @@ body[data-route="catat"] .chatbtn{display:none}
 .todo{display:grid;gap:6px;margin-top:12px}
 .todo .todo-r{display:flex;align-items:center;gap:10px;background:var(--sheet);border-radius:999px;padding:7px 8px 7px 16px;font-size:13.5px;line-height:1.35;border-top:0}
 .todo .todo-r .mini{margin-left:auto}
+.todo-h{display:inline-flex;align-items:center;gap:10px;justify-self:start;background:var(--sheet);border:0;border-radius:999px;padding:8px 16px;font:inherit;font-size:13.5px;color:var(--ink);cursor:pointer}
+.todo-h i{width:9px;height:9px;border-radius:999px;background:var(--ink)}.todo-h.bad i{background:var(--loss)}
+.todo-h b{font-weight:500}.todo-h .todo-c{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -1665,7 +1668,9 @@ function todoList(){
   return out;
 }
 function todoCard(){const act=todoList().filter(x=>x.tone!=='info');if(!act.length)return '';
-  return `<div class="todo">${act.slice(0,4).map(x=>`<div class="todo-r ${x.tone}"><i></i><span>${esc(x.text)}</span>${x.btn&&editable()?`<button class="mini" ${x.act}>${esc(x.btn)}</button>`:''}</div>`).join('')}</div>`;}
+  const bad=act.filter(x=>x.tone==='bad').length,open=S.todoOpen;
+  const head=`<button type="button" class="todo-h${bad?' bad':''}" data-act="todo-toggle" aria-expanded="${open?'true':'false'}"><i></i><b>${L(`${act.length} thing${act.length===1?'':'s'} to do`,`${act.length} hal perlu dikerjakan`)}</b>${bad?`<span class="neg">${L(`${bad} late`,`${bad} telat`)}</span>`:''}<span class="todo-c">${open?L('Hide','Tutup'):L('Show','Lihat')}</span></button>`;
+  return `<div class="todo">${head}${open?act.map(x=>`<div class="todo-r ${x.tone}"><i></i><span>${esc(x.text)}</span>${x.btn&&editable()?`<button class="mini" ${x.act}>${esc(x.btn)}</button>`:''}</div>`).join(''):''}</div>`;}
 /* -------- Beranda -------- */
 function pageOverview(){
   const d=D();
@@ -1848,6 +1853,7 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-ac
   if(act==='came'){await markCame(b.dataset.id);return;}
   if(act==='went'){await markWent(b.dataset.id);return;}
   if(act==='bill-paid'){await markBillPaid(b.dataset.id);return;}
+  if(act==='todo-toggle'){S.todoOpen=!S.todoOpen;render();return;}
 });
 document.addEventListener('input',ev=>{const el=ev.target,f=S.f;if(!f||!el.dataset)return;
   if(el.dataset.ff){f[el.dataset.ff]=el.value;return;}
