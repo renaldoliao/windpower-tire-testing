@@ -708,6 +708,11 @@ tr.inl td{background:var(--paper);padding:0 12px 14px!important}tr.irow.open td{
 .inrow{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}.inrow>.micro{min-width:90px}
 .inrow input[type=date],.inrow .fin{width:auto!important;max-width:220px;flex:0 0 auto}.inrow input[type=date]{border:0;background:var(--paper);border-radius:999px;padding:8px 14px;font:inherit;color:var(--ink)}
 .phist{display:flex;flex-direction:column;gap:4px;font-size:13.5px;color:var(--muted)}
+.tpick{display:flex;flex-wrap:wrap;gap:8px;flex-basis:100%}
+.tp{border:1px solid var(--rule);background:var(--sheet);border-radius:16px;padding:10px 14px;display:grid;gap:2px;text-align:left;font:inherit;color:var(--ink);cursor:pointer;min-width:120px}
+.tp span{font-size:12.5px;color:var(--muted)}.tp.on{background:var(--ink);color:var(--sheet);border-color:var(--ink)}.tp.on span{color:inherit;opacity:.75}
+.ltot{align-self:end;padding-bottom:12px;font-size:14px;color:var(--muted)}.ltot b{color:var(--ink);font-weight:500}
+#f-sum{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:14px}#f-sum .sep{width:1px;height:14px;background:currentColor;opacity:.3;margin:0 4px}
 </style>
 </head>
 <body>
@@ -1178,6 +1183,15 @@ function payInline(e,I){const q=S.sl.pq||{},c=e.stage==='planned';
       ${full==='dp'?`<input class="fin money pqin" data-pq="a" inputmode="numeric" placeholder="0" value="${esc(q.a||'')}" style="max-width:200px">`:''}</div>
     <div class="inrow"><span class="micro">${L('Date','Tanggal')}</span><input type="date" class="pqin" data-pq="d" max="${today()}" value="${esc(q.d||today())}"><span class="err" id="pqErr"></span><span style="flex:1"></span><button class="link" data-act="sl-pq" data-id="${e.id}">${L('Cancel','Batal')}</button><button class="btn primary sm" data-act="sl-pqsave" data-id="${e.id}">${L('Save payment','Simpan pembayaran')}</button></div>
   </div></td></tr>`;}
+function fsum(f){const tot=f.lines.reduce((a,l)=>a+n(l.q)*n(l.u),0),b=v=>`<b>${esc(rp(v))}</b>`;
+  if(f.kind==='out-stock'&&f.sub==='sell'){const dp=(f.pay==='cash'||f.pay==='transfer')&&f.dp==='dp';
+    if(dp){const d=n(f.dpa),left=tot-d;return `${L('Total','Total')} ${b(tot)}<span class="sep"></span>DP ${b(d)}<span class="sep"></span>${L('Still owed','Sisa piutang')} <b class="${left<0?'neg':''}">${esc(rp(left))}</b>`;}
+    if(f.pay==='later'||f.pay==='cheque')return `${L('Total','Total')} ${b(tot)}<span class="sep"></span>${L('Still owed','Sisa piutang')} ${b(tot)}`;
+    return `${L('Total','Total')} ${b(tot)}<span class="sep"></span>${L('Fully paid','Lunas')}`;}
+  if(f.kind==='in-stock'&&f.sub==='jakarta')return `${L('Total','Total')} ${b(tot)}`;
+  if(f.kind==='in-money'&&f.sub==='shop'){const k=cidByName(f.k);if(!k)return '';const owed=now().openAR.filter(o=>o.k===k&&(f.tick||[]).includes(o.id)).reduce((a,o)=>a+o.open,0);
+    const pay=(f.full||'full')==='full'?owed:n(f.a),left=owed-pay;return `${L('Owed','Utang')} ${b(owed)}<span class="sep"></span>${L('Paying','Bayar')} ${b(pay)}<span class="sep"></span>${L('Still owed','Sisa')} <b class="${left<-0.5?'neg':''}">${esc(rp(Math.max(0,left)))}</b>`;}
+  return '';}
 function dpBlock(f,tot){const v=f.dp||'full';return `<p class="small" style="margin:12px 0 6px">${L('Fully paid or only DP?','Lunas atau baru DP?')}</p><div class="chips">${chip('dp','full',v,L('Fully paid','Lunas'))}${chip('dp','dp',v,L('Only DP','Baru DP'))}</div>${v==='dp'?`<p class="small" style="margin:10px 0 6px">${L('DP amount','Jumlah DP')}</p><input class="fin money" data-ff="dpa" inputmode="numeric" value="${esc(f.dpa||'')}" placeholder="0"><p class="small" style="margin:10px 0 6px">${L('The rest is due in','Sisanya dibayar dalam')}</p><div class="chips">${['7','14','30'].map(t=>chip('term',t,f.term,L(t+' days',t+' hari'))).join('')}</div>`:''}`;}
 function howWord(p){return /cheque/.test(p.how)?'Giro':p.how==='transfer'||p.acct===handTo()?L('Transfer','Transfer'):L('Cash','Tunai');}
 function goPill(e,ed){if(e.void)return '';
@@ -1831,10 +1845,11 @@ function applyShop(f){const k=cidByName(f.k);if(!k)return;
   if(f.kind==='in-money'){const open=now().openAR.filter(o=>o.k===k);f.tick=open.map(o=>o.id);f.a=fmt(open.reduce((s,o)=>s+o.open,0));}}
 function linesBlock(f,price){
   const ws=whStock(),src=f.kind==='out-stock'?(f.sub==='move'?f.from:f.wh):null;
-  return `<div class="flines">${f.lines.map((l,i)=>`<div class="fline"><select class="fin" data-fl="p" data-i="${i}">${prodOptions(l.p)}</select>
+  const P=D().products,pids=Object.keys(P).filter(id=>P[id].restock!==false||n(ws[id+'|'+(src||'lpg')])>0);
+  return `<div class="flines">${f.lines.map((l,i)=>`<div class="fline"><div class="tpick">${pids.map(id=>`<button type="button" class="tp${l.p===id?' on':''}" data-act="f-pick" data-i="${i}" data-v="${id}"><b>${esc(pShort(id))}</b><span>${src?`${n(ws[id+'|'+src])} ${L('in stock','stok')}`:''}${price?`${src?' · ':''}${esc(sh2(f.kind==='in-stock'?lastCost(id):(lastPrice(cidByName(f.k),id)||n(P[id].price))))}`:''}</span></button>`).join('')}</div>
     <label><span class="micro">${L('How many','Jumlah')}</span><input class="fin" data-fl="q" data-i="${i}" inputmode="numeric" value="${esc(l.q)}" placeholder="0"></label>
     ${price?`<label><span class="micro">${price}</span><input class="fin money" data-fl="u" data-i="${i}" inputmode="numeric" value="${esc(l.u)}"></label>`:''}
-    ${src?`<span class="small">${L('in','di')} ${esc(whName(src))}: ${n(ws[l.p+'|'+src])}</span>`:''}
+    ${price?`<span class="ltot">= <b id="flt-${i}">${esc(rp(n(l.q)*n(l.u)))}</b></span>`:''}
     ${f.lines.length>1?`<button class="mini ghost" data-act="f-delline" data-i="${i}">×</button>`:''}</div>`).join('')}
     <button class="mini" data-act="f-addline">+ ${L('another tire','ban lain')}</button></div>`;}
 function whenBlock(f,nowL,laterL){return bigQ(L('When?','Kapan?'),`<div class="chips">${chip('when','now',f.when,nowL)}${chip('when','later',f.when,laterL)}</div>${f.when==='later'?`<input class="fin" type="date" data-ff="later" min="${addDays(1)}" value="${esc(f.later)}">`:`<input class="fin" type="date" data-ff="d" max="${today()}" value="${esc(f.d)}">`}`);}
@@ -1903,10 +1918,9 @@ function pageCatat(){
     body+=f.sub==='cost'?whenBlock(f,L('Paid today','Sudah dibayar'),L('Will pay on','Akan dibayar tanggal')):bigQ(L('Date','Tanggal'),`<input class="fin" type="date" data-ff="d" max="${today()}" value="${esc(f.d)}">`);
     if(f.sub==='cost'&&f.when==='later')body+=`<p class="small" style="margin:-4px 4px 0">${L('Nothing is taken out yet. On that date the app reminds you, and you press Paid.','Belum ada uang keluar. Di tanggal itu aplikasi mengingatkan, lalu tekan Sudah bayar.')}</p>`;
   }
-  const showTot=(f.kind==='out-stock'&&f.sub==='sell')||(f.kind==='in-stock'&&f.sub==='jakarta');
   return `<section class="wrap narrow"><button class="link" data-act="f-back">‹ ${L('Back','Kembali')}</button>
     <h1 class="h1" style="margin-top:10px">${L(...FKIND[f.kind])}</h1><div class="fform">${body}</div>
-    <div class="fsave">${showTot?`<span>${L('Total','Total')} <b id="f-tot">${esc(rp(tot))}</b></span>`:'<span></span>'}<button class="btn primary" data-act="f-save">${L('Save','Simpan')}</button></div><p class="err" id="fErr"></p></section>`;
+    <div class="fsave"><span id="f-sum">${fsum(f)}</span><button class="btn primary" data-act="f-save">${L('Save','Simpan')}</button></div><p class="err" id="fErr"></p></section>`;
 }
 async function saveF(){
   const f=S.f,err=m=>{const x=$('#fErr');if(x)x.textContent=m;},by=(S.me&&S.me.name)||'',id='e'+uid(),ts=Date.now();
@@ -1966,6 +1980,7 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-ac
     const src=f.kind==='out-money'?now().openAP:now().openAR;f.a=fmt(src.filter(o=>t.includes(o.id)).reduce((s,o)=>s+o.open,0));render();return;}
   if(act==='f-addline'){const f=S.f,p=f.lines[f.lines.length-1].p;f.lines.push({p,q:'',u:f.kind==='in-stock'?fmt(lastCost(p)):fmt(lastPrice(cidByName(f.k),p)||n((D().products[p]||{}).price))});render();return;}
   if(act==='f-delline'){S.f.lines.splice(+b.dataset.i,1);render();return;}
+  if(act==='f-pick'){const f=S.f,l=f.lines[+b.dataset.i];l.p=b.dataset.v;l.u=f.kind==='in-stock'?fmt(lastCost(l.p)):fmt(lastPrice(cidByName(f.k),l.p)||n((D().products[l.p]||{}).price));render();return;}
   if(act==='f-save'){await saveF();return;}
   if(act==='scroll-owe'){const o=$('#owe');if(o)o.scrollIntoView({behavior:'smooth',block:'start'});return;}
   if(act==='came'){await markCame(b.dataset.id);return;}
@@ -1986,8 +2001,9 @@ document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-ac
 document.addEventListener('input',ev=>{const el=ev.target;if(el.dataset&&el.dataset.pq&&S.sl.pq){S.sl.pq[el.dataset.pq]=el.value;}});
 document.addEventListener('change',ev=>{const el=ev.target;if(el.dataset&&el.dataset.pq&&S.sl.pq){S.sl.pq[el.dataset.pq]=el.value;}});
 document.addEventListener('input',ev=>{const el=ev.target,f=S.f;if(!f||!el.dataset)return;
-  if(el.dataset.ff){f[el.dataset.ff]=el.value;return;}
-  if(el.dataset.fl){f.lines[+el.dataset.i][el.dataset.fl]=el.value;const t=$('#f-tot');if(t)t.textContent=rp(f.lines.reduce((a,l)=>a+n(l.q)*n(l.u),0));}});
+  const upd=()=>{const t=$('#f-sum');if(t)t.innerHTML=fsum(f);f.lines.forEach((l,i)=>{const x=$(`#flt-${i}`);if(x)x.textContent=rp(n(l.q)*n(l.u));});};
+  if(el.dataset.ff){f[el.dataset.ff]=el.value;upd();return;}
+  if(el.dataset.fl){f.lines[+el.dataset.i][el.dataset.fl]=el.value;upd();}});
 document.addEventListener('change',ev=>{const el=ev.target,f=S.f;if(!f||!el.dataset)return;
   if(el.dataset.ff==='k'){f.k=el.value;applyShop(f);render();return;}
   if(el.dataset.fl==='p'){const l=f.lines[+el.dataset.i];l.p=el.value;l.u=f.kind==='in-stock'?fmt(lastCost(l.p)):fmt(lastPrice(cidByName(f.k),l.p)||n((D().products[l.p]||{}).price));render();return;}
