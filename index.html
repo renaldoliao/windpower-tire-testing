@@ -532,7 +532,7 @@ tr.newrow .cell{background:var(--sheet)}
 tr.newerr td{border-bottom:0;padding:0 18px}
 tr.newerr .err:empty{display:none}
 tr.flash td{animation:flash 2.4s var(--ease) both}
-@keyframes flash{0%,45%{background:color-mix(in srgb,var(--accent) 28%,var(--sheet))}}
+@keyframes flash{0%,40%{background:color-mix(in srgb,var(--accent) 12%,var(--sheet))}}
 @media (max-width:760px){table.xl.inv tr.irow.flash{animation:flash 2.4s var(--ease) both}}
 tr.paypanel td{background:var(--field);white-space:normal;padding:0}
 .pp{padding:16px 18px;position:sticky;left:0;box-sizing:border-box;width:min(1440px,calc(100vw - 32px))}
@@ -743,12 +743,12 @@ tr.inl td{background:var(--paper);padding:0 12px 14px!important}tr.irow.open td{
 #askbar{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;width:min(640px,calc(100vw - 24px));background:var(--ink);color:var(--sheet);border-radius:24px;padding:18px 20px;display:grid;gap:14px;animation:rise .35s var(--ease) both}
 #askbar p{margin:0;font-size:15.5px;line-height:1.45}#askbar b{font-weight:600}#askbar .row{justify-content:flex-end;gap:8px}#askbar .btn:not(.primary){background:transparent;color:var(--sheet);border-color:color-mix(in srgb,var(--sheet) 35%,transparent)}
 @media (max-width:760px){#askbar{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
-table.xl.inv tr.r-done td{background:color-mix(in srgb,var(--paid) 13%,var(--sheet))}
-table.xl.inv tr.r-wait td{background:color-mix(in srgb,#d89a1e 15%,var(--sheet))}
-table.xl.inv tr.r-late td{background:color-mix(in srgb,var(--loss) 14%,var(--sheet))}
-@media (max-width:760px){table.xl.inv tr.irow.r-done{background:color-mix(in srgb,var(--paid) 13%,var(--sheet))}table.xl.inv tr.irow.r-wait{background:color-mix(in srgb,#d89a1e 15%,var(--sheet))}table.xl.inv tr.irow.r-late{background:color-mix(in srgb,var(--loss) 14%,var(--sheet))}}
+table.xl.inv tr.r-done td{background:color-mix(in srgb,var(--paid) 7%,var(--sheet))}
+table.xl.inv tr.r-wait td{background:var(--sheet)}
+table.xl.inv tr.r-late td{background:color-mix(in srgb,var(--loss) 7%,var(--sheet))}
+@media (max-width:760px){table.xl.inv tr.irow.r-done{background:color-mix(in srgb,var(--paid) 7%,var(--sheet))}table.xl.inv tr.irow.r-wait{background:var(--sheet)}table.xl.inv tr.irow.r-late{background:color-mix(in srgb,var(--loss) 7%,var(--sheet))}}
 .rlegend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted);margin:14px 4px 10px}.rlegend span{display:inline-flex;align-items:center;gap:7px}.rlegend i{width:14px;height:14px;border-radius:999px;display:inline-block}
-.rlegend .r-done{background:color-mix(in srgb,var(--paid) 35%,var(--sheet))}.rlegend .r-wait{background:color-mix(in srgb,#d89a1e 40%,var(--sheet))}.rlegend .r-late{background:color-mix(in srgb,var(--loss) 40%,var(--sheet))}
+.rlegend .r-done{background:color-mix(in srgb,var(--paid) 30%,var(--sheet))}.rlegend .r-wait{background:var(--sheet);border:1px solid var(--rule)}.rlegend .r-late{background:color-mix(in srgb,var(--loss) 30%,var(--sheet))}
 </style>
 </head>
 <body>
