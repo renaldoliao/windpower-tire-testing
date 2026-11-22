@@ -720,6 +720,25 @@ tr.inl td{background:var(--paper);padding:0 12px 14px!important}tr.irow.open td{
 .tabbar a{font-size:11px!important}
 .sortsel select{border:0;background:var(--sheet);border-radius:999px;padding:9px 14px;font:inherit;color:var(--ink)}.sortsel{display:flex;align-items:center;gap:10px}
 .vrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+@media (max-width:760px){
+  table.xl.inv{min-width:0!important;width:100%!important}table.xl.inv thead{display:none}
+  table.xl.inv tbody tr.irow{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;padding:14px 4px;border-bottom:1px solid var(--rule)}
+  table.xl.inv tbody tr.irow td{display:block;padding:0!important;border:0!important;background:none!important}
+  table.xl.inv tr.irow td:nth-child(1){display:none}
+  table.xl.inv tr.irow td:nth-child(2){grid-column:1;grid-row:1;font-size:12px;color:var(--muted)}
+  table.xl.inv tr.irow td:nth-child(3){grid-column:2;grid-row:1;font-size:12px;color:var(--muted)}
+  table.xl.inv tr.irow td:nth-child(5){grid-column:3;grid-row:1;text-align:right}
+  table.xl.inv tr.irow td:nth-child(4){grid-column:1/-1;grid-row:2}
+  table.xl.inv tr.irow td:nth-child(6){grid-column:1/-1;grid-row:3}
+  table.xl.inv tr.irow td:nth-child(6)::before{content:'Cash';display:inline-block;width:46px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  table.xl.inv tr.irow td:nth-child(7)::before{content:'Stock';display:inline-block;width:46px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);vertical-align:top;padding-top:6px}
+  table.xl.inv tr.irow td:nth-child(7) .gocell{display:inline-grid}
+  table.xl.inv tr.irow td:nth-child(7){grid-column:1/-1;grid-row:4}
+  table.xl.inv tr.irow td:nth-child(8){grid-column:1/-1;grid-row:5}
+  table.xl.inv tr.inl{display:block}table.xl.inv tr.inl td{display:block}table.xl.inv tr.inl td:first-child{display:none}
+  table.xl.inv tfoot tr{display:flex;flex-wrap:wrap;gap:6px 12px;padding:12px 4px}table.xl.inv tfoot td{padding:0!important;border:0!important}
+  .stiles .stile .kv{font-size:28px}
+}
 </style>
 </head>
 <body>
@@ -1619,7 +1638,7 @@ function chatHandle(text){
   const c=now(),T=today();
   /* questions */
   if(/\b(stok|stock)\b/.test(x0)&&!/(jual|sold|sell)/.test(x0)){const P=D().products,ws=whStock();botSay(L('Tires in the warehouse:','Ban di gudang:')+'<ul>'+Object.keys(P).map(id=>`<li>${esc(P[id].pattern||pname(id))}: <b>${(c.st[id]||{q:0}).q}</b> <span class="small">(${whs().map(w=>esc(w.name)+' '+n(ws[id+'|'+w.id])).join(', ')})</span></li>`).join('')+'</ul>');return;}
-  if(/(piutang|belum bayar|belum lunas|unpaid|who owes|owes us|utang toko)/.test(x0)){const L2=c.openAR.slice(0,6);botSay(L2.length?L(`Shops owe ${rp(c.arTot)}. Oldest first:`,`Toko masih utang ${rp(c.arTot)}. Yang paling lama:`)+'<ul>'+L2.map(o=>`<li>${esc(cname(o.k))} · ${esc(o.nota)} · <b>${esc(rp(o.open))}</b>${o.due<T?' <span class="neg">'+L('late','telat')+'</span>':''}</li>`).join('')+'</ul>':L('Nobody owes anything.','Tidak ada yang utang.'));return;}
+  if(/(piutang|belum bayar|belum lunas|unpaid|who owes|owes us|utang toko)/.test(x0)){const L2=c.openAR.slice(0,6);botSay(L2.length?L(`Shops owe ${rp(c.arGross)}. Oldest first:`,`Toko masih utang ${rp(c.arGross)}. Yang paling lama:`)+'<ul>'+L2.map(o=>`<li>${esc(cname(o.k))} · ${esc(o.nota)} · <b>${esc(rp(o.open))}</b>${o.due<T?' <span class="neg">'+L('late','telat')+'</span>':''}</li>`).join('')+'</ul>':L('Nobody owes anything.','Tidak ada yang utang.'));return;}
   if(/(untung|laba|profit|rugi)/.test(x0)){const [f,tt]=monthRange(0),m=compute(f,tt).P;botSay(L(`This month so far: sales ${rp(m.net)} (${m.tires} tires), profit <b>${rp(m.profit)}</b>.`,`Bulan ini sejauh ini: penjualan ${rp(m.net)} (${m.tires} ban), untung <b>${rp(m.profit)}</b>.`));return;}
   if(/^(how much money|saldo|uang sekarang|money now|balance)/.test(x0)){botSay(L('Money now:','Uang sekarang:')+'<ul>'+accts().map(a=>`<li>${esc(a.name)}: <b>${esc(rp(c.bal[a.id]||0))}</b></li>`).join('')+'</ul>');return;}
   /* pull out a giro clear date first, then the date of the event */
@@ -1680,7 +1699,7 @@ async function chatConfirm(){
   const p=S.chatPending;if(!p)return;S.chatPending=null;const by=p.by||(S.me&&S.me.name)||'',id='e'+uid(),ts=Date.now();
   if(p.t==='sale'){const k=p.k||await ensureContact(p.newName,'customer');if(D().entries.some(x=>x.t==='sale'&&x.nota===p.nota))p.nota=nextNota();
     const e={id,t:'sale',wh:p.wh,d:p.d,ts,k,nota:p.nota,lines:p.lines,disc:0,ship:0,shipAcct:p.acct,term:p.term,due:p.term==='cash'?'':addDaysTo(p.d,parseInt(p.term,10)||0),acct:p.acct,note:'',claim:'',by};e.paid=p.term==='cash'?entryTotal(e):0;if(p.planned){e.stage='planned';e.paid=0;}
-    await saveEntry(e);S.sl.flash=e.id;botSay(p.planned?L(`Planned for ${fd(p.d)}. It shows under Going out on Home.`,`Direncanakan ${fd(p.d)}. Muncul di Akan keluar di Beranda.`):L(`Saved invoice ${e.nota}.`,`Nota ${e.nota} tersimpan.`));}
+    await saveEntry(e);S.sl.flash=e.id;botSay(p.planned?L(`Saved for ${fd(p.d)}. It shows in Sales as Not out yet.`,`Tersimpan untuk ${fd(p.d)}. Muncul di Penjualan sebagai Belum keluar.`):L(`Saved invoice ${e.nota}.`,`Nota ${e.nota} tersimpan.`));}
   if(p.t==='recv'){const e={id,t:'recv',d:p.d,ts,k:p.k,a:p.a,acct:p.acct,alloc:p.alloc,method:p.method,note:'',by};if(p.method==='cheque')Object.assign(e,{clear:p.clear,chqBank:'',chqNo:''});await saveEntry(e);botSay(L('Payment saved.','Pembayaran tersimpan.'));}
   if(p.t==='expense'){const e={id,t:'expense',d:p.d,ts,cat:p.cat,a:p.a,acct:p.acct,note:'',by};if(p.planned)e.stage='planned';await saveEntry(e);botSay(p.planned?L(`Reminder set for ${fd(p.d)}. It shows under Bills to pay on Home.`,`Pengingat untuk ${fd(p.d)}. Muncul di Tagihan di Beranda.`):L('Cost saved.','Biaya tersimpan.'));}
   if(p.t==='transfer'){await saveEntry({id,t:'transfer',d:p.d,ts,from:p.from,to:p.to,a:p.a,note:'Handed over',by});botSay(L('Handover saved.','Setoran tersimpan.'));}
@@ -1820,7 +1839,7 @@ function pageOverview(){
     <div class="kpi"><span class="micro">${L('Money now','Uang sekarang')}</span><span class="kv">${esc(sh(c.money))}</span><span class="small">${L('This month','Bulan ini')} <b class="pos">+${esc(sh(cur.i))}</b> <b>-${esc(sh(cur.o))}</b></span></div>
     <div class="kpi"><span class="micro">${L('Sales this month','Penjualan bulan ini')}</span><span class="kv">${esc(sh(cur.sales))}</span>${vsPrev(cur.sales,prev&&prev.sales)}</div>
     <div class="kpi"><span class="micro">${L('Profit this month','Untung bulan ini')}</span><span class="kv${cur.profit<0?' neg':''}">${esc(sh(cur.profit))}</span>${vsPrev(cur.profit,prev&&prev.profit)}</div>
-    <a class="kpi" href="#unpaid"><span class="micro">${L('Shops owe us','Piutang toko')}</span><span class="kv">${esc(sh(c.arTot))}</span><span class="small">${late>0.5?`<span class="neg">${esc(sh(late))} ${L('late','telat')}</span>`:L('Nothing late','Tidak ada yang telat')}</span></a></div>`;
+    <a class="kpi" href="#unpaid"><span class="micro">${L('Shops owe us','Piutang toko')}</span><span class="kv">${esc(sh(c.arGross))}</span><span class="small">${late>0.5?`<span class="neg">${esc(sh(late))} ${L('late','telat')}</span>`:L('Nothing late','Tidak ada yang telat')}</span></a></div>`;
   const one=(key,tipf)=>{const mx=Math.max(1,...M.map(x=>Math.abs(x[key])));
     return `<div class="legend" style="margin-top:6px"><span><i class="key s-prof"></i>${L('Full month','Bulan penuh')}</span><span><i class="key s-run"></i>${L('This month so far','Bulan ini sejauh ini')}</span></div><div class="gcols">${M.map((x,i)=>`<div class="gcol${x.k===0?' now':''}" data-tip="${esc(tipf(x))}"><i class="${x[key]<0?'s-late':x.k===0?'s-run':'s-prof'}" style="height:${Math.max(1,Math.abs(x[key])/mx*100)}%;max-width:44px;animation-delay:${i*50}ms"><span class="cv">${esc(sh(x[key]))}</span></i></div>`).join('')}</div>
     <div class="cx">${M.map(x=>`<span>${esc(x.lab)}${x.k===0?L(' (so far)',' (berjalan)'):''}</span>`).join('')}</div>`;};
@@ -1970,6 +1989,8 @@ async function saveF(){
   const dt=f.when==='later'&&(f.kind==='out-stock'&&f.sub==='sell'||f.kind==='in-stock'&&f.sub==='jakarta'||f.kind==='out-money'&&f.sub==='cost')?f.later:f.d;
   if(!dt)return err(L('Pick a date.','Pilih tanggal.'));
   let e=null,msg=L('Saved','Tersimpan');
+  if(f.kind==='out-stock'&&f.sub==='sell'&&!(f.k||'').trim())return err(L('Type the shop name.','Isi nama toko.'));
+  if(f.kind==='in-money'&&f.sub==='shop'&&!cidByName(f.k))return err(L('Pick a shop from the list. Only shops with a sale can pay.','Pilih toko dari daftar. Hanya toko yang punya penjualan bisa bayar.'));
   if(f.kind==='out-stock'||f.kind==='in-stock'){if(!lines.length)return err(L('Type how many tires.','Isi jumlah ban.'));}
   if(f.kind==='out-stock'&&f.when!=='later'&&f.sub!=='sell'||f.kind==='out-stock'&&f.sub==='sell'&&f.when==='now'){const src=f.sub==='move'?f.from:f.wh;const short=lines.find(l=>n(l.q)>n(ws[l.p+'|'+src]));if(short)return err(L(`${whName(src)} only has ${n(ws[short.p+'|'+src])} ${pShort(short.p)}.`,`${whName(src)} hanya punya ${n(ws[short.p+'|'+src])} ${pShort(short.p)}.`));}
   if(f.kind==='out-stock'&&f.sub==='sell'&&f.editId){const o=D().entries.find(x=>x.id===f.editId);if(!o)return;const name=(f.k||'').trim();if(!name)return err(L('Type the shop name.','Isi nama toko.'));const k=cidByName(name)||await ensureContact(name,'customer');
@@ -2354,7 +2375,7 @@ function pagePeople(){
     return `<tr><td>${esc(x.name)}<div class="small">${esc([x.town,x.phone].filter(Boolean).join(' · '))}</div></td><td class="small">${x.kind==='both'?'Shop and supplier':x.kind==='supplier'?'Supplier':'Shop'}</td><td class="num">${Math.round(ar)?M(ar):''}${lateN?`<div><span class="tag late">${lateN} late</span></div>`:''}</td><td class="num">${Math.round(ap)?M(ap):''}</td><td class="num">${acts}</td></tr>`;}).join('');
   const form=editable()&&S.contEdit?`<form id="contForm" class="quick grid2" novalidate style="margin-top:20px">${F('Name',`<input id="cf-name" value="${esc(ce.name)}">`)}${F('Phone or WhatsApp',`<input id="cf-phone" value="${esc(ce.phone)}">`)}${F('Town',`<input id="cf-town" value="${esc(ce.town)}" placeholder="Sribawono, Jambi, Padang">`)}${F('Kind',`<select id="cf-kind">${[['customer','Shop'],['supplier','Supplier'],['both','Both']].map(([v,l])=>`<option value="${v}"${v===ce.kind?' selected':''}>${l}</option>`).join('')}</select>`)}<div class="row" style="align-self:end"><button class="btn primary" type="submit">Save</button><button type="button" class="link" data-act="cont-cancel">Cancel</button></div></form>`:'';
   return `<section class="wrap"><h1 class="h1">Shops and suppliers</h1>
-    <div class="row" style="margin-top:18px;gap:10px 40px"><span>Shops owe you <strong>${M(c.arTot)}</strong></span><span>You owe suppliers <strong>${M(c.apTot)}</strong></span></div>${form}
+    <div class="row" style="margin-top:18px;gap:10px 40px"><span>Shops owe you <strong>${M(c.arGross)}</strong></span><span>You owe suppliers <strong>${M(c.apTot)}</strong></span></div>${form}
     <div class="tbl" style="margin-top:24px"><table><thead><tr><th>Name</th><th>Kind</th><th class="num">Owes you</th><th class="num">You owe</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="small">Shops and suppliers appear here as soon as you name them on an invoice or DO.</td></tr>'}</tbody></table></div></section>`;
 }
 
@@ -2508,7 +2529,7 @@ function pageOverviewOld(){
     <div class="hello"><div class="stack" style="gap:6px"><p class="small">${esc(longToday())}</p><h1 class="h1">Overview</h1></div>
       <div class="row">${editable()?`<button type="button" class="btn primary" data-act="sl-new">+ New sale</button><button type="button" class="btn" data-act="go-unpaid">Mark a payment</button><button type="button" class="btn" data-act="pick" data-t="purchase">+ Tires arrived</button><button type="button" class="btn" data-act="cs-new">+ Add cost</button>`:''}</div></div>
     <div class="card kpis">
-      <a class="kpi" href="#unpaid"><span class="micro">To collect</span><span class="kv">${fmtShort(c.arTot)}</span><span class="small">${sLate>0.5?`<span class="neg">${fmtShort(sLate)} late</span>`:'Nothing late'}</span></a>
+      <a class="kpi" href="#unpaid"><span class="micro">To collect</span><span class="kv">${fmtShort(c.arGross)}</span><span class="small">${sLate>0.5?`<span class="neg">${fmtShort(sLate)} late</span>`:'Nothing late'}</span></a>
       <div class="kpi"><span class="micro">Money on hand</span><span class="kv">${fmtShort(c.money)}</span><span class="small">${chq.length?`+ ${fmtShort(chq.reduce((a,e)=>a+n(e.a),0))} in cheques`:'All places together'}</span></div>
       <a class="kpi" href="#stock"><span class="micro">Tires in stock</span><span class="kv">${totT}</span><span class="small">${totInc?`+ ${totInc} on the way`:'Nothing on the way'}</span></a>
       <a class="kpi" href="#reports"><span class="micro">Profit this month</span><span class="kv${m.P.profit<0?' neg':''}">${fmtShort(m.P.profit)}</span><span class="small">${m.P.tires} tires sold${pm?` · last month ${fmtShort(pm.P.profit)}`:''}</span></a>
@@ -2516,7 +2537,7 @@ function pageOverviewOld(){
     <div class="hgrid">
       <div class="stack" style="gap:14px"><div class="card">
         <div class="chead"><h2 class="ch">To collect</h2><a class="link" href="#unpaid">All unpaid</a></div>
-        <div class="hero-n" style="font-size:clamp(38px,5.4vw,64px)"><span class="cur">Rp</span>${fmt(c.arTot)}</div>
+        <div class="hero-n" style="font-size:clamp(38px,5.4vw,64px)"><span class="cur">Rp</span>${fmt(c.arGross)}</div>
         <div style="margin-top:18px">${segbar}</div>
         <div style="margin-top:14px">${top.length?`<p class="micro" style="margin:6px 0 2px">Chase first</p>${top.map(o=>collectRow(o,c)).join('')}`:'<p class="small" style="padding-block:10px">Nothing late or due this week.</p>'}
         ${late.length+soon.length>4?`<p style="margin-top:12px"><a class="link" href="#unpaid">See all ${late.length+soon.length} late or due this week</a></p>`:''}</div>
@@ -2653,7 +2674,7 @@ function pageUnpaid(){
   const chq=c.pending.slice().sort((a,b)=>a.clear<b.clear?-1:1),chqTot=chq.reduce((a,e)=>a+n(e.a),0);
   const chqFor=o=>chq.filter(e=>e.k===o.k&&(!(e.alloc||[]).length||(e.alloc||[]).includes(o.id)));
   return `<section class="wrap"><h1 class="h1">Unpaid invoices</h1>
-  <p style="margin-top:14px;font-size:17px">Shops owe <strong>${rp(c.arTot)}</strong> on ${ar.length} invoice${ar.length===1?'':'s'}.${late.length?` <span class="neg">${late.length} ${late.length===1?'is':'are'} late.</span>`:''}</p>
+  <p style="margin-top:14px;font-size:17px">Shops owe <strong>${rp(c.arGross)}</strong> on ${ar.length} invoice${ar.length===1?'':'s'}.${late.length?` <span class="neg">${late.length} ${late.length===1?'is':'are'} late.</span>`:''}</p>
   <p class="hint" style="margin-top:6px">When a shop pays anyone (Via, Papi or BCA Bella), press Mark paid and choose who received the money.</p>
   ${byShop.length?`<div class="card" style="margin-top:20px"><div class="chead"><h2 class="ch">Who owes the most</h2><div class="legend" style="margin:0"><span><i class="key s-late"></i>Late</span><span><i class="key s-in"></i>Not due yet</span></div></div>
     ${byShop.map(x=>`<div class="hb" data-tip="${esc(cname(x.k))}: ${esc(rp(x.tot))}${x.late>0.5?`, ${esc(rp(x.late))} late`:''} on ${x.cnt} invoice${x.cnt===1?'':'s'}"><span class="hn">${esc(cname(x.k))}<span class="ex">${x.cnt} invoice${x.cnt===1?'':'s'}${x.late>0.5?` · <span class="neg">${esc(rp(x.late))} late</span>`:''}</span></span><span class="tr">${x.late>0.5?`<i class="fl s-late" style="width:${x.late/mxShop*100}%"></i>`:''}${x.tot-x.late>0.5?`<i class="fl" style="width:${(x.tot-x.late)/mxShop*100}%"></i>`:''}</span><span class="hv">${esc(fmtShort(x.tot))}</span></div>`).join('')}</div>`:''}
